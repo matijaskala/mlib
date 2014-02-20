@@ -1,0 +1,4 @@
+[Project]
+Name=mlib
+Manager=KDevCMakeManager
+VersionControl=kdevgit
