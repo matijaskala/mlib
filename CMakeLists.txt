@@ -1,5 +1,21 @@
 project(mlib)
 
-add_executable(mlib main.cpp)
+cmake_minimum_required(VERSION 2.6)
 
-install(TARGETS mlib RUNTIME DESTINATION bin)
+if(__${CMAKE_BUILD_TYPE}__ STREQUAL __Debug__)
+    add_definitions(-D__DEBUG__)
+endif()
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
+
+add_library(mlib SHARED
+    mdebug.cpp
+    mglobal.cpp
+    mobject.cpp
+    mplugin.cpp
+    )
+
+target_link_libraries(mlib dl)
+
+install(TARGETS mlib LIBRARY DESTINATION lib)
