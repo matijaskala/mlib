@@ -42,6 +42,10 @@ namespace M
     std::string typeName() {
         return demangle ( typeid ( _Class ).name() );
     }
+    template< typename _Class >
+    std::string typeName ( _Class& object ) {
+        return demangle ( typeid ( object ).name() );
+    }
 }
 
 #endif // MGLOBAL_H
