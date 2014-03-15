@@ -15,6 +15,9 @@ add_library(mlib SHARED
     mobject.cpp
     mplugin.cpp
     )
+add_library(mimageloader MODULE mimageloader.cpp)
+#add_library(mpng MODULE mpng.cpp)
+#target_link_libraries(mpng png)
 
 target_link_libraries(mlib dl)
 
