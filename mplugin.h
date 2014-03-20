@@ -24,9 +24,8 @@
 
 #define M_PLUGIN_EXPORT(TYPE,NAME) \
 extern "C" M_EXPORT \
-MPlugin* Load##TYPE() { \
-    static MPlugin* plugin = new NAME; \
-    return plugin; \
+MPlugin* __M_EXPORTED_##TYPE##_CREATE__() { \
+    return new NAME; \
 }
 
 class MPlugin

@@ -30,7 +30,7 @@ MPlugin* MPlugin::_load ( const std::string& file, std::string&& symbol )
         return NULL;
     }
 
-    symbol.insert ( 0, "Load" );
+    symbol = "__M_EXPORTED_" + symbol + "_CREATE__";
     void* func = dlsym ( handle, symbol.c_str() );
     if ( !func ) {
         mDebug ( ERROR ) << dlerror();
