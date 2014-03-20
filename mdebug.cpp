@@ -23,11 +23,12 @@ MDebug::MDebug ( MDebugLevel level )
     : level ( level )
     , stream ( std::cerr )
 {
-
+    if ( level == ERROR )
+        stream << "\033[1;33;41mERROR: \033[1;39;41m";
 }
 
 MDebug::~MDebug()
 {
-    stream << trace << std::endl;
+    stream << trace << "\033[0m" << std::endl;
 }
 
