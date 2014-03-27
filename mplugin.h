@@ -42,8 +42,7 @@ protected:
     MPlugin ( const MPlugin& other ) = delete;
     virtual ~MPlugin() {}
 private:
-    static MPlugin* _load ( const std::string& file, std::string&& symbol );
-    void* d;
+    static MPlugin* _load ( const std::string& file, const std::string& symbol );
 };
 
 #endif // MPLUGIN_H

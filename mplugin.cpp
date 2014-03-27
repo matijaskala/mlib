@@ -20,35 +20,35 @@
 #include "mplugin.h"
 
 #include "mdebug.h"
-#include <dlfcn.h>
+#include "nonstd/module"
+#include <map>
 
-MPlugin* MPlugin::_load ( const std::string& file, std::string&& symbol )
+static std::map < std::string, non_std::module > loaded;
+
+MPlugin* MPlugin::_load ( const std::string& file, const std::string& symbol )
 {
-    void* handle = dlopen ( file.c_str(), RTLD_NOW );
-    if ( !handle ) {
-        mDebug ( ERROR ) << dlerror();
+    non_std::module mod = loaded[file];
+    if ( !mod.is_open() && !mod.open ( file ) ) {
+        mDebug ( ERROR ) << non_std::module::last_error();
         return NULL;
     }
 
-    symbol = "__M_EXPORTED_" + symbol + "_CREATE__";
-    void* func = dlsym ( handle, symbol.c_str() );
-    if ( !func ) {
-        mDebug ( ERROR ) << dlerror();
-        dlclose(handle);
+    auto create = mod.symbol< MPlugin*() > ( "__M_EXPORTED_" + symbol + "_CREATE__" );
+    if ( !create ) {
+        mDebug ( ERROR ) << non_std::module::last_error();
+        mod.close();
         return NULL;
     }
 
-    MPlugin* plugin = reinterpret_cast< MPlugin* ( * ) () > ( func ) ();
+    MPlugin* plugin = create();
     if ( plugin )
-        plugin->d = handle;
+        loaded[file] = mod;
     else
-        dlclose(handle);
+        mod.close();
     return plugin;
 }
 
 void MPlugin::unload(MPlugin* plugin)
 {
-    void* handle = plugin->d;
     delete plugin;
-    dlclose ( handle );
 }
