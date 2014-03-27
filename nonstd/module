@@ -73,6 +73,8 @@ public:
         return reference_cast<_Res*> ( __sym );
     }
 
+    static const char* last_error();
+
 private:
     void* _M_symbol ( const char* __s );
 };

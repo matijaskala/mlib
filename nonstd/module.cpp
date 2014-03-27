@@ -28,26 +28,12 @@
 using namespace non_std;
 
 static std::string suffix() {
-#ifdef WIN32
-    #ifdef __DEBUG__
-        return "d.dll";
-    #else
-        return ".dll";
-    #endif
+#if defined WIN32
+    return ".dll";
+#elif defined __APPLE__
+    return ".dylib";
 #else
-    #ifdef __APPLE__
-        #ifdef __DEBUG__
-                return "d.dylib";
-        #else
-                return ".dylib";
-        #endif
-    #else
-        #ifdef __DEBUG__
-                return "d.so";
-        #else
-                return ".so";
-        #endif
-    #endif
+    return ".so";
 #endif
 }
 
@@ -94,6 +80,15 @@ bool non_std::module::close()
     return FreeLibrary ( handle );
 #else
     return dlclose ( handle ) == 0;
+#endif
+}
+
+const char* non_std::module::last_error()
+{
+#ifdef WIN32
+    return GetLastError();
+#else
+    return dlerror();
 #endif
 }
 
