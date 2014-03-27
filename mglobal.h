@@ -22,6 +22,7 @@
 
 #include <string>
 #include <typeinfo>
+#include "nonstd/cxxabi"
 
 #ifdef WIN32
 #define M_NO_EXPORT
@@ -37,14 +38,13 @@
 
 namespace M
 {
-    std::string demangle ( const char* symbol );
     template< typename _Class >
     std::string typeName() {
-        return demangle ( typeid ( _Class ).name() );
+        return non_std::demangle ( typeid ( _Class ).name() );
     }
     template< typename _Class >
     std::string typeName ( _Class& object ) {
-        return demangle ( typeid ( object ).name() );
+        return non_std::demangle ( typeid ( object ).name() );
     }
 }
 

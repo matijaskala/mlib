@@ -17,13 +17,12 @@
  *
  */
 
-#include "mglobal.h"
+#include "cxxabi"
 
 #include <cxxabi.h>
+#include <memory>
 
-std::string M::demangle ( const char* symbol ) {
-    char* sym = abi::__cxa_demangle ( symbol, 0, 0, 0 );
-    std::string str = sym;
-    free(sym);
-    return str;
+std::string non_std::demangle ( const char* symbol ) {
+    std::unique_ptr< char, void ( * ) ( void* ) > name ( abi::__cxa_demangle ( symbol, 0, 0, 0 ), std::free );
+    return name.get();
 }

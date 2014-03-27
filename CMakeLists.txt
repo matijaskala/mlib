@@ -11,9 +11,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -pedantic")
 
 add_library(mlib SHARED
     mdebug.cpp
-    mglobal.cpp
     mobject.cpp
     mplugin.cpp
+    nonstd/cxxabi.cpp
     nonstd/module.cpp
 )
 add_library(mimageloader MODULE mimageloader.cpp)
