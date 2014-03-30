@@ -34,35 +34,13 @@ file::file ( const std::string& __s )
     mode = st.st_mode;
 }
 
-_Directory_iterator& _Directory_iterator::operator++() {
-    dirent* entry = static_cast<dirent*> ( _M_data );
-    DIR* directory = reinterpret_cast<DIR*> ( _M_directory );
-    readdir_r ( directory, entry, &entry );
-    _M_data = entry;
-    return *this;
-}
-
-_Directory_iterator& _Directory_iterator::operator++(int) {
-    dirent* entry = static_cast<dirent*> ( _M_data );
-    DIR* directory = reinterpret_cast<DIR*> ( _M_directory );
-    readdir_r ( directory, entry, &entry );
-    _M_data = entry;
-    return *this;
-}
-
-const char* _Directory_iterator::operator*() {
-    dirent* entry = static_cast<dirent*> ( _M_data );
-    return entry->d_name;
-}
-
 directory::directory ( const std::string& __s )
-    : file ( __s ) {
-    DIR* directory = opendir ( __s.c_str() );
-    if ( !directory )
+    : name ( __s ) {
+    DIR* dir = opendir ( __s.c_str() );
+    if ( !dir )
         throw "DIRECTORY DOESN'T EXIST";
-    _M_directory = reinterpret_cast<__directory*> ( directory );
-    _M_begin._M_directory = reinterpret_cast<__directory*> ( directory );
-    _M_begin._M_data = readdir ( directory );
-    _M_end._M_directory = reinterpret_cast<__directory*> ( directory );
-    _M_end._M_data = nullptr;
+    while ( dirent* entry = readdir ( dir ) ) {
+        insert(entry->d_name);
+    }
+    closedir ( dir );
 }

@@ -21,8 +21,8 @@
 #define NON_STD_FILESYSTEM
 
 #include <string>
+#include <set>
 
-struct __directory;
 namespace non_std
 {
 
@@ -39,7 +39,7 @@ struct file
         type = 0xf000,
     };
 
-    std::string name;
+    const std::string name;
 
     mode_t mode;
 
@@ -59,52 +59,11 @@ struct file
 
 };
 
-struct _Directory_iterator
+struct directory : public std::set<std::string>
 {
-    __directory* _M_directory;
-
-    void* _M_data;
-
-    bool operator== ( const _Directory_iterator& other ) {
-        return _M_data == other._M_data;
-    }
-
-    bool operator!= ( const _Directory_iterator& other ) {
-        return _M_data != other._M_data;
-    }
-
-    const char* operator*();
-
-    _Directory_iterator& operator++();
-
-    _Directory_iterator& operator++(int);
-
-};
-
-class directory : public file
-{
-public:
-    typedef _Directory_iterator iterator;
-    typedef const _Directory_iterator const_iterator;
-
-private:
-    __directory* _M_directory;
-
-    iterator _M_begin;
-
-    iterator _M_end;
-
-public:
     directory ( const std::string& __s );
 
-    const_iterator begin() {
-        return _M_begin;
-    }
-
-    const_iterator end() {
-        return _M_end;
-    }
-
+    const std::string name;
 };
 }
 
