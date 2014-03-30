@@ -14,6 +14,7 @@ add_library(mlib SHARED
     mobject.cpp
     mplugin.cpp
     nonstd/cxxabi.cpp
+    nonstd/filesystem.cpp
     nonstd/module.cpp
 )
 add_library(mimageloader MODULE mimageloader.cpp)
