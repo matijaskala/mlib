@@ -17,27 +17,37 @@
  *
  */
 
-#include "mdebug.h"
+#ifndef NON_STD_XTERM
+#define NON_STD_XTERM
 
-#include "nonstd/xterm"
+#include <string>
 
-using namespace non_std::xterm;
-
-MDebug::MDebug ( MDebugLevel level )
-    : level ( level )
-    , stream ( std::cerr )
+namespace non_std
 {
-    if ( level == ERROR ) {
-        stream << bold() << fgcolor ( non_std::yellow ) << bgcolor ( non_std::red );
-        stream << "ERROR: ";
-        stream << fgcolor ( non_std::default_color );
-    }
+
+enum color {
+    black,
+    red,
+    green,
+    yellow,
+    blue,
+    magenta,
+    cyan,
+    white,
+    custom,
+    default_color
+};
+
+namespace xterm
+{
+
+std::string bold ();
+std::string escape ( const std::string& __s );
+std::string bgcolor ( color __c );
+std::string fgcolor ( color __c );
+std::string reset ();
 }
 
-MDebug::~MDebug()
-{
-    stream << trace;
-    stream << reset ();
-    stream << std::endl;
 }
 
+#endif // NON_STD_XTERM

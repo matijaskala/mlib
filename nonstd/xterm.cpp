@@ -17,27 +17,27 @@
  *
  */
 
-#include "mdebug.h"
+#include "xterm"
 
-#include "nonstd/xterm"
+using namespace non_std;
 
-using namespace non_std::xterm;
-
-MDebug::MDebug ( MDebugLevel level )
-    : level ( level )
-    , stream ( std::cerr )
-{
-    if ( level == ERROR ) {
-        stream << bold() << fgcolor ( non_std::yellow ) << bgcolor ( non_std::red );
-        stream << "ERROR: ";
-        stream << fgcolor ( non_std::default_color );
-    }
+std::string xterm::bold () {
+    return escape ( "1m" );
 }
 
-MDebug::~MDebug()
-{
-    stream << trace;
-    stream << reset ();
-    stream << std::endl;
+std::string xterm::escape ( const std::string& __s ) {
+    static char* TERM = getenv ( "TERM" );
+    return TERM ? "\033[" + __s : "";
 }
 
+std::string xterm::bgcolor ( color __c ) {
+    return escape ( "4" + std::to_string ( __c ) + "m" );
+}
+
+std::string xterm::fgcolor ( color __c ) {
+    return escape ( "3" + std::to_string ( __c ) + "m" );
+}
+
+std::string xterm::reset () {
+    return escape ( "m" );
+}

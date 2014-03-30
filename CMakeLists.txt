@@ -16,6 +16,7 @@ add_library(mlib SHARED
     nonstd/cxxabi.cpp
     nonstd/filesystem.cpp
     nonstd/module.cpp
+    nonstd/xterm.cpp
 )
 add_library(mimageloader MODULE mimageloader.cpp)
 #add_library(mpng MODULE mpng.cpp)
