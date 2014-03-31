@@ -25,3 +25,5 @@ add_library(mimageloader MODULE mimageloader.cpp)
 target_link_libraries(mlib dl)
 
 install(TARGETS mlib LIBRARY DESTINATION lib)
+
+add_subdirectory(test)
