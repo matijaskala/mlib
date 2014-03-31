@@ -25,11 +25,12 @@
 
 using namespace non_std;
 
-file::file ( const std::string& __s )
-    : name ( __s )
+file::file ( const std::pair< std::string, std::string >& __s )
+    : name ( __s.first )
+    , path ( __s.second )
 {
     struct stat st;
-    stat ( __s.c_str(), &st );
+    stat ( ( path + "/" + name ).c_str(), &st );
 
     mode = st.st_mode;
 }
@@ -40,7 +41,7 @@ directory::directory ( const std::string& __s )
     if ( !dir )
         throw "DIRECTORY DOESN'T EXIST";
     while ( dirent* entry = readdir ( dir ) ) {
-        insert(entry->d_name);
+        insert ( { entry->d_name, name } );
     }
     closedir ( dir );
 }

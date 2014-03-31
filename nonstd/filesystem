@@ -40,10 +40,11 @@ struct file
     };
 
     const std::string name;
+    const std::string path;
 
     mode_t mode;
 
-    file ( const std::string& __s );
+    file ( const std::pair< std::string, std::string >& __s );
 
     bool is_regular() {
         return ( mode & type ) == regular;
@@ -59,7 +60,7 @@ struct file
 
 };
 
-struct directory : public std::set<std::string>
+struct directory : public std::set< std::pair< std::string, std::string > >
 {
     directory ( const std::string& __s );
 

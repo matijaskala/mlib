@@ -32,13 +32,12 @@ int main ( int argc, char** argv ) {
     else
         t[0] = ".";
     for ( directory dir: t ) {
-        for ( string __f: dir ) {
-            file f = dir.name + "/" + __f;
+        for ( file f: dir ) {
             if ( f.is_directory() )
                 cerr << xterm::bold() << xterm::fgcolor ( blue );
             else if ( f.mode & 0x40 )
                 cerr << xterm::bold() << xterm::fgcolor ( green );
-            cerr << __f << xterm::reset() << ' ';
+            cerr << f.name << xterm::reset() << ' ';
         }
         cerr << endl;
     }
