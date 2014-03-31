@@ -27,7 +27,7 @@ std::string xterm::bold () {
 
 std::string xterm::escape ( const std::string& __s ) {
     static char* TERM = getenv ( "TERM" );
-    return TERM ? "\033[" + __s : "";
+    return TERM ? "[" + __s : "";
 }
 
 std::string xterm::bgcolor ( color __c ) {
