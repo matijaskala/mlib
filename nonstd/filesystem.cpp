@@ -30,7 +30,7 @@ file::file ( const std::string& __s )
     , path ( )
 {
     struct stat st;
-    stat ( ( name ).c_str(), &st );
+    lstat ( name.c_str(), &st );
 
     mode = st.st_mode;
 }
@@ -40,7 +40,8 @@ file::file ( const std::pair< std::string, std::string >& __s )
     , path ( __s.second )
 {
     struct stat st;
-    stat ( ( path + "/" + name ).c_str(), &st );
+    std::string loc = path + "/" + name;
+    lstat ( loc.c_str(), &st );
 
     mode = st.st_mode;
 }

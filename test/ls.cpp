@@ -25,7 +25,9 @@ using namespace std;
 using namespace non_std;
 
 void list ( const file& f ) {
-    if ( f.is_directory() )
+    if ( f.is_symlink() )
+        cerr << xterm::bold() << xterm::fgcolor ( cyan );
+    else if ( f.is_directory() )
         cerr << xterm::bold() << xterm::fgcolor ( blue );
     else if ( f.mode & 0x40 )
         cerr << xterm::bold() << xterm::fgcolor ( green );
