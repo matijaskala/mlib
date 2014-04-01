@@ -44,17 +44,19 @@ struct file
 
     mode_t mode;
 
+    file ( const std::string& __s );
+
     file ( const std::pair< std::string, std::string >& __s );
 
-    bool is_regular() {
+    bool is_regular() const {
         return ( mode & type ) == regular;
     }
 
-    bool is_directory() {
+    bool is_directory() const {
         return ( mode & type ) == directory;
     }
 
-    bool is_symlink() {
+    bool is_symlink() const {
         return ( mode & type ) == symlink;
     }
 

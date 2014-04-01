@@ -24,6 +24,14 @@
 using namespace std;
 using namespace non_std;
 
+void list ( const file& f ) {
+    if ( f.is_directory() )
+        cerr << xterm::bold() << xterm::fgcolor ( blue );
+    else if ( f.mode & 0x40 )
+        cerr << xterm::bold() << xterm::fgcolor ( green );
+    cerr << f.name << xterm::reset() << ' ';
+}
+
 int main ( int argc, char** argv ) {
     string t[argc > 1 ? argc - 1 : 1];
     if ( argc > 1 )
@@ -31,14 +39,15 @@ int main ( int argc, char** argv ) {
             t[i-1] = argv[i];
     else
         t[0] = ".";
-    for ( directory dir: t ) {
-        for ( file f: dir ) {
-            if ( f.is_directory() )
-                cerr << xterm::bold() << xterm::fgcolor ( blue );
-            else if ( f.mode & 0x40 )
-                cerr << xterm::bold() << xterm::fgcolor ( green );
-            cerr << f.name << xterm::reset() << ' ';
+    for ( file d: t ) {
+        if ( d.is_directory() ) {
+            directory dir = d.name;
+            for ( file f: dir ) {
+                list ( f );
+            }
         }
+        else
+            list ( d );
         cerr << endl;
     }
     return 0;

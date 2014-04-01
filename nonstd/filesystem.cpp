@@ -25,6 +25,16 @@
 
 using namespace non_std;
 
+file::file ( const std::string& __s )
+    : name ( __s )
+    , path ( )
+{
+    struct stat st;
+    stat ( ( name ).c_str(), &st );
+
+    mode = st.st_mode;
+}
+
 file::file ( const std::pair< std::string, std::string >& __s )
     : name ( __s.first )
     , path ( __s.second )
