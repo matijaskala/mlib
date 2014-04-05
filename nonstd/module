@@ -64,13 +64,13 @@ public:
     template < typename _Res >
     std::function< _Res > symbol ( const char* __s ) {
         void* __sym = _M_symbol ( __s );
-        return reference_cast<_Res*> ( __sym );
+        return reinterpret_cast<_Res*&> ( __sym );
     }
 
     template < typename _Res >
     std::function< _Res > symbol ( const std::string& __s ) {
         void* __sym = _M_symbol ( __s.c_str() );
-        return reference_cast<_Res*> ( __sym );
+        return reinterpret_cast<_Res*&> ( __sym );
     }
 
     static const char* last_error();
