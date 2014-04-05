@@ -29,6 +29,7 @@ namespace non_std
 struct file
 {
     enum {
+        permissions = 0x0fff,
         FIFO = 0x1000,
         character_device = 0x2000,
         directory = 0x4000,
@@ -47,6 +48,8 @@ struct file
     file ( const std::string& __s );
 
     file ( const std::pair< std::string, std::string >& __s );
+
+    void refresh();
 
     bool is_regular() const {
         return ( mode & type ) == regular;

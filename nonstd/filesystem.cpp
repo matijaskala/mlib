@@ -22,35 +22,44 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <iostream>
+#include <stdexcept>
 
+using namespace std;
 using namespace non_std;
 
-file::file ( const std::string& __s )
+file::file ( const string& __s )
     : name ( __s )
     , path ( )
 {
-    struct stat st;
-    lstat ( name.c_str(), &st );
-
-    mode = st.st_mode;
+    refresh();
 }
 
-file::file ( const std::pair< std::string, std::string >& __s )
+file::file ( const pair< string, string >& __s )
     : name ( __s.first )
     , path ( __s.second )
 {
-    struct stat st;
-    std::string loc = path + "/" + name;
-    lstat ( loc.c_str(), &st );
-
-    mode = st.st_mode;
+    refresh();
 }
 
-directory::directory ( const std::string& __s )
+void file::refresh()
+{
+    struct stat st;
+    string fullpath = ( path == "" ) ? name : path + "/" + name;
+
+    lstat ( fullpath.c_str(), &st );
+    mode = st.st_mode;
+    if ( ( mode & type ) == symlink ) {
+        stat ( fullpath.c_str(), &st );
+        if ( ( st.st_mode & type ) == symlink )
+        mode &= ~type;
+    }
+}
+
+directory::directory ( const string& __s )
     : name ( __s ) {
     DIR* dir = opendir ( __s.c_str() );
     if ( !dir )
-        throw "DIRECTORY DOESN'T EXIST";
+        throw runtime_error ( "Unknown directory." );
     while ( dirent* entry = readdir ( dir ) ) {
         insert ( { entry->d_name, name } );
     }
