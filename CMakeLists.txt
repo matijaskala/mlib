@@ -13,6 +13,7 @@ add_library(mlib SHARED
     mdebug.cpp
     mobject.cpp
     mplugin.cpp
+    mreflection.cpp
     nonstd/cxxabi.cpp
     nonstd/filesystem.cpp
     nonstd/module.cpp
