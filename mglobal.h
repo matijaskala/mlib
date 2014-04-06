@@ -43,7 +43,7 @@ namespace M
         return non_std::demangle ( typeid ( _Class ).name() );
     }
     template< typename _Class >
-    std::string typeName ( _Class& object ) {
+    std::string typeName ( const _Class& object ) {
         return non_std::demangle ( typeid ( object ).name() );
     }
 }
