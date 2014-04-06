@@ -1,0 +1,74 @@
+/*
+ * This file is part of MLib
+ * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#ifndef FUNC_ID
+#define FUNC_ID
+
+#include "mglobal.h"
+
+template< typename... _Args >
+struct arg_id;
+
+template< typename _FirstArg, typename... _OtherArgs >
+struct arg_id<_FirstArg, _OtherArgs...>
+{
+    static std::string name() {
+        return M::typeName<_FirstArg>() + "," + arg_id<_OtherArgs...>::name();
+    }
+};
+
+template< typename _OnlyOneArg >
+struct arg_id<_OnlyOneArg>
+{
+    static std::string name() {
+        return M::typeName<_OnlyOneArg>();
+    }
+};
+
+template<>
+struct arg_id<>
+{
+    static std::string name() {
+        return "";
+    }
+};
+
+template< typename _Func >
+struct func_id;
+
+template< typename _ReturnType, typename... _Args >
+struct func_id<_ReturnType(*)(_Args...)> : public func_id<_ReturnType(_Args...)>
+{};
+
+template< typename _ReturnType, typename _Class, typename... _Args >
+struct func_id<_ReturnType(_Class::*)(_Args...)> : public func_id<_ReturnType(_Args...)>
+{};
+
+template< typename _ReturnType, typename... _Args >
+struct func_id<_ReturnType(_Args...)>
+{
+    static std::string name() {
+        return "(" + arg_id<_Args...>::name() + ")";
+    }
+};
+
+#define func_name(FUNC) (#FUNC + func_id<decltype(&FUNC)>::name())
+#define method_name(CLASS,METHOD) (#METHOD + func_id<decltype(&CLASS::METHOD)>::name())
+
+#endif // FUNC_ID
