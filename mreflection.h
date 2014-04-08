@@ -26,7 +26,8 @@
 #include <stdexcept>
 #include "mglobal.h"
 
-#define reflected { MReflection::invoke_pretty ( this, __PRETTY_FUNCTION__ ); }
+#define reflected reflect ( this )
+#define reflect(...) { MReflection::invoke_pretty ( __PRETTY_FUNCTION__, __VA_ARGS__ ); }
 
 class MReflection
 {
@@ -37,7 +38,7 @@ class MReflection
 
 public:
     template< typename _Instance, typename... _Args >
-    static void invoke_pretty ( _Instance* _This, std::string&& pretty_function_name, _Args... __args ) {
+    static void invoke_pretty ( std::string&& pretty_function_name, _Instance* _This, _Args... __args ) {
         size_t f_begin = pretty_function_name.find(' ');
         size_t b_begin = pretty_function_name.find('(', f_begin);
         size_t r_begin = pretty_function_name.rfind("::", b_begin) + 2;
