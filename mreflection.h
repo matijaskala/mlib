@@ -28,6 +28,7 @@
 
 #define reflected reflect ( this )
 #define reflect(...) { MReflection::invoke_pretty ( __PRETTY_FUNCTION__, __VA_ARGS__ ); }
+#define reflect_func(FUNC_NAME,FUNC_TYPE) funcs< void FUNC_TYPE >() [FUNC_NAME] = [] FUNC_TYPE
 
 class MReflection
 {
