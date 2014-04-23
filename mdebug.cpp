@@ -28,7 +28,7 @@ MDebug::MDebug ( MDebugLevel level )
     , stream ( std::cerr )
 {
     if ( level == ERROR ) {
-        stream << bold() << fgcolor ( non_std::yellow ) << bgcolor ( non_std::red );
+        stream << bold << fgcolor ( non_std::yellow ) << bgcolor ( non_std::red );
         stream << "ERROR: ";
         stream << fgcolor ( non_std::default_color );
     }
@@ -37,7 +37,7 @@ MDebug::MDebug ( MDebugLevel level )
 MDebug::~MDebug()
 {
     stream << trace;
-    stream << reset ();
+    stream << reset;
     stream << std::endl;
 }
 

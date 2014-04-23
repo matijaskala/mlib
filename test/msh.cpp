@@ -83,7 +83,7 @@ struct autocompletion_string {
     inline std::basic_ostream<_CharT, _Traits>&
     operator<<(std::basic_ostream<_CharT, _Traits>& __os, const autocompletion_string& s) {
         if (s.bold)
-            __os << xterm::bold();
+            __os << xterm::bold;
         __os << xterm::fgcolor(s.fgcolor);
         __os << xterm::bgcolor(s.bgcolor);
         __os << s.name;

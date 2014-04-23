@@ -21,10 +21,6 @@
 
 using namespace non_std;
 
-std::string xterm::bold () {
-    return escape ( "1m" );
-}
-
 std::string xterm::escape ( const std::string& __s ) {
     static char* TERM = getenv ( "TERM" );
     return TERM ? "[" + __s : "";
@@ -36,8 +32,4 @@ std::string xterm::bgcolor ( color __c ) {
 
 std::string xterm::fgcolor ( color __c ) {
     return escape ( "3" + std::to_string ( __c ) + "m" );
-}
-
-std::string xterm::reset () {
-    return escape ( "m" );
 }
