@@ -65,12 +65,19 @@ inline bool operator>= ( mchar_t __mc1, mchar_t __mc2 )
     return __mc1.value >= __mc2.value;
 }
 
+inline void __mchar_helper(mchar_t& __mc, std::function< void ( char& ) > __a) {
+    char* __ptr = reinterpret_cast<char*> ( &__mc.value );
+    __a ( __ptr[0] );
+    if ( __ptr[0] & 0x80 )
+        __a ( __ptr[1] );
+}
+
 inline mchar_t getmchar()
 {
     mchar_t __mc;
-    __mc.value = std::getchar();
-    if ( __mc.value & 0x80 )
-        __mc.value |= std::getchar() << 8;
+    __mc.value = 0;
+    auto __f = [] ( char& __c ) { __c = std::getchar(); };
+    __mchar_helper ( __mc, __f );
     return __mc;
 }
 
@@ -89,18 +96,33 @@ template<typename _CharT, typename _Traits>
 inline std::basic_istream<_CharT, _Traits>&
 operator>> ( std::basic_istream<_CharT, _Traits>& __is, mchar_t& __mc )
 {
-    _CharT* input = reinterpret_cast<_CharT*> ( &__mc.value );
-    __is >> input[0];
-    if ( __mc.value & 0x80 )
-        __is >> input[1];
+    __mc.value = 0;
+    auto __f = [&__is] ( _CharT&__c ) { __is >> __c; };
+    __mchar_helper ( __mc, __f );
     return __is;
 }
 
 template<typename _CharT, typename _Traits>
 inline std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os, mchar_t __mc) {
-    _CharT* output = reinterpret_cast<_CharT*> ( &__mc.value );
-    return std::__ostream_insert ( __os, output, __mc.value & 0x80 ? 2 : 1 );
+    auto __f = [&__os] ( _CharT& __c ) { __os << __c; };
+    __mchar_helper ( __mc, __f );
+    return __os;
+}
+
+template<typename _CharT, typename _Traits>
+inline std::basic_string<_CharT, _Traits>&
+operator+=(std::basic_string<_CharT, _Traits>& __s, mchar_t __mc) {
+    auto __f = [&__s] ( _CharT& __c ) { __s += __c; };
+    __mchar_helper ( __mc, __f );
+    return __s;
+}
+
+template<typename _CharT, typename _Traits>
+inline std::basic_string<_CharT, _Traits>
+operator+(std::basic_string<_CharT, _Traits> __s, const mchar_t& __c) {
+    __s += __c;
+    return __s;
 }
 
 #endif // MCHAR_H
