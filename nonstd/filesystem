@@ -29,6 +29,7 @@ namespace non_std
 struct file
 {
     enum {
+        broken = 0x0000,
         permissions = 0x0fff,
         FIFO = 0x1000,
         character_device = 0x2000,
