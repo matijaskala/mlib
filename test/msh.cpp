@@ -23,11 +23,35 @@
 #include <functional>
 #include <list>
 #include <vector>
-#include <nonstd/tokenizer>
-#include <boost/tokenizer.hpp>
+#include <mchar.h>
 
 using namespace std;
 using namespace non_std;
+
+
+
+
+
+
+
+
+
+typedef std::basic_string<mchar_t> mstring;
+  string to_string ( const mstring& __ms ) {
+    string __s;
+    for ( mchar_t __c: __ms ) {
+      __s += __c;
+    }
+    return __s;
+  }
+
+template<typename _CharT, typename _Traits>
+  inline std::basic_ostream<_CharT, _Traits>&
+  operator<<(std::basic_ostream<_CharT, _Traits>& __os, mstring __ms) {
+      for ( mchar_t __c: __ms )
+          __os << __c;
+      return __os;
+  }
 
 #include <termios.h>
 #include <unistd.h>
@@ -47,6 +71,27 @@ struct termios_handler {
     }
 };
 
+struct autocompletion_string {
+        string name;
+        color fgcolor = default_color;
+        color bgcolor = default_color;
+        bool bold = false;
+        char suffix = ' ';
+        string::size_type length() const { return name.length(); }
+};
+  template<typename _CharT, typename _Traits>
+    inline std::basic_ostream<_CharT, _Traits>&
+    operator<<(std::basic_ostream<_CharT, _Traits>& __os, const autocompletion_string& s) {
+        if (s.bold)
+            __os << xterm::bold();
+        __os << xterm::fgcolor(s.fgcolor);
+        __os << xterm::bgcolor(s.bgcolor);
+        __os << s.name;
+        __os << xterm::reset;
+        __os << s.suffix;
+        return __os;
+    }
+
 static function< void ( const string& ) > waiting;
 
 static set< string > commands;
@@ -60,32 +105,64 @@ void refresh_commands() {
             commands.insert ( f.name );
 }
 
-void fprint_list ( const list< pair< string, size_t > > files, bool interactive );
-
 winsize termsize() {
     winsize w;
     ioctl ( STDOUT_FILENO, TIOCGWINSZ, &w );
     return w;
 }
 
+template<typename _string>
+void fprint_list ( const list< _string > files, bool interactive ) {
+    if ( files.empty() )
+        return;
+    ostream& out = interactive ? cerr : cout;
+    size_t longest = 0;
+    for ( const _string& f: files ) {
+        if ( f.length() > longest )
+            longest = f.length();
+    }
+    winsize w = termsize();
+    int cols = w.ws_col / ( longest + 1 );
+    int rows = files.size() / cols + 1;
+    auto it = files.begin();
+    if ( interactive ) {
+        cerr << xterm::escape ( "s" ) << '\n';
+    }
+    for ( int _d = files.size(); _d > 0; _d-- ) {
+        out << *it << string ( longest - it->length(), ' ' );
+        for ( int i = 0; i < rows; i++ ) {
+            it++;
+            if ( it == files.end() ) {
+                it = files.begin();
+                i -= files.size() % rows;
+                if ( i < 0 )
+                    i += rows;
+                it++;
+                out << endl;
+            }
+        }
+    }
+    if ( interactive )
+        cerr << xterm::escape ( "u" );
+}
+
 void autocomplete_fini ( const string& com, short unsigned int rows, short unsigned int cols, const string& position ) {
     short unsigned int col, row;
     sscanf ( position.c_str(), "%hu:%hu", &row, &col );
-    list< pair< string, size_t > > files;
+    list< string > files;
     for ( set<string>::iterator i = commands.lower_bound ( com ); i != commands.end() && i->compare ( 0, com.size(), com ) == 0; i++ )
-        files.push_back ( { *i, i->size() } );
+        files.push_back ( *i );
     size_t longest = 0;
-    for ( const pair<string,size_t>& f: files ) {
-        if ( f.second > longest )
-            longest = f.second;
+    for ( const string& f: files ) {
+        if ( f.size() > longest )
+            longest = f.size();
     }
     winsize w = termsize();
-    int wcols = w.ws_col / longest;
+    int wcols = w.ws_col / ( longest + 1 );
     int wrows = files.size() / wcols + 1;
     if ( wrows >= w.ws_row ) {
         cerr << xterm::escape ( "s" ) << "do you wish to see all " << files.size() << " possibilities (" << wrows << " lines)?";
-        char r;
-        cin >> r;
+        char r = getchar();
 	cerr << xterm::escape ( "u" );
         if ( r == 'y' )
             cerr << endl;
@@ -95,63 +172,70 @@ void autocomplete_fini ( const string& com, short unsigned int rows, short unsig
         }
     }
     if ( rows - row < wrows ) {
-    string srows = to_string ( wrows );
+        string srows = to_string ( wrows - rows + row );
             cerr << xterm::escape ( srows + "S" ) << xterm::escape ( srows + "A" );
     }
     fprint_list ( files, true );
+    if ( rows - row <= wrows )
+        cerr << xterm::escape ( "T" );
 }
 
 void autocomplete ( const string& com ) {
     winsize w = termsize();
-    cerr << xterm::escape ( "6n" );
+    cerr << xterm::escape ( "6n" ) << xterm::escape ( "J" );
     waiting = bind ( autocomplete_fini, com, w.ws_row, w.ws_col, placeholders::_1 );
 }
 
-string get_command ( list<string>& history ) {
-    string prompt = xterm::fgcolor ( green ) + "$ " + xterm::reset();
+string get_command ( list<mstring>& history ) {
+    autocompletion_string prompt;
+    prompt.fgcolor = green;
+    prompt.name = "$";
     cerr << xterm::escape ( "G" ) << prompt;
     termios_handler h;
-    list<string>::iterator command_it = history.end();
-    string command;
-    string command_t;
+    list<mstring>::iterator command_it = history.end();
+    mstring command;
+    mstring command_t;
     command.reserve(80);
     size_t cn = command.size();
 
     for ( ;; ) {
-        char c = getchar();
-        switch ( c ) {
+        mchar_t c = getmchar();
+                    //cerr << "<" << c.to_int() << ">";continue;
+        switch ( c.value ) {
             case 4: // EOF
-                if( command == "" ) {
+                if( command.empty() ) {
                     cerr << endl;
                     return "\4";
                 }
                 break;
             case 9: // TAB
-                autocomplete ( command );
+                cerr << xterm::escape ( "J" );
+                autocomplete ( to_string(command) );
                 break;
             case 10: // ENTER
-                if( command != "" ) {
-                    for ( list<string>::iterator i = history.begin(); i != history.end(); i++ )
+                cerr << xterm::escape ( "J" );
+                //if( !command.empty() ) {
+                    for ( list<mstring>::iterator i = history.begin(); i != history.end(); i++ )
                         if ( *i == command ) {
                             history.erase ( i-- );
                         }
                     history.push_back ( command );
-                }
+                //}
                 cerr << endl;
-                return command;
+                return to_string(command);
             case 12: // CLS
                 cerr << xterm::escape ( "H" ) << xterm::escape ( "2J" ) << prompt << command;
                 break;
             case 27: // ESC
-                c = getchar();
+                cin >> c;
                 if ( c == 91 ) {
                     string seq;
-                    c = getchar();
+                    cin >> c;
                     while ( ( c < 'a' || c > 'z' ) && ( c < 'A' || c > 'Z' ) ) {
                         seq += c;
-                        c = getchar();
+                        cin >> c;
                     }
-                    switch ( c ) {
+                    switch ( c.value ) {
                         case 'A':
                             if ( command_it != history.begin() ) {
                                 if ( command_it == history.end() )
@@ -172,6 +256,7 @@ string get_command ( list<string>& history ) {
                                 cn = command.size();
                                 cerr << xterm::escape ( "G" ) << prompt << command << xterm::escape ( "K" );
                             }
+                            break;
                         case 'C':
                             if ( cn < command.size() ) {
                                 cn++;
@@ -184,14 +269,26 @@ string get_command ( list<string>& history ) {
                                 cerr << xterm::escape ( "D" );
                             }
                             break;
-                       case 'R':
+                        case 'F':
+                            if ( cn != command.size() ) {
+                                cerr << xterm::escape ( to_string ( command.size() - cn ) + "C" );
+                                cn = command.size();
+                            }
+                            break;
+                        case 'H':
+                            if ( cn != 0 ) {
+                                cerr << xterm::escape ( to_string ( cn ) + "D" );
+                                cn = 0;
+                            }
+                            break;
+                        case 'R':
                             if ( waiting ) {
                                 waiting ( seq );
                                 waiting = nullptr;
                             }
                             break;
                         case '~':
-                            c = getchar();
+                            cin >> c;
                             cerr << c;
                             break;
                         default:
@@ -200,7 +297,7 @@ string get_command ( list<string>& history ) {
                     }
                 }
                         else if (c=='O') {
-                            c = getchar();
+                            cin >> c;
                             if ( c == 'F' ) {
                                 if ( cn != command.size() ) {
                                     cerr << xterm::escape ( to_string ( command.size() - cn ) + "C" );
@@ -213,7 +310,7 @@ string get_command ( list<string>& history ) {
                                     cn = 0;
                                 }
                             }
-                            }
+                            } else { cerr << "^[" << c << endl; }
  
                 break;
             case 127: // BACKSPACE
@@ -236,7 +333,7 @@ string get_command ( list<string>& history ) {
                     cn++;
                 }
                 else
-                    cerr << "\b" << (int)c;
+                    cerr << "<" << c.value << ">";
         }
     }
 }
@@ -244,42 +341,46 @@ string get_command ( list<string>& history ) {
 void ls_files ( const directory& dir ) {
     if ( dir.empty() )
         return;
-    list< pair< string, size_t > > files;
+    list< autocompletion_string > files;
     for ( const file& f: dir ) {
-        string format;
+        autocompletion_string out;
         if ( f.mode & 0100 )
-            format += xterm::bold();
+            out.bold = true;
         switch ( f.mode & file::type ) {
             case file::regular:
                 if ( f.mode & 0100 )
-                    format += xterm::fgcolor ( green );
+                    out.fgcolor = green;
                 break;
             case file::symlink:
-                format += xterm::fgcolor ( cyan );
+                out.fgcolor = cyan;
                 break;
             case file::directory:
-                format += xterm::fgcolor ( blue );
+                out.fgcolor = blue;
                 break;
             case file::socket:
-                format += xterm::fgcolor ( magenta );
+                out.fgcolor = magenta;
                 break;
             case file::character_device:
             case file::block_device:
-                format += xterm::bold();
+                out.bold = true;
             case file::FIFO:
-                format += xterm::fgcolor ( yellow );
+                out.fgcolor = yellow;
                 break;
-            case file::type:
-                format += xterm::fgcolor ( white ) + xterm::bgcolor ( red );
+            case file::broken:
+                out.fgcolor = white;
+                out.bgcolor = red;
                 break;
         }
-        if ( f.mode & 01000 )
-            format = xterm::fgcolor ( black ) + xterm::bgcolor ( green );
+        if ( f.mode & 01000 ) {
+            out.fgcolor = black;
+            out.bgcolor = green;
+        }
         char indicator = ' ';
         if ( f.mode & 0100 )
             indicator = '*';
         switch ( f.mode & file::type ) {
             case file::symlink:
+            case file::broken:
                 indicator = '@';
                 break;
             case file::directory:
@@ -298,45 +399,11 @@ void ls_files ( const directory& dir ) {
                 indicator = '|';
                 break;
         }
-        string out = format + f.name + xterm::reset() + indicator;
-        files.push_back ( { out, f.name.size() } );
-        // cout << xterm::escape ( "40G" ) << oct << xterm::fgcolor ( cyan ) << ( xfile.mode & ~file::type ) << xterm::reset() << endl;
+        out.name = f.name;
+        out.suffix = indicator;
+        files.push_back ( out );
     }
     fprint_list ( files, false );
-}
-
-void fprint_list ( const list< pair< string, size_t > > files, bool interactive ) {
-    if ( files.empty() )
-        return;
-    ostream& out = interactive ? cerr : cout;
-    size_t longest = 0;
-    for ( const pair<string,size_t>& f: files ) {
-        if ( f.second > longest )
-            longest = f.second;
-    }
-    winsize w = termsize();
-    int cols = w.ws_col / longest;
-    int rows = files.size() / cols + 1;
-    auto it = files.begin();
-    if ( interactive ) {
-        cerr << xterm::escape ( "s" ) << '\n';
-    }
-    for ( int _d = files.size(); _d > 0; _d-- ) {
-        out << it->first << string ( longest - it->second, ' ' );
-        for ( int i = 0; i < rows; i++ ) {
-            it++;
-            if ( it == files.end() ) {
-                it = files.begin();
-                i -= files.size() % rows;
-                if ( i < 0 )
-                    i += rows;
-                it++;
-                out << endl;
-            }
-        }
-    }
-    if ( interactive )
-        cerr << xterm::escape ( "u" );
 }
 
 vector<string> expand_command ( string command ) {
@@ -368,9 +435,7 @@ vector<string> expand_command ( string command ) {
 
 int main() {
     refresh_commands();
-    tokenizer t ( "" );
-    for ( string s: t );
-    list<string> history;
+    list<mstring> history;
 
     for ( string com; com != "\4"; com = get_command ( history ) ) {
         int e = com.find ( ' ' );
@@ -400,7 +465,7 @@ int main() {
             if ( chdir ( filename ) < 0 )
                 switch ( errno ) {
                     case EFAULT:
-                        cerr << filename << ": input/outpur error." << endl;
+                        cerr << filename << ": Input/Output error." << endl;
                         break;
                     case ELOOP:
                         cerr << filename << ": Too many levels of symbolic links." << endl;
