@@ -11,6 +11,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -pedantic")
 
 add_library(mlib SHARED
     mdebug.cpp
+    meventhandler.cpp
     mobject.cpp
     mplugin.cpp
     mreflection.cpp
