@@ -22,9 +22,10 @@ add_library(mlib SHARED
     nonstd/xterm.cpp
 )
 add_library(mimageloader MODULE mimageloader.cpp)
-#add_library(mpng MODULE mpng.cpp)
-#target_link_libraries(mpng png)
+add_library(mpng MODULE mpng.cpp)
+target_link_libraries(mpng png)
 add_library(msdl MODULE msdl.cpp)
+target_link_libraries(msdl SDL)
 
 target_link_libraries(mlib dl GL)
 
