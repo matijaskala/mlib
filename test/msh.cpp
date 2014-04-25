@@ -25,6 +25,9 @@
 #include <vector>
 #include <mchar.h>
 
+#include <cstring>
+#include <sys/wait.h>
+
 using namespace std;
 using namespace non_std;
 
@@ -485,8 +488,25 @@ int main() {
             cout << working_dir << endl;
         else if ( args.front() == "echo" )
             cout << com.substr ( e + 1 ) << endl;
-        else
-            system ( com.c_str() );
+        else {
+            pid_t pid = fork();
+            switch ( pid ) {
+                case 0:
+                {
+                    int argc = args.size();
+                    char** argv = new char*[argc+1];
+                    for ( int i = 0; i < argc; i++ )
+                        argv[i] = strdup ( args[i].c_str() );
+                    argv[argc] = nullptr;
+                    execvp ( args.front().c_str(), argv );
+                    system ( com.c_str() );
+                    break;
+                }
+                default:
+                    waitpid ( pid, NULL, 0 );
+                    break;
+            }
+        }
     }
 
     return 0;
