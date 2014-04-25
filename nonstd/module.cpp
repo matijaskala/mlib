@@ -27,7 +27,7 @@
 
 using namespace non_std;
 
-static std::string suffix() {
+std::string non_std::module::suffix() {
 #if defined WIN32
     return ".dll";
 #elif defined __APPLE__
@@ -37,18 +37,19 @@ static std::string suffix() {
 #endif
 }
 
-bool non_std::module::open ( const std::string& __s )
+bool non_std::module::open ( const char* __s )
 {
     if ( is_open() )
         close();
 #ifdef WIN32
-    if ( __s.empty() )
+    std::string str = __s;
+    if ( str.empty() )
         _M_handle = GetModuleHandle ( NULL );
     else
     {
         std::string fileName;
 
-        for ( char c: __s )
+        for ( char c: str )
         {
             if( !c )
                 break;
@@ -64,8 +65,7 @@ bool non_std::module::open ( const std::string& __s )
                                  LOAD_WITH_ALTERED_SEARCH_PATH );
     }
 #else
-    std::string fileName = __s + suffix();
-    _M_handle = dlopen ( fileName.c_str(), RTLD_NOW );
+    _M_handle = dlopen ( __s, RTLD_NOW );
 #endif
     return _M_handle;
 }

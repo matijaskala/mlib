@@ -48,16 +48,18 @@ public:
         : _M_handle() {
         open ( __s );
     }
+    
+    static std::string suffix();
 
     bool is_open() {
         return _M_handle;
     }
 
-    bool open ( const char* __s ) {
-        return open ( __s );
-    }
+    bool open ( const char* __s );
 
-    bool open ( const std::string& __s );
+    bool open ( const std::string& __s ) {
+        return open ( __s.c_str() );
+    }
 
     bool close();
 
