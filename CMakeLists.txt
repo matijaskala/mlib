@@ -16,6 +16,7 @@ add_library(mlib SHARED
     mobject.cpp
     mplugin.cpp
     mreflection.cpp
+    mtexture.cpp
     mvideointerface.cpp
     nonstd/cxxabi.cpp
     nonstd/filesystem.cpp
