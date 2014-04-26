@@ -70,6 +70,7 @@ bool SDLVideoInterface::init()
     if ( SDL_GL_SetAttribute ( SDL_GL_DOUBLEBUFFER, 1 ) < 0 ) {
         mDebug ( ERROR ) << SDL_GetError();
     }
+    SDL_SetVideoMode ( 0, 0, 0, SDL_OPENGL );
     return true;
 }
 
