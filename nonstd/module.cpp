@@ -65,7 +65,7 @@ bool non_std::module::open ( const char* __s )
                                  LOAD_WITH_ALTERED_SEARCH_PATH );
     }
 #else
-    _M_handle = dlopen ( __s, RTLD_NOW );
+    _M_handle = dlopen ( __s, RTLD_NOW | RTLD_GLOBAL );
 #endif
     return _M_handle;
 }
@@ -92,11 +92,22 @@ const char* non_std::module::last_error()
 #endif
 }
 
-void* non_std::module::_M_symbol ( const char* __s )
+void* non_std::module::_M_symbol ( const char* __s ) const
 {
 #ifdef WIN32
     return GetProcAddress ( _M_handle, __s );
 #else
     return dlsym ( _M_handle, __s );
 #endif
+}
+
+abstract_function non_std::module::operator->* ( const char* __s )
+{
+    void* __sym = _M_symbol ( __s );
+    return reinterpret_cast< int ( *& ) () > ( __sym );
+}
+
+non_std::abstract_function::abstract_function ( const char* __s )
+{
+    _M_set ( dlsym ( nullptr, __s ) );
 }

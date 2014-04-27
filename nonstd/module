@@ -21,8 +21,7 @@
 #define NON_STD_MODULE
 
 #include <string>
-#include <functional>
-#include "casts"
+#include "abstract_function"
 
 namespace non_std
 {
@@ -64,21 +63,27 @@ public:
     bool close();
 
     template < typename _Res >
-    std::function< _Res > symbol ( const char* __s ) {
+    std::function< _Res > symbol ( const char* __s ) const {
         void* __sym = _M_symbol ( __s );
         return reinterpret_cast<_Res*&> ( __sym );
     }
 
     template < typename _Res >
-    std::function< _Res > symbol ( const std::string& __s ) {
+    std::function< _Res > symbol ( const std::string& __s ) const {
         void* __sym = _M_symbol ( __s.c_str() );
         return reinterpret_cast<_Res*&> ( __sym );
     }
 
     static const char* last_error();
 
+    abstract_function operator->* ( const char* __s );
+
+    abstract_function operator->* ( const std::string& __s ) {
+        return *this->*__s.c_str();
+    }
+
 private:
-    void* _M_symbol ( const char* __s );
+    void* _M_symbol ( const char* __s ) const;
 };
 }
 

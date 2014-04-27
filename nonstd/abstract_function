@@ -1,0 +1,78 @@
+/*
+ * This file is part of MLib
+ * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#ifndef NON_STD_ABSTRACT_FUNCTION
+#define NON_STD_ABSTRACT_FUNCTION
+
+#include <functional>
+
+namespace non_std
+{
+
+class module;
+
+class abstract_function
+{
+    template< typename _Func >
+    void _M_set ( _Func __f ) {
+        _M_func = reinterpret_cast<void*&> ( __f );
+    }
+
+    template< typename _Func >
+    _Func* _M_get() {
+        return reinterpret_cast<_Func*&> ( _M_func );
+    }
+
+    void* _M_func;
+
+public:
+    template< typename... _Args >
+    abstract_function ( int ( __f ) ( _Args... ) ) {
+        _M_set ( __f );
+    }
+
+    template< typename... _Args >
+    abstract_function ( std::function< int ( _Args... ) > __f ) {
+        _M_set ( __f );
+    }
+
+    abstract_function ( const char* __s );
+
+    abstract_function ( const std::string& __s )
+        : abstract_function ( __s.c_str() ) {}
+
+    template< typename... _Args >
+    int operator() ( _Args... __args ) {
+        return _M_get< int ( _Args... ) > () ( __args... );
+    }
+
+    void* get() {
+        return _M_get<void> ();
+    }
+};
+
+abstract_function operator->* ( const module& __m, const char* __s );
+
+inline abstract_function operator->* ( const module& __m, const std::string& __s ) {
+    return __m->*__s.c_str();
+}
+
+}
+
+#endif // NON_STD_ABSTRACT_FUNCTION
