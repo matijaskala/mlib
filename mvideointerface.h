@@ -21,10 +21,12 @@
 #define MVIDEOINTERFACE_H
 
 #include "mplugin.h"
+#include "msize.h"
 
 class MVideoInterface : public MPlugin
 {
 public:
+    MSize screen_size;
     void test ();
     virtual void beginPaint() {}
     virtual void endPaint() {}

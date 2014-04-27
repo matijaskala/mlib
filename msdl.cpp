@@ -20,6 +20,7 @@
 #include "mvideointerface.h"
 #include "mdebug.h"
 #include "meventhandler.h"
+#include "msize.h"
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 
@@ -41,6 +42,9 @@ void SDLVideoInterface::handleEvents()
         switch ( ev.type ) {
             case SDL_QUIT:
                 handler->quit();
+                break;
+            case SDL_VIDEORESIZE:
+                setVideoMode(ev.resize.w,ev.resize.h);
                 break;
         }
 }
@@ -76,16 +80,21 @@ bool SDLVideoInterface::init()
 
 bool SDLVideoInterface::setVideoMode ( int x, int y )
 {
-    SDL_Surface* screen = SDL_SetVideoMode ( x, y, 32, SDL_HWSURFACE | SDL_OPENGL );
+    SDL_Surface* screen = SDL_SetVideoMode ( x, y, 32, SDL_OPENGL | SDL_RESIZABLE );
     if ( !screen ) {
         mDebug ( ERROR ) << SDL_GetError();
         return false;
     }
 
-    glViewport ( 0, 0, screen->w, screen->h );
+    SDL_Event ev;
+    while ( SDL_PollEvent ( &ev ) );
+
+    screen_size = { screen->w, screen->h };
+
+    glViewport ( 0, 0, screen_size.width(), screen_size.height() );
     glMatrixMode ( GL_PROJECTION );
     glLoadIdentity();
-    glOrtho ( 0, screen->w, screen->h,0,-1,1 );
+    glOrtho ( 0, screen_size.width(), screen_size.height(), 0, -1, 1 );
     glMatrixMode ( GL_MODELVIEW );
     glEnable(GL_BLEND);
     glEnable ( GL_TEXTURE_2D );
