@@ -59,20 +59,16 @@ public:
 
     template< typename... _Args >
     int operator() ( _Args... __args ) {
-        return _M_get< int ( _Args... ) > () ( __args... );
+        auto __f = _M_get< int ( _Args... ) > ();
+        if ( !__f )
+            std::__throw_bad_function_call();
+        return __f ( __args... );
     }
 
     void* get() {
         return _M_get<void> ();
     }
 };
-
-abstract_function operator->* ( const module& __m, const char* __s );
-
-inline abstract_function operator->* ( const module& __m, const std::string& __s ) {
-    return __m->*__s.c_str();
-}
-
 }
 
 #endif // NON_STD_ABSTRACT_FUNCTION
