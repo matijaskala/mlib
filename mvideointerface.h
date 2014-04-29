@@ -28,9 +28,9 @@ class MVideoInterface : public MPlugin
 public:
     MSize screen_size;
     void test ();
-    virtual void beginPaint() {}
-    virtual void endPaint() {}
-    virtual bool init() = 0;
+    virtual void beginPaint();
+    virtual void endPaint();
+    virtual bool init();
     virtual void handleEvents() {}
     virtual bool setVideoMode ( int x, int y ) = 0;
 };

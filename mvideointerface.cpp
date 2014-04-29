@@ -20,6 +20,25 @@
 #include "mvideointerface.h"
 
 #include <GL/gl.h>
+#include <unistd.h>
+
+void MVideoInterface::beginPaint()
+{
+    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+}
+
+void MVideoInterface::endPaint()
+{
+    glFlush();
+    usleep ( 20 );
+}
+
+bool MVideoInterface::init()
+{
+    glEnable ( GL_BLEND );
+    glEnable ( GL_TEXTURE_2D );
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
 
 void MVideoInterface::test ()
 {
