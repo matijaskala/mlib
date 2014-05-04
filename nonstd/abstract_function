@@ -41,14 +41,19 @@ class abstract_function
 
     void* _M_func;
 
+    template<typename _Tp>
+    using _Supported = std::__or_<std::is_integral<_Tp>, std::is_enum<_Tp>>;
+
 public:
-    template< typename... _Args >
-    abstract_function ( int ( __f ) ( _Args... ) ) {
+    template< typename _ReturnType, typename... _Args >
+    abstract_function ( _ReturnType ( __f ) ( _Args... ) ) {
+        std::_Require< _Supported< _ReturnType > > ();
         _M_set ( __f );
     }
 
-    template< typename... _Args >
-    abstract_function ( std::function< int ( _Args... ) > __f ) {
+    template< typename _ReturnType, typename... _Args >
+    abstract_function ( std::function< _ReturnType ( _Args... ) > __f ) {
+        std::_Require< _Supported< _ReturnType > > ();
         _M_set ( __f );
     }
 
@@ -58,8 +63,8 @@ public:
         : abstract_function ( __s.c_str() ) {}
 
     template< typename... _Args >
-    int operator() ( _Args... __args ) {
-        auto __f = _M_get< int ( _Args... ) > ();
+    std::size_t operator() ( _Args... __args ) {
+        auto __f = _M_get< std::size_t ( _Args... ) > ();
         if ( !__f )
             std::__throw_bad_function_call();
         return __f ( __args... );

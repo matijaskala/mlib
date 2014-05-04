@@ -104,7 +104,7 @@ void* non_std::module::_M_symbol ( const char* __s ) const
 abstract_function non_std::module::operator->* ( const char* __s )
 {
     void* __sym = _M_symbol ( __s );
-    return reinterpret_cast< int ( *& ) () > ( __sym );
+    return reinterpret_cast< std::size_t ( *& ) () > ( __sym );
 }
 
 non_std::abstract_function::abstract_function ( const char* __s )
