@@ -20,6 +20,8 @@
 #ifndef MOBJECT_H
 #define MOBJECT_H
 
+#include <list>
+
 class MObject
 {
 public:
@@ -28,6 +30,7 @@ public:
     MObject ( const MObject& other ) = delete;
 
     void reparent ( MObject* parent );
+    const std::list<MObject*>& children ();
 
 private:
     class MObjectPrivate* const d;

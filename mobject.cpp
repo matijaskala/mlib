@@ -48,6 +48,10 @@ void MObject::reparent ( MObject* parent )
         d->parent->d->children.push_back ( this );
 }
 
+const std::list< MObject* >& MObject::children()
+{
+    return d->children;
+}
 
 
 
