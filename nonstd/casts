@@ -20,13 +20,15 @@
 #ifndef NON_STD_CASTS
 #define NON_STD_CASTS
 
-#include <type_traits>
+#include <sstream>
 
 template < typename _Res, typename _Arg >
-inline _Res reference_cast ( _Arg s ) {
-    void* p = &s;
-    _Res* r = static_cast<_Res*> ( p );
-    return *r;
+inline _Res lexical_cast ( _Arg s ) {
+    std::stringstream stream;
+    _Res r;
+    stream << s;
+    stream >> r;
+    return r;
 }
 
 #endif // NON_STD_CASTS
