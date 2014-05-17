@@ -21,6 +21,7 @@
 #define NON_STD_CASTS
 
 #include <sstream>
+#include <typeinfo>
 
 template < typename _Res, typename _Arg >
 inline _Res lexical_cast ( _Arg s ) {
@@ -28,6 +29,8 @@ inline _Res lexical_cast ( _Arg s ) {
     _Res r;
     stream << s;
     stream >> r;
+    if ( stream.fail() || stream.get() != std::char_traits< char >::eof() )
+        throw std::bad_cast();
     return r;
 }
 
