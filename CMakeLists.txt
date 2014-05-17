@@ -18,11 +18,8 @@ add_library(mlib SHARED
     mreflection.cpp
     mtexture.cpp
     mvideointerface.cpp
-    nonstd/cxxabi.cpp
-    nonstd/filesystem.cpp
-    nonstd/module.cpp
-    nonstd/xterm.cpp
 )
+target_link_libraries(mlib nonstdcxx)
 add_library(mimageloader MODULE mimageloader.cpp)
 add_library(mpng MODULE mpng.cpp)
 target_link_libraries(mpng png)
