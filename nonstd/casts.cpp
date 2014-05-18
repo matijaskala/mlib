@@ -17,28 +17,8 @@
  *
  */
 
-#ifndef NON_STD_CASTS
-#define NON_STD_CASTS
+#include "casts"
 
-#include <sstream>
-#include <typeinfo>
-
-namespace non_std
-{
-
-class bad_lexical_cast : public std::bad_cast {
-public:
-    virtual const char* what() const noexcept;
-};
+const char* non_std::bad_lexical_cast::what() const noexcept {
+    return "non_std::bad_lexical_cast";
 }
-
-template < typename _Res, typename _Arg >
-inline _Res lexical_cast ( const _Arg& s ) throw ( non_std::bad_lexical_cast ) {
-    std::stringstream stream;
-    _Res r;
-    if ( !( stream << s ) || !( stream >> r ) || stream.rdbuf()->in_avail() )
-        throw non_std::bad_lexical_cast();
-    return r;
-}
-
-#endif // NON_STD_CASTS
