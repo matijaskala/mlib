@@ -34,7 +34,7 @@ template< typename _CharT, typename _Traits >
 class basic_buffered_ifstream
 {
 public:
-    basic_buffered_ifstream ( std::string&& file )
+    basic_buffered_ifstream ( std::string file )
         : _M_stream ( file ) {
     }
 
@@ -66,7 +66,7 @@ private:
     bool _M_eof = false;
     void _M_fill_buffer() {
         if ( _M_offset >= _M_buffer_size ) {
-            if ( _M_stream.rdbuf().sgetc() == _Traits::eof() ) {
+            if ( _M_stream.rdbuf()->sgetc() == _Traits::eof() ) {
                 _M_eof = true;
             }
             else {

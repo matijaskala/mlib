@@ -22,6 +22,7 @@
 
 MObjectPrivate::MObjectPrivate ( MObject* q ) : q ( q )
 {
+    parent = nullptr;
 }
 MObjectPrivate::~MObjectPrivate()
 {

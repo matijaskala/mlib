@@ -84,7 +84,7 @@ bool MTexture::load ( const std::string& file )
     glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
     GLenum format = image->depth == 24 ? GL_RGB : GL_RGBA;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->size.width(), image->size.height(), 0, format, GL_UNSIGNED_BYTE, image->data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, image->size.width(), image->size.height(), 0, format, GL_UNSIGNED_BYTE, image->data);
     delete image->data;
     delete image;
 
