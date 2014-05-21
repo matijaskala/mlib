@@ -1,0 +1,69 @@
+/*
+ * This file is part of MLib
+ * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#ifndef NON_STD_VARIANT
+#define NON_STD_VARIANT
+
+#include "casts"
+
+namespace non_std
+{
+
+    template< typename... _Types >
+    struct variant;
+
+    template<>
+    struct variant<> {
+        variant () = default;
+
+        template< typename _Type >
+        explicit variant ( const _Type __value ) {}
+    };
+
+    template< typename _FirstType, typename... _OtherTypes >
+    struct variant<_FirstType, _OtherTypes...> : public variant<_OtherTypes...> {
+        using next = variant<_OtherTypes...>;
+
+        using next::operator=;
+
+        _FirstType value;
+
+        variant () = default;
+
+        template< typename _Type >
+        explicit variant ( const _Type __value )
+            : next ( __value )
+            , value ( lexical_cast<_FirstType> ( __value ) ) {}
+
+        variant& operator= ( _FirstType __value ) {
+            value = __value;
+            return *this;
+        }
+
+        operator _FirstType& () {
+            return value;
+        }
+
+        operator const _FirstType& () const {
+            return value;
+        }
+    };
+}
+
+#endif // NON_STD_VARIANT
