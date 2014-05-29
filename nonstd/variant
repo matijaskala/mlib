@@ -20,8 +20,6 @@
 #ifndef NON_STD_VARIANT
 #define NON_STD_VARIANT
 
-#include "casts"
-
 namespace non_std
 {
 
@@ -31,9 +29,6 @@ namespace non_std
     template<>
     struct variant<> {
         variant () = default;
-
-        template< typename _Type >
-        explicit variant ( const _Type __value ) {}
     };
 
     template< typename _FirstType, typename... _OtherTypes >
@@ -44,12 +39,11 @@ namespace non_std
 
         _FirstType value;
 
-        variant () = default;
+        variant () : value() {}
 
-        template< typename _Type >
-        explicit variant ( const _Type __value )
-            : next ( __value )
-            , value ( lexical_cast<_FirstType> ( __value ) ) {}
+        variant ( _FirstType __first_value, _OtherTypes... __other_values )
+            : next ( __other_values... )
+            , value ( __first_value ) {}
 
         variant& operator= ( _FirstType __value ) {
             value = __value;
