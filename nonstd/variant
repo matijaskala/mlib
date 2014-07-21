@@ -38,6 +38,7 @@ struct variant;
 template<>
 struct variant<> {
     variant () = default;
+    variant& operator= ( decltype(nullvalue) ) { return *this; }
 };
 
 template< typename _Value >
@@ -57,8 +58,6 @@ struct variant<_FirstType, _OtherTypes...> : public variant<_OtherTypes...>, pro
     using next = variant<_OtherTypes...>;
     using value = _VariantValue<_FirstType>;
 
-    using next::operator=;
-
     explicit variant ( )
         : next ( )
         , value ( nullptr ) {}
@@ -73,13 +72,21 @@ struct variant<_FirstType, _OtherTypes...> : public variant<_OtherTypes...>, pro
         : next ( __other_values... )
         , value ( nullptr ) {}
 
-    variant& operator= ( const _FirstType& value ) {
-        set<_FirstType>( value );
+    template< typename _Type >
+    variant& operator= ( const _Type& value ) {
+        set<_Type>( value );
         return *this;
     }
 
-    operator const _FirstType& () const {
-        return get<_FirstType>;
+    variant& operator= ( decltype(nullvalue) ) {
+        set<_FirstType>( nullvalue );
+        next::operator= ( nullvalue );
+        return *this;
+    }
+
+    template< typename _Type >
+    operator const _Type& () const {
+        return get<_Type>();
     }
 
     template< typename _Type >
@@ -101,6 +108,14 @@ struct variant<_FirstType, _OtherTypes...> : public variant<_OtherTypes...>, pro
         if ( value )
             delete value;
         value = new _Type ( __value );
+    }
+
+    template< typename _Type >
+    void set ( decltype(nullvalue) ) {
+        auto& value = _VariantValue< _Type >::value;
+        if ( value )
+            delete value;
+        value = nullptr;
     }
 
 };
