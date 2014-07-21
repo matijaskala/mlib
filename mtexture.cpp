@@ -26,11 +26,6 @@
 
 static std::map< std::string, MTexture* > map;
 
-class MImagePrivate
-{
-    unsigned texture;
-};
-
 MTexture::MTexture( MSize size, unsigned int tex )
 {
     d = new MTexturePrivate;
@@ -41,6 +36,7 @@ MTexture::MTexture( MSize size, unsigned int tex )
 
 MTexture::~MTexture()
 {
+    glDeleteTextures(1, &d->tex);
     delete d;
 }
 
@@ -56,7 +52,7 @@ const MSize& MTexture::size() const
 
 void MTexture::draw ( int x1, int y1, int x2, int y2 ) const
 {
-    glBindTexture(GL_TEXTURE_2D,d->tex);
+    glBindTexture(GL_TEXTURE_2D,texture());
     glBegin(GL_QUADS);
         glTexCoord2f(0,0);
         glVertex2f(x1,y1);
@@ -103,7 +99,7 @@ void MTexture::unload ( const std::string& file )
 
 void MTexture::unload ( const MTexture* texture )
 {
-    for ( std::pair< std::string, MTexture* > position: map )
+    for ( auto position: map )
         if ( position.second == texture )
             map.erase ( position.first );
     delete texture;
