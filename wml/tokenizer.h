@@ -20,7 +20,6 @@
 #ifndef WML_TOKENIZER_H
 #define WML_TOKENIZER_H
 
-#include <stack>
 #include <nonstd/buffered_ifstream>
 
 namespace wml
@@ -59,7 +58,6 @@ public:
         : stream ( file ) {
         next_char();
     }
-    std::stack<int> elements;
     const token& next_token();
     const token& current_token() const {
         return curr_token;
