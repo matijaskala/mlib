@@ -31,6 +31,9 @@ struct arg_id<_FirstArg, _OtherArgs...>
     static std::string name() {
         return M::typeName<_FirstArg>() + "," + arg_id<_OtherArgs...>::name();
     }
+    static constexpr int count() {
+        return 1 + arg_id<_OtherArgs...>::count();
+    }
 };
 
 template< typename _OnlyOneArg >
@@ -39,6 +42,9 @@ struct arg_id<_OnlyOneArg>
     static std::string name() {
         return M::typeName<_OnlyOneArg>();
     }
+    static constexpr int count() {
+        return 1;
+    }
 };
 
 template<>
@@ -46,6 +52,9 @@ struct arg_id<>
 {
     static std::string name() {
         return "";
+    }
+    static constexpr int count() {
+        return 0;
     }
 };
 
@@ -63,12 +72,13 @@ struct func_id<_ReturnType(_Class::*)(_Args...)> : public func_id<_ReturnType(_A
 template< typename _ReturnType, typename... _Args >
 struct func_id<_ReturnType(_Args...)>
 {
-    static std::string name() {
-        return "(" + arg_id<_Args...>::name() + ")";
+    using args = arg_id<_Args...>;
+    static constexpr std::string return_type() {
+        return M::typeName<_ReturnType>();
     }
 };
 
-#define func_name(FUNC) (#FUNC + func_id<decltype(&FUNC)>::name())
-#define method_name(CLASS,METHOD) (#METHOD + func_id<decltype(&CLASS::METHOD)>::name())
+#define func_name(FUNC) (#FUNC + ( "(" + func_id<decltype(&FUNC)>::args::name() + ")" ) )
+#define method_name(CLASS,METHOD) (#METHOD + ( "(" + func_id<decltype(&CLASS::METHOD)>::args::name() + ")" ) )
 
 #endif // FUNC_ID
