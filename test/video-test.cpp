@@ -19,15 +19,45 @@
 
 #include <mvideointerface.h>
 #include <mtexture.h>
+#include <meventhandler.h>
 #include <FTGL/ftgl.h>
 #include <GL/gl.h>
+
+class EventHandler : public MEventHandler {
+    virtual void quit();
+    virtual void key_pressed ( uint64_t keysym );
+    virtual void key_released ( uint64_t keysym );
+};
+
+static std::string text = "Hello World!";
+
+void EventHandler::quit()
+{
+    exit(0);
+}
+
+MVideoInterface* video;
+void EventHandler::key_pressed ( uint64_t keysym )
+{
+    MKey key = video->getKey(keysym);
+    if ( key == MKey::BACKSPACE && !text.empty() )
+        text.pop_back();
+    else if ( static_cast<int> ( key ) >= 32 && static_cast<int> ( key ) < 256 )
+        text += static_cast<char> ( key );
+}
+
+void EventHandler::key_released ( uint64_t keysym )
+{
+    MKey key = video->getKey(keysym);
+}
 
 int main() {
     FTGLPixmapFont font ( DATADIR "fonts/DejaVuSans.ttf" );
     if ( font.Error() )
         return 1;
+    MEventHandler::setCurrent(new EventHandler);
     const MTexture* tex;
-    MVideoInterface* video = MPlugin::load<MVideoInterface> ( "msdl" );
+    video = MPlugin::load<MVideoInterface> ( "msdl" );
     video->init();
     if ( !MTexture::load ( DATADIR "images/sample.png" ) )
         return 1;
@@ -42,7 +72,7 @@ int main() {
         glColor4d(0,0,1,1);
         glRasterPos2i(72,72);
         font.FaceSize(72);
-        font.Render("Hello World!");
+        font.Render(text.c_str());
         glPopAttrib();
         video->endPaint();
     }
