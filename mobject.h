@@ -33,32 +33,30 @@ public:
     void reparent ( MObject* parent );
     const std::list<MObject*>& children ();
 
-private:
-    template< typename... _Args >
-    class Slot {
-        using _Slot = std::function< void ( MObject*, _Args...) >;
-        _Slot slot;
-        MObject* receiver;
-    public:
-        Slot ( _Slot slot, MObject* receiver ) : slot ( slot ), receiver ( receiver ) {}
-        void call ( MObject* sender, _Args... __args ) { slot ( sender, __args... ); }
-    };
-
 protected:
     template< typename... _Args >
-    struct Signal {
-        using _Slot = Slot< _Args... >;
-        std::list< _Slot* > _slots;
-    };
+    struct Signal;
+
+private:
+    template< typename... _Args >
+    class Slot;
 
 public:
 #define classof(object) std::remove_pointer<decltype(object)>::type
 #define emit _emit
 #define connect(sender,signal,receiver,slot) _connect((sender)->signal,receiver,&classof(receiver)::slot)
+#define disconnect(sender,signal,receiver,slot) _disconnect((sender)->signal,receiver,&classof(receiver)::slot)
     template< typename _Receiver, typename... _Args >
-    static void _connect ( Signal< _Args... > signal, _Receiver* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
+    static void _connect ( Signal< _Args... >& signal, _Receiver* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
         auto wrapper = [slot, receiver] ( MObject* sender, _Args... __args ) { (receiver->*slot) ( sender, __args... ); };
-        signal._slots.push_back ( new Slot< _Args... > ( wrapper, receiver ) );
+        new Slot< _Args... > ( wrapper, &signal, receiver, slot );
+    }
+
+    template< typename _Receiver, typename... _Args >
+    static void _disconnect ( Signal< _Args... >& signal, _Receiver* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
+        for ( Slot< _Args... >* _slot: signal._slots )
+            if ( _slot.receiver == receiver && _slot.slot_ptr == slot )
+                signal._slot.remove ( _slot );
     }
 
     template< typename... _Args >
@@ -70,6 +68,39 @@ public:
 private:
     class MObjectPrivate* const d;
 };
+
+    struct MObjectSignalBase {};
+
+    struct MObjectSlotBase {
+        using _SlotPtr = void ( MObject::* ) ( );
+        MObjectSignalBase* signal;
+        MObject* receiver;
+        _SlotPtr slot_ptr;
+        MObjectSlotBase ( MObjectSignalBase* signal, MObject* receiver, _SlotPtr slot_ptr )
+            : signal ( signal )
+            , receiver ( receiver )
+            , slot_ptr ( slot_ptr ) {}
+    };
+
+    template< typename... _Args >
+    class MObject::Slot : public MObjectSlotBase {
+        using _Wrapper = std::function< void ( MObject*, _Args...) >;
+        _Wrapper __wrapper;
+    public:
+        template< typename _Receiver >
+        Slot ( _Wrapper __wrapper, Signal< _Args... >* signal, MObject* receiver, void ( _Receiver::* slot_ptr ) ( MObject*, _Args... ) )
+            : MObjectSlotBase ( signal, receiver, reinterpret_cast< MObjectSlotBase::_SlotPtr > ( slot_ptr ) )
+            , __wrapper ( __wrapper ) {
+                signal->_slots.push_back ( this );
+            }
+        void call ( MObject* sender, _Args... __args ) { __wrapper ( sender, __args... ); }
+    };
+
+    template< typename... _Args >
+    struct MObject::Signal : public MObjectSignalBase {
+        using _Slot = Slot< _Args... >;
+        std::list< _Slot* > _slots;
+    };
 
 #endif // MOBJECT_H
 
