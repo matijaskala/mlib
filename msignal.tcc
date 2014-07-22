@@ -37,9 +37,9 @@ class MObject::Slot : public MObjectSlotBase {
     using _Wrapper = std::function< void ( MObject*, _Args...) >;
     _Wrapper __wrapper;
 public:
-    Slot ( _Wrapper __wrapper, Signal< _Args... >* signal, MObject* receiver, void ( MObject::* slot_ptr ) ( MObject*, _Args... ) )
-        : MObjectSlotBase ( signal, receiver, reinterpret_cast< MObjectSlotBase::_SlotPtr > ( slot_ptr ) )
-        , __wrapper ( __wrapper ) {
+    Slot ( Signal< _Args... >* signal, MObject* receiver, void ( MObject::* slot ) ( MObject*, _Args... ) )
+        : MObjectSlotBase ( signal, receiver, reinterpret_cast< MObjectSlotBase::_SlotPtr > ( slot ) )
+        , __wrapper ( [slot, receiver] ( MObject* sender, _Args... __args ) { (receiver->*slot) ( sender, __args... ); } ) {
             signal->_slots.push_back ( this );
         }
     void call ( MObject* sender, _Args... __args ) { __wrapper ( sender, __args... ); }
