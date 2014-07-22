@@ -25,7 +25,7 @@
  *  as international virtual keycodes.  We'll follow in the footsteps of X11...
  *  @brief The names of the keys
  */
-typedef enum {
+enum MKey {
         /** @name ASCII mapped keysyms
          *  The keyboard syms have been cleverly chosen to map to ASCII
          */
@@ -296,10 +296,10 @@ typedef enum {
         /* Add any other keys here */
 
         MKEY_LAST
-} MKey;
+};
 
 /** Enumeration of valid key mods (possibly OR'd together) */
-typedef enum {
+enum KMod {
         KMOD_NONE  = 0x0000,
         KMOD_LSHIFT= 0x0001,
         KMOD_RSHIFT= 0x0002,
@@ -313,7 +313,7 @@ typedef enum {
         KMOD_CAPS  = 0x2000,
         KMOD_MODE  = 0x4000,
         KMOD_RESERVED = 0x8000
-} KMod;
+};
 
 #define KMOD_CTRL       (KMOD_LCTRL|KMOD_RCTRL)
 #define KMOD_SHIFT      (KMOD_LSHIFT|KMOD_RSHIFT)
