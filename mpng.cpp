@@ -61,10 +61,12 @@ MImage* MPNG::load ( const std::string& file )
                 png_set_expand_gray_1_2_4_to_8 ( png );
             break;
     }
+    png_read_update_info ( png, info );
     bitDepth = png_get_bit_depth ( png, info );
+    stride = png_get_rowbytes ( png, info );
     png_byte channels = png_get_channels ( png, info );
-    png_bytepp rowPointers = new png_bytep[height];
     png_bytep data = new png_byte[height * stride];
+    png_bytepp rowPointers = new png_bytep[height];
     for ( png_uint_32 i = 0; i < height; i++ ) {
         rowPointers[i] = data + i * stride;
     }
