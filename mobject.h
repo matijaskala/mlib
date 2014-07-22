@@ -44,17 +44,17 @@ private:
 public:
 #define classof(object) std::remove_pointer<decltype(object)>::type
 #define emit _emit
-#define connect(sender,signal,receiver,slot) _connect((sender)->signal,receiver,&classof(receiver)::slot)
-#define disconnect(sender,signal,receiver,slot) _disconnect((sender)->signal,receiver,&classof(receiver)::slot)
+#define connect(sender,signal,receiver,slot) _connect(&(sender)->signal,receiver,&classof(receiver)::slot)
+#define disconnect(sender,signal,receiver,slot) _disconnect(&(sender)->signal,receiver,&classof(receiver)::slot)
     template< typename _Receiver, typename... _Args >
-    static void _connect ( Signal< _Args... >& signal, _Receiver* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
+    static void _connect ( Signal< _Args... >* signal, _Receiver* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
         auto wrapper = [slot, receiver] ( MObject* sender, _Args... __args ) { (receiver->*slot) ( sender, __args... ); };
-        new Slot< _Args... > ( wrapper, &signal, receiver, slot );
+        new Slot< _Args... > ( wrapper, signal, receiver, slot );
     }
 
     template< typename _Receiver, typename... _Args >
-    static void _disconnect ( Signal< _Args... >& signal, _Receiver* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
-        for ( Slot< _Args... >* _slot: signal._slots )
+    static void _disconnect ( Signal< _Args... >* signal, _Receiver* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
+        for ( Slot< _Args... >* _slot: signal->_slots )
             if ( _slot.receiver == receiver && _slot.slot_ptr == slot )
                 signal._slot.remove ( _slot );
     }
