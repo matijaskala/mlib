@@ -28,7 +28,7 @@ static std::map < std::string, non_std::module > loaded;
 MPlugin* MPlugin::_load ( const std::string& file, const std::string& symbol )
 {
     non_std::module mod = loaded[file];
-    if ( !mod.is_open() && !mod.open ( file + mod.suffix() ) ) {
+    if ( !mod.is_open() && !mod.open ( LIBDIR + mod.prefix() + file + mod.suffix() ) ) {
         mDebug ( ERROR ) << non_std::module::last_error();
         return NULL;
     }

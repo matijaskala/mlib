@@ -32,7 +32,7 @@ struct GenericImageLoader : MImageLoader {
 
 GenericImageLoader::GenericImageLoader()
 {
-    MImagePlugin* plugin = MPlugin::load<MImagePlugin> ( "./libmpng" );
+    MImagePlugin* plugin = MPlugin::load<MImagePlugin> ( "mpng" );
     plugins.push_front ( plugin );
 }
 

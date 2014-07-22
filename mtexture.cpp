@@ -67,7 +67,7 @@ void MTexture::draw ( int x1, int y1, int x2, int y2 ) const
 
 bool MTexture::load ( const std::string& file )
 {
-    static MImageLoader* loader = MPlugin::load< MImageLoader > ( "./libmimageloader" );
+    static MImageLoader* loader = MPlugin::load< MImageLoader > ( "mimageloader" );
     MImage* image = loader->load ( file );
     if ( !image )
         return false;
