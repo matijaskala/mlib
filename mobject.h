@@ -69,38 +69,7 @@ private:
     class MObjectPrivate* const d;
 };
 
-    struct MObjectSignalBase {};
-
-    struct MObjectSlotBase {
-        using _SlotPtr = void ( MObject::* ) ( );
-        MObjectSignalBase* signal;
-        MObject* receiver;
-        _SlotPtr slot_ptr;
-        MObjectSlotBase ( MObjectSignalBase* signal, MObject* receiver, _SlotPtr slot_ptr )
-            : signal ( signal )
-            , receiver ( receiver )
-            , slot_ptr ( slot_ptr ) {}
-    };
-
-    template< typename... _Args >
-    class MObject::Slot : public MObjectSlotBase {
-        using _Wrapper = std::function< void ( MObject*, _Args...) >;
-        _Wrapper __wrapper;
-    public:
-        template< typename _Receiver >
-        Slot ( _Wrapper __wrapper, Signal< _Args... >* signal, MObject* receiver, void ( _Receiver::* slot_ptr ) ( MObject*, _Args... ) )
-            : MObjectSlotBase ( signal, receiver, reinterpret_cast< MObjectSlotBase::_SlotPtr > ( slot_ptr ) )
-            , __wrapper ( __wrapper ) {
-                signal->_slots.push_back ( this );
-            }
-        void call ( MObject* sender, _Args... __args ) { __wrapper ( sender, __args... ); }
-    };
-
-    template< typename... _Args >
-    struct MObject::Signal : public MObjectSignalBase {
-        using _Slot = Slot< _Args... >;
-        std::list< _Slot* > _slots;
-    };
+#include "msignal.tcc"
 
 #endif // MOBJECT_H
 
