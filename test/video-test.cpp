@@ -19,19 +19,31 @@
 
 #include <mvideointerface.h>
 #include <mtexture.h>
+#include <FTGL/ftgl.h>
+#include <GL/gl.h>
 
 int main() {
-    const MTexture* tex;
-    MVideoInterface* video = MPlugin::load<MVideoInterface> ( "../libmsdl" );
-    video->init();
-    if ( !MTexture::load ( "../../../AI/data/images/apple-gray.png" ) )
+    FTGLPixmapFont font ( DATADIR "fonts/DejaVuSans.ttf" );
+    if ( font.Error() )
         return 1;
-    tex = MTexture::get ( "../../../AI/data/images/apple-gray.png" );
+    const MTexture* tex;
+    MVideoInterface* video = MPlugin::load<MVideoInterface> ( "msdl" );
+    video->init();
+    if ( !MTexture::load ( DATADIR "images/sample.png" ) )
+        return 1;
+    tex = MTexture::get ( DATADIR "images/sample.png" );
     video->setVideoMode(200,200);
     for(;;) {
         video->handleEvents();
         video->beginPaint();
-        tex->draw(0,0,200,200);
+        MSize size = video->screen_size;
+        tex->draw(0,0,size.width(),size.height());
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+        glColor4d(0,0,1,1);
+        glRasterPos2i(72,72);
+        font.FaceSize(72);
+        font.Render("Hello World!");
+        glPopAttrib();
         video->endPaint();
     }
 }
