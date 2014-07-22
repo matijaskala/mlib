@@ -49,14 +49,14 @@ public:
     template< typename _Receiver, typename... _Args >
     static void _connect ( Signal< _Args... >* signal, _Receiver* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
         auto wrapper = [slot, receiver] ( MObject* sender, _Args... __args ) { (receiver->*slot) ( sender, __args... ); };
-        new Slot< _Args... > ( wrapper, signal, receiver, slot );
+        new Slot< _Args... > ( wrapper, signal, receiver, static_cast< void (MObject::*)(MObject*, _Args...) > ( slot ) );
     }
 
     template< typename _Receiver, typename... _Args >
     static void _disconnect ( Signal< _Args... >* signal, _Receiver* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
         for ( Slot< _Args... >* _slot: signal->_slots )
             if ( _slot.receiver == receiver && _slot.slot_ptr == slot )
-                signal._slot.remove ( _slot );
+                signal->_slot.remove ( _slot );
     }
 
     template< typename... _Args >
