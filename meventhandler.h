@@ -20,6 +20,8 @@
 #ifndef MEVENTHANDLER_H
 #define MEVENTHANDLER_H
 
+#include <cstdint>
+
 class MEventHandler
 {
 public:
@@ -27,6 +29,8 @@ public:
     static void setCurrent ( MEventHandler* handler );
 
     virtual void quit() {}
+    virtual void key_pressed ( std::uint64_t keysym ) {}
+    virtual void key_released ( std::uint64_t keysym ) {}
 };
 
 #endif // MEVENTHANDLER_H
