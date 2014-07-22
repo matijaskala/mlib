@@ -32,6 +32,7 @@ class SDLVideoInterface : public MVideoInterface
     virtual void handleEvents() override;
     virtual bool init() override;
     virtual bool setVideoMode ( int x, int y ) override;
+    virtual MKey getKey ( uint64_t keysym ) override;
 };
 
 void SDLVideoInterface::handleEvents()
@@ -45,6 +46,12 @@ void SDLVideoInterface::handleEvents()
                 break;
             case SDL_VIDEORESIZE:
                 setVideoMode(ev.resize.w,ev.resize.h);
+                break;
+            case SDL_KEYDOWN:
+                handler->key_pressed(ev.key.keysym.sym << 16 | ev.key.keysym.mod);
+                break;
+            case SDL_KEYUP:
+                handler->key_released(ev.key.keysym.sym << 16 | ev.key.keysym.mod);
                 break;
         }
 }
@@ -101,6 +108,11 @@ bool SDLVideoInterface::setVideoMode ( int x, int y )
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     return true;
+}
+
+MKey SDLVideoInterface::getKey ( uint64_t keysym )
+{
+    return MKey ( keysym >> 16 );
 }
 
 M_PLUGIN_EXPORT ( MVideoInterface, SDLVideoInterface )

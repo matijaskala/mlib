@@ -37,6 +37,7 @@ class WaylandVideoInterface : public MVideoInterface
     virtual void handleEvents();
     virtual bool init();
     virtual bool setVideoMode ( int x, int y );
+    virtual MKey getKey ( uint64_t keysym ) { return MKey::UNKNOWN; }
     struct wl_display *wl_display;
     struct wl_compositor *wl_compositor;
     struct wl_seat *wl_seat;
