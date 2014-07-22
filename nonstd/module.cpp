@@ -27,6 +27,14 @@
 
 using namespace non_std;
 
+std::string non_std::module::prefix() {
+#if defined WIN32
+    return "";
+#else
+    return "lib";
+#endif
+}
+
 std::string non_std::module::suffix() {
 #if defined WIN32
     return ".dll";

@@ -47,7 +47,9 @@ public:
         : _M_handle() {
         open ( __s );
     }
-    
+
+    static std::string prefix();
+
     static std::string suffix();
 
     bool is_open() {
