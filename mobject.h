@@ -42,21 +42,26 @@ private:
     class Slot;
 
 public:
-#define classof(object) std::remove_pointer<decltype(object)>::type
-#define emit _emit
-#define connect(sender,signal,receiver,slot) _connect(&(sender)->signal,receiver,&classof(receiver)::slot)
-#define disconnect(sender,signal,receiver,slot) _disconnect(&(sender)->signal,receiver,&classof(receiver)::slot)
-    template< typename _Receiver, typename... _Args >
-    static void _connect ( Signal< _Args... >* signal, MObject* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
-        new Slot< _Args... > ( signal, receiver, static_cast< void (MObject::*)(MObject*, _Args...) > ( slot ) );
+    template< typename _Object, typename... _Args >
+    using _Method = void ( _Object::* ) ( _Args... );
+
+    template< typename _Res = MObject, typename _Source, typename... _Args >
+    static _Method< _Res, _Args... > method_cast ( void ( _Source::*source ) ( _Args... ) ) {
+        return static_cast< _Method< _Res, _Args... > > ( source );
     }
 
-    template< typename _Receiver, typename... _Args >
-    static void _disconnect ( Signal< _Args... >* signal, MObject* receiver, void ( _Receiver::*slot ) ( MObject*, _Args... ) ) {
-        for ( Slot< _Args... >* _slot: signal->_slots )
-            if ( _slot.receiver == receiver && _slot.slot_ptr == slot )
-                signal->_slot.remove ( _slot );
+#define classof(object) std::remove_pointer<decltype(object)>::type
+#define emit _emit
+#define connect(sender,signal,receiver,slot) _connect(&(sender)->signal,receiver,method_cast(&classof(receiver)::slot))
+#define disconnect(sender,signal,receiver,slot) _disconnect(&(sender)->signal,receiver,method_cast(&classof(receiver)::slot))
+
+    template< typename... _Args >
+    static void _connect ( Signal< _Args... >* signal, MObject* receiver, _Method< MObject, MObject*, _Args... > slot ) {
+        new Slot< _Args... > ( signal, receiver, slot );
     }
+
+    template< typename... _Args >
+    static void _disconnect ( Signal< _Args... >* signal, MObject* receiver, _Method< MObject, MObject*, _Args... > slot );
 
     template< typename... _Args >
     void _emit ( Signal< _Args... > signal, _Args... __args ) {
@@ -65,6 +70,7 @@ public:
     }
 
 private:
+    void disconnect_private ( class MObjectSignalBase* signal, _Method<MObject> slot );
     class MObjectPrivate* const d;
 };
 

@@ -54,5 +54,11 @@ const std::list< MObject* >& MObject::children()
     return d->children;
 }
 
+void MObject::disconnect_private ( MObjectSignalBase* signal, _Method< MObject > slot )
+{
+    for ( MObjectSlotBase* _slot: d->signal_connections )
+        if ( _slot->signal == signal && _slot->slot_ptr == slot )
+            d->signal_connections.remove ( _slot );
+}
 
 

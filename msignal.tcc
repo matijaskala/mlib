@@ -19,6 +19,14 @@
 
 
 
+template< typename... _Args >
+void MObject::_disconnect ( Signal< _Args... >* signal, MObject* receiver, _Method< MObject, MObject*, _Args... > slot ) {
+    for ( auto i = signal->_slots.begin(); i != signal->_slots.end(); i++ )
+        if ( (*i)->receiver == receiver && reinterpret_cast< _Method< MObject, MObject*, _Args... > > ( (*i)->slot_ptr ) == slot )
+            signal->_slots.remove ( *i-- );
+    receiver->disconnect_private ( signal, reinterpret_cast< _Method< MObject > > ( slot ) );
+}
+
 struct MObjectSignalBase {};
 
 struct MObjectSlotBase {

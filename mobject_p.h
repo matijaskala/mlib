@@ -22,6 +22,8 @@
 
 #include <list>
 
+struct MObjectSlotBase;
+
 class MObjectPrivate
 {
 public:
@@ -30,6 +32,7 @@ public:
 
     MObject* parent;
     std::list<MObject*> children;
+    std::list<MObjectSlotBase*> signal_connections;
 
 private:
     class MObject* const q;
