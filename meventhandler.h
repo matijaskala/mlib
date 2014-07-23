@@ -25,8 +25,17 @@
 
 class MEventHandler
 {
-    struct Stack : std::stack< MEventHandler > {
+    class Stack {
+        std::stack< MEventHandler* > pointers;
+    public:
         Stack();
+        template< class _Handler >
+        void push() {
+            pointers.push ( new _Handler );
+        }
+        void pop();
+        MEventHandler& top();
+        bool empty() const;
     };
 
 public:
@@ -35,6 +44,9 @@ public:
     virtual void quit() {}
     virtual void key_pressed ( std::uint64_t keysym ) {}
     virtual void key_released ( std::uint64_t keysym ) {}
+
+protected:
+    virtual ~MEventHandler() = default;
 };
 
 #endif // MEVENTHANDLER_H

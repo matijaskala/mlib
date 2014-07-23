@@ -30,5 +30,21 @@ MEventHandler::Stack::Stack()
             std::exit ( 0 );
         }
     };
-    push ( FallbackHandler() );
+    push< FallbackHandler > ();
+}
+
+void MEventHandler::Stack::pop()
+{
+    delete pointers.top();
+    pointers.pop();
+}
+
+MEventHandler& MEventHandler::Stack::top()
+{
+    return *pointers.top();
+}
+
+bool MEventHandler::Stack::empty() const
+{
+    return pointers.empty();
 }
