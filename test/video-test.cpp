@@ -24,6 +24,8 @@
 #include <GL/gl.h>
 #include <nonstd/filesystem>
 #include <mdebug.h>
+#include <mobject.h>
+#include <vector>
 
 class EventHandler : public MEventHandler {
     virtual void quit();
@@ -53,6 +55,73 @@ void EventHandler::key_released ( uint64_t keysym )
     MKey key = video->getKey(keysym);
 }
 
+struct Menu : public MObject {
+    int current = 0;
+    struct EventHandler : public MEventHandler {
+        Menu* menu;
+        EventHandler ( Menu* menu ) : menu ( menu ) {}
+        virtual void key_pressed ( uint64_t keysym ) override {
+            MKey key = video->getKey ( keysym );
+            if ( key == MKey::UP ) {
+                if ( menu->current == 0 )
+                    menu->current = menu->items.size();
+                menu->current--;
+            }
+            else if ( key == MKey::DOWN ) {
+                menu->current++;
+                if ( menu->current == menu->items.size() )
+                    menu->current = 0;
+            }
+            else if ( key == MKey::RETURN )
+                menu->confirmed();
+        }
+        virtual void quit() {
+            exit(0);
+        }
+    };
+    Menu ( MObject* parent = nullptr ) : MObject(parent) {
+        MEventHandler::handlers.push<EventHandler> ( this );
+    }
+    virtual ~Menu() {
+        MEventHandler::handlers.pop();
+    }
+    void confirmed() {
+        emit ( activated, current );
+    }
+    std::vector< std::string > items;
+    Signal<int> activated;
+    void render(FTGLPixmapFont& font) {
+        int x = 100;
+        int y = 100;
+        int i = 0;
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+        for ( std::string item: items ) {
+            if ( current == i )
+                glColor4d(1,0,0,1);
+            else
+                glColor4d(0,1,1,1);
+            glRasterPos2i(x,y);
+            font.FaceSize ( 20 );
+            font.Render ( item.c_str() );
+            i++;
+            y += 20;
+        }
+        glPopAttrib();
+    }
+};
+
+class Listener : public MObject {
+    void activated(MObject* sender, int z) {
+        Menu* menu = dynamic_cast<Menu*> ( sender );
+        menu->items.push_back ( "ACTIVATED: " + menu->items[z] );
+    }
+public:
+    Listener ( MObject* parent = nullptr ) : MObject(parent) {
+        Menu* menu = dynamic_cast<Menu*> ( parent );
+        connect(menu, activated, this, activated);
+    }
+};
+
 int main() {
     FTGLPixmapFont font ( DATADIR "fonts/DejaVuSans.ttf" );
     if ( font.Error() )
@@ -73,6 +142,11 @@ int main() {
     }
     tex = MTexture::get ( DATADIR "images/sample.png" );
     video->setVideoMode(200,200);
+    Menu* menu = new Menu;
+    menu->items.push_back("ITEM1");
+    menu->items.push_back("ITEM2");
+    menu->items.push_back("ITEM3");
+    new Listener ( menu );
     for(;;) {
         video->handleEvents();
         video->beginPaint();
@@ -84,6 +158,7 @@ int main() {
         font.FaceSize(72);
         font.Render(text.c_str());
         glPopAttrib();
+        menu->render(font);
         video->endPaint();
     }
 }
