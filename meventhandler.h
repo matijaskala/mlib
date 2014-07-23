@@ -29,9 +29,9 @@ class MEventHandler
         std::stack< MEventHandler* > pointers;
     public:
         Stack();
-        template< class _Handler >
-        void push() {
-            pointers.push ( new _Handler );
+        template< class _Handler, typename... _Args >
+        void push( _Args... __args ) {
+            pointers.push ( new _Handler ( __args... ) );
         }
         void pop();
         MEventHandler& top();
