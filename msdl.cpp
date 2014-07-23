@@ -38,20 +38,20 @@ class SDLVideoInterface : public MVideoInterface
 void SDLVideoInterface::handleEvents()
 {
     SDL_Event ev;
-    MEventHandler* handler = MEventHandler::current();
+    MEventHandler& handler = MEventHandler::handlers.top();
     while ( SDL_PollEvent ( &ev ) )
         switch ( ev.type ) {
             case SDL_QUIT:
-                handler->quit();
+                handler.quit();
                 break;
             case SDL_VIDEORESIZE:
                 setVideoMode(ev.resize.w,ev.resize.h);
                 break;
             case SDL_KEYDOWN:
-                handler->key_pressed(ev.key.keysym.sym << 16 | ev.key.keysym.mod);
+                handler.key_pressed(ev.key.keysym.sym << 16 | ev.key.keysym.mod);
                 break;
             case SDL_KEYUP:
-                handler->key_released(ev.key.keysym.sym << 16 | ev.key.keysym.mod);
+                handler.key_released(ev.key.keysym.sym << 16 | ev.key.keysym.mod);
                 break;
         }
 }

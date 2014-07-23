@@ -90,7 +90,7 @@ bool WaylandVideoInterface::init()
         [] ( void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state ) {
             auto _This = static_cast<WaylandVideoInterface*> ( data );
             if ( button == 274 && state == WL_POINTER_BUTTON_STATE_RELEASED ) {
-                MEventHandler::current()->quit();
+                MEventHandler::handlers.top().quit();
             }
         },
         [] ( void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value ) {},
@@ -102,7 +102,7 @@ bool WaylandVideoInterface::init()
         [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state ) {
             auto _This = static_cast<WaylandVideoInterface*> ( data );
             if ( key == KEY_ESC ) {
-                MEventHandler::current()->quit();
+                MEventHandler::handlers.top().quit();
             }
         },
         [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group ) {},

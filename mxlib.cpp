@@ -59,7 +59,7 @@ void XlibVideoInterface::endPaint()
 
 void XlibVideoInterface::handleEvents()
 {
-    MEventHandler* handler = MEventHandler::current();
+    MEventHandler& handler = MEventHandler::handlers.top();
     while ( XPending ( xdisplay ) ) {
         XEvent ev;
         XNextEvent ( xdisplay, &ev );
@@ -68,7 +68,7 @@ void XlibVideoInterface::handleEvents()
                 break;
             case ClientMessage:
                 if ( ev.xclient.data.l[0] == WM_DELETE_WINDOW ) {
-                    handler->quit();
+                    handler.quit();
                 }
                 break;
             case ConfigureNotify:
@@ -80,7 +80,7 @@ void XlibVideoInterface::handleEvents()
     glMatrixMode ( GL_MODELVIEW );
                 break;
             case KeyPress:
-                handler->key_pressed(ev.xkey.keycode);
+                handler.key_pressed(ev.xkey.keycode);
                 break;
             case KeyRelease:
                 if ( XEventsQueued ( xdisplay, QueuedAfterReading ) ) {
@@ -91,7 +91,7 @@ void XlibVideoInterface::handleEvents()
                         break;
                     }
                 }
-                handler->key_released(ev.xkey.keycode);
+                handler.key_released(ev.xkey.keycode);
                 break;
         }
     }

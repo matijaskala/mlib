@@ -21,28 +21,14 @@
 
 #include <cstdlib>
 
-static MEventHandler* current_handler = nullptr;
-static MEventHandler* fallback_handler = nullptr;
+MEventHandler::Stack MEventHandler::handlers;
 
-MEventHandler* MEventHandler::current()
+MEventHandler::Stack::Stack()
 {
     class FallbackHandler : public MEventHandler {
         virtual void quit() {
             std::exit ( 0 );
         }
     };
-    if ( !current_handler )
-        current_handler = fallback_handler = new FallbackHandler;
-
-    return current_handler;
-}
-
-void MEventHandler::setCurrent ( MEventHandler* handler )
-{
-    if ( fallback_handler ) {
-        delete fallback_handler;
-        fallback_handler = nullptr;
-    }
-
-    current_handler = handler;
+    push ( FallbackHandler() );
 }

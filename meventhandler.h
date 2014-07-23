@@ -21,12 +21,16 @@
 #define MEVENTHANDLER_H
 
 #include <cstdint>
+#include <stack>
 
 class MEventHandler
 {
+    struct Stack : std::stack< MEventHandler > {
+        Stack();
+    };
+
 public:
-    static MEventHandler* current();
-    static void setCurrent ( MEventHandler* handler );
+    static Stack handlers;
 
     virtual void quit() {}
     virtual void key_pressed ( std::uint64_t keysym ) {}

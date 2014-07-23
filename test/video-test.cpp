@@ -55,7 +55,7 @@ int main() {
     FTGLPixmapFont font ( DATADIR "fonts/DejaVuSans.ttf" );
     if ( font.Error() )
         return 1;
-    MEventHandler::setCurrent(new EventHandler);
+    MEventHandler::handlers.push ( EventHandler() );
     const MTexture* tex;
     video = MPlugin::load<MVideoInterface> ( "msdl" );
     video->init();
