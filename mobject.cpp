@@ -20,20 +20,20 @@
 #include "mobject.h"
 #include "mobject_p.h"
 
-MObjectPrivate::MObjectPrivate ( MObject* q ) : q ( q )
+MObject::Private::Private ( MObject* q ) : q ( q )
 {
     parent = nullptr;
 }
-MObjectPrivate::~MObjectPrivate()
+MObject::Private::~Private()
 {
     for ( auto connection: signal_connections ) {
-        connection->signal->connections.remove ( connection );
-        delete connection;
+        connection->d->signal->connections.remove ( connection );
+        delete_connection ( connection );
     }
 }
 
 MObject::MObject ( MObject* parent )
-    : d ( new MObjectPrivate ( this ) )
+    : d ( new Private ( this ) )
 {
     reparent ( parent );
 }
@@ -58,30 +58,47 @@ const std::list< MObject* >& MObject::children()
     return d->children;
 }
 
-void MObject::disconnect_private ( SignalBase* signal, _Method< MObject > slot )
+void MObject::connect_private ( SignalBase* signal, Connection::Slot slot, WrapperBase* wrapper )
+{
+    auto connection = new Connection;
+    connection->d = new Connection::Data;
+    connection->d->signal = signal;
+    connection->d->receiver = this;
+    connection->d->slot = slot;
+    connection->d->wrapper = wrapper;
+    signal->connections.push_back ( connection );
+    d->signal_connections.push_back ( connection );
+}
+
+void MObject::disconnect_private ( SignalBase* signal, Connection::Slot slot )
 {
     for ( auto connection: signal->connections )
-        if ( connection->receiver == this && connection->slot == slot ) {
+        if ( connection->d->receiver == this && connection->d->slot == slot ) {
             signal->connections.remove ( connection );
             d->signal_connections.remove ( connection );
-            delete connection;
+            delete_connection ( connection );
             return;
         }
+}
+
+void MObject::delete_connection ( Connection* connection )
+{
+    delete connection->d->wrapper;
+    delete connection->d;
+    delete connection;
 }
 
 
 MObject::SignalBase::~SignalBase() {
     for ( auto connection: connections ) {
-        connection->receiver->d->signal_connections.remove ( connection );
-        delete connection;
+        connection->d->receiver->d->signal_connections.remove ( connection );
+        delete_connection ( connection );
     }
 }
 
-MObject::ConnectionBase::ConnectionBase ( SignalBase* signal, MObject* receiver, Slot slot )
-    : signal ( signal )
-    , receiver ( receiver )
-    , slot ( slot ) {
-        signal->connections.push_back ( this );
-        receiver->d->signal_connections.push_back ( this );
-    }
+MObject::WrapperBase* MObject::Connection::__wrapper()
+{
+    return d->wrapper;
+}
+
 

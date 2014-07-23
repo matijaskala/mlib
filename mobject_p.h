@@ -22,18 +22,25 @@
 
 #include "mobject.h"
 
-class MObjectPrivate
+class MObject::Private
 {
 public:
-    MObjectPrivate ( MObject* q );
-    virtual ~MObjectPrivate();
+    Private ( MObject* q );
+    virtual ~Private();
 
     MObject* parent;
     std::list<MObject*> children;
-    std::list<MObject::ConnectionBase*> signal_connections;
+    std::list<MObject::Connection*> signal_connections;
 
 private:
     class MObject* const q;
+};
+
+struct MObject::Connection::Data {
+    SignalBase* signal;
+    MObject* receiver;
+    Slot slot;
+    WrapperBase* wrapper;
 };
 
 #endif // MOBJECTPRIVATE_H
