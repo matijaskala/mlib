@@ -19,16 +19,16 @@
 
 
 
-struct MObject::SlotBase {
-    using _SlotPtr = void ( MObject::* ) ( );
+struct MObject::ConnectionBase {
+    using Slot = void ( MObject::* ) ( );
     SignalBase* signal;
     MObject* receiver;
-    _SlotPtr slot_ptr;
-    SlotBase ( SignalBase* signal, MObject* receiver, _SlotPtr slot_ptr );
+    Slot slot;
+    ConnectionBase ( SignalBase* signal, MObject* receiver, Slot slot );
 };
 
 struct MObject::SignalBase {
-    std::list< SlotBase* > _slots;
+    std::list< ConnectionBase* > connections;
     ~SignalBase();
 };
 
@@ -37,12 +37,12 @@ struct MObject::Signal : public SignalBase {
 };
 
 template< typename... _Args >
-class MObject::Slot : public SlotBase {
+class MObject::Connection : public ConnectionBase {
     using _Wrapper = std::function< void ( MObject*, _Args...) >;
     _Wrapper __wrapper;
 public:
-    Slot ( SignalBase* signal, MObject* receiver, void ( MObject::* slot ) ( MObject*, _Args... ) )
-        : SlotBase ( signal, receiver, reinterpret_cast< SlotBase::_SlotPtr > ( slot ) )
+    Connection ( SignalBase* signal, MObject* receiver, void ( MObject::* slot ) ( MObject*, _Args... ) )
+        : ConnectionBase ( signal, receiver, reinterpret_cast< ConnectionBase::Slot > ( slot ) )
         , __wrapper ( [slot, receiver] ( MObject* sender, _Args... __args ) {
             (receiver->*slot) ( sender, __args... );
         } ) {}

@@ -30,7 +30,7 @@ public:
 
     MObject* parent;
     std::list<MObject*> children;
-    std::list<MObject::SlotBase*> signal_connections;
+    std::list<MObject::ConnectionBase*> signal_connections;
 
 private:
     class MObject* const q;

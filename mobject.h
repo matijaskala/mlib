@@ -40,10 +40,10 @@ protected:
     struct Signal;
 
 private:
-    class SlotBase;
+    class ConnectionBase;
 
     template< typename... _Args >
-    class Slot;
+    class Connection;
 
 public:
     template< typename _Object, typename... _Args >
@@ -61,7 +61,7 @@ public:
 
     template< typename... _Args >
     static void _connect ( Signal< _Args... >* signal, MObject* receiver, _Method< MObject, MObject*, _Args... > slot ) {
-        new Slot< _Args... > ( signal, receiver, slot );
+        new Connection< _Args... > ( signal, receiver, slot );
     }
 
     template< typename... _Args >
@@ -71,8 +71,8 @@ public:
 
     template< typename... _Args >
     void _emit ( Signal< _Args... > signal, _Args... __args ) {
-        for ( SlotBase* slot: signal._slots )
-            static_cast< Slot< _Args... >* > ( slot )->call ( this, __args... );
+        for ( ConnectionBase* connection: signal.connections )
+            static_cast< Connection< _Args... >* > ( connection )->call ( this, __args... );
     }
 
 private:

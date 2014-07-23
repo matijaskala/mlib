@@ -27,7 +27,7 @@ MObjectPrivate::MObjectPrivate ( MObject* q ) : q ( q )
 MObjectPrivate::~MObjectPrivate()
 {
     for ( auto connection: signal_connections ) {
-        connection->signal->_slots.remove ( connection );
+        connection->signal->connections.remove ( connection );
         delete connection;
     }
 }
@@ -60,28 +60,28 @@ const std::list< MObject* >& MObject::children()
 
 void MObject::disconnect_private ( SignalBase* signal, _Method< MObject > slot )
 {
-    for ( auto i: signal->_slots )
-        if ( i->receiver == this && i->slot_ptr == slot ) {
-            signal->_slots.remove ( i );
-            d->signal_connections.remove ( i );
-            delete i;
+    for ( auto connection: signal->connections )
+        if ( connection->receiver == this && connection->slot == slot ) {
+            signal->connections.remove ( connection );
+            d->signal_connections.remove ( connection );
+            delete connection;
             return;
         }
 }
 
 
 MObject::SignalBase::~SignalBase() {
-    for ( auto slot: _slots ) {
-        slot->receiver->d->signal_connections.remove ( slot );
-        delete slot;
+    for ( auto connection: connections ) {
+        connection->receiver->d->signal_connections.remove ( connection );
+        delete connection;
     }
 }
 
-MObject::SlotBase::SlotBase ( SignalBase* signal, MObject* receiver, _SlotPtr slot_ptr )
+MObject::ConnectionBase::ConnectionBase ( SignalBase* signal, MObject* receiver, Slot slot )
     : signal ( signal )
     , receiver ( receiver )
-    , slot_ptr ( slot_ptr ) {
-        signal->_slots.push_back ( this );
+    , slot ( slot ) {
+        signal->connections.push_back ( this );
         receiver->d->signal_connections.push_back ( this );
     }
 
