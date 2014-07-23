@@ -22,6 +22,8 @@
 #include <meventhandler.h>
 #include <FTGL/ftgl.h>
 #include <GL/gl.h>
+#include <nonstd/filesystem>
+#include <mdebug.h>
 
 class EventHandler : public MEventHandler {
     virtual void quit();
@@ -55,12 +57,20 @@ int main() {
     FTGLPixmapFont font ( DATADIR "fonts/DejaVuSans.ttf" );
     if ( font.Error() )
         return 1;
-    MEventHandler::handlers.push ( EventHandler() );
+    MEventHandler::handlers.push< EventHandler > ();
     const MTexture* tex;
     video = MPlugin::load<MVideoInterface> ( "msdl" );
     video->init();
-    if ( !MTexture::load ( DATADIR "images/sample.png" ) )
-        return 1;
+    for ( non_std::file f: non_std::directory ( DATADIR "images" ) ) {
+        if ( f.name[0] == '.' )
+            continue;
+        MDebug debug;
+        debug << "Loading image " << f.name << " ... ";
+        if ( MTexture::load ( f.path + "/" + f.name ) )
+            debug << "done";
+        else
+            debug << "failed";
+    }
     tex = MTexture::get ( DATADIR "images/sample.png" );
     video->setVideoMode(200,200);
     for(;;) {
