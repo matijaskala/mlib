@@ -37,15 +37,13 @@ struct MObject::Signal : public SignalBase {
 };
 
 template< typename... _Args >
-class MObject::Connection : public ConnectionBase {
+struct MObject::Connection : public ConnectionBase {
     using _Wrapper = std::function< void ( MObject*, _Args...) >;
     _Wrapper __wrapper;
-public:
     Connection ( SignalBase* signal, MObject* receiver, void ( MObject::* slot ) ( MObject*, _Args... ) )
         : ConnectionBase ( signal, receiver, reinterpret_cast< ConnectionBase::Slot > ( slot ) )
         , __wrapper ( [slot, receiver] ( MObject* sender, _Args... __args ) {
             (receiver->*slot) ( sender, __args... );
         } ) {}
-    void call ( MObject* sender, _Args... __args ) { __wrapper ( sender, __args... ); }
 };
 

@@ -40,10 +40,10 @@ protected:
     struct Signal;
 
 private:
-    class ConnectionBase;
+    struct ConnectionBase;
 
     template< typename... _Args >
-    class Connection;
+    struct Connection;
 
 public:
     template< typename _Object, typename... _Args >
@@ -72,7 +72,7 @@ public:
     template< typename... _Args >
     void _emit ( Signal< _Args... > signal, _Args... __args ) {
         for ( ConnectionBase* connection: signal.connections )
-            static_cast< Connection< _Args... >* > ( connection )->call ( this, __args... );
+            static_cast< Connection< _Args... >* > ( connection )->__wrapper ( this, __args... );
     }
 
 private:
