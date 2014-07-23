@@ -34,10 +34,14 @@ public:
     const std::list<MObject*>& children ();
 
 protected:
+    struct SignalBase;
+
     template< typename... _Args >
     struct Signal;
 
 private:
+    class SlotBase;
+
     template< typename... _Args >
     class Slot;
 
@@ -61,17 +65,20 @@ public:
     }
 
     template< typename... _Args >
-    static void _disconnect ( Signal< _Args... >* signal, MObject* receiver, _Method< MObject, MObject*, _Args... > slot );
+    static void _disconnect ( Signal< _Args... >* signal, MObject* receiver, _Method< MObject, MObject*, _Args... > slot ) {
+        receiver->disconnect_private ( signal, reinterpret_cast< _Method< MObject > > ( slot ) );
+    }
 
     template< typename... _Args >
     void _emit ( Signal< _Args... > signal, _Args... __args ) {
-        for ( Slot< _Args... >* slot: signal._slots )
-            slot->call ( this, __args... );
+        for ( SlotBase* slot: signal._slots )
+            static_cast< Slot< _Args... >* > ( slot )->call ( this, __args... );
     }
 
 private:
-    void disconnect_private ( class MObjectSignalBase* signal, _Method<MObject> slot );
+    void disconnect_private ( SignalBase* signal, _Method<MObject> slot );
     class MObjectPrivate* const d;
+    friend class MObjectPrivate;
 };
 
 #include "msignal.tcc"

@@ -19,43 +19,33 @@
 
 
 
-template< typename... _Args >
-void MObject::_disconnect ( Signal< _Args... >* signal, MObject* receiver, _Method< MObject, MObject*, _Args... > slot ) {
-    for ( auto i = signal->_slots.begin(); i != signal->_slots.end(); i++ )
-        if ( (*i)->receiver == receiver && reinterpret_cast< _Method< MObject, MObject*, _Args... > > ( (*i)->slot_ptr ) == slot )
-            signal->_slots.remove ( *i-- );
-    receiver->disconnect_private ( signal, reinterpret_cast< _Method< MObject > > ( slot ) );
-}
-
-struct MObjectSignalBase {};
-
-struct MObjectSlotBase {
+struct MObject::SlotBase {
     using _SlotPtr = void ( MObject::* ) ( );
-    MObjectSignalBase* signal;
+    SignalBase* signal;
     MObject* receiver;
     _SlotPtr slot_ptr;
-    MObjectSlotBase ( MObjectSignalBase* signal, MObject* receiver, _SlotPtr slot_ptr )
-        : signal ( signal )
-        , receiver ( receiver )
-        , slot_ptr ( slot_ptr ) {}
+    SlotBase ( SignalBase* signal, MObject* receiver, _SlotPtr slot_ptr );
+};
+
+struct MObject::SignalBase {
+    std::list< SlotBase* > _slots;
+    ~SignalBase();
 };
 
 template< typename... _Args >
-class MObject::Slot : public MObjectSlotBase {
+struct MObject::Signal : public SignalBase {
+};
+
+template< typename... _Args >
+class MObject::Slot : public SlotBase {
     using _Wrapper = std::function< void ( MObject*, _Args...) >;
     _Wrapper __wrapper;
 public:
-    Slot ( Signal< _Args... >* signal, MObject* receiver, void ( MObject::* slot ) ( MObject*, _Args... ) )
-        : MObjectSlotBase ( signal, receiver, reinterpret_cast< MObjectSlotBase::_SlotPtr > ( slot ) )
-        , __wrapper ( [slot, receiver] ( MObject* sender, _Args... __args ) { (receiver->*slot) ( sender, __args... ); } ) {
-            signal->_slots.push_back ( this );
-        }
+    Slot ( SignalBase* signal, MObject* receiver, void ( MObject::* slot ) ( MObject*, _Args... ) )
+        : SlotBase ( signal, receiver, reinterpret_cast< SlotBase::_SlotPtr > ( slot ) )
+        , __wrapper ( [slot, receiver] ( MObject* sender, _Args... __args ) {
+            (receiver->*slot) ( sender, __args... );
+        } ) {}
     void call ( MObject* sender, _Args... __args ) { __wrapper ( sender, __args... ); }
-};
-
-template< typename... _Args >
-struct MObject::Signal : public MObjectSignalBase {
-    using _Slot = Slot< _Args... >;
-    std::list< _Slot* > _slots;
 };
 

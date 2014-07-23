@@ -20,9 +20,7 @@
 #ifndef MOBJECTPRIVATE_H
 #define MOBJECTPRIVATE_H
 
-#include <list>
-
-struct MObjectSlotBase;
+#include "mobject.h"
 
 class MObjectPrivate
 {
@@ -32,7 +30,7 @@ public:
 
     MObject* parent;
     std::list<MObject*> children;
-    std::list<MObjectSlotBase*> signal_connections;
+    std::list<MObject::SlotBase*> signal_connections;
 
 private:
     class MObject* const q;
