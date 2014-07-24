@@ -82,7 +82,7 @@ bool SDLVideoInterface::init()
         mDebug ( ERROR ) << SDL_GetError();
     }
     SDL_SetVideoMode ( 1, 1, 0, SDL_OPENGL );
-    return true;
+    return MVideoInterface::init();
 }
 
 bool SDLVideoInterface::setVideoMode ( int x, int y )
@@ -104,7 +104,7 @@ bool SDLVideoInterface::setVideoMode ( int x, int y )
     glOrtho ( 0, screen_size.width(), screen_size.height(), 0, -1, 1 );
     glMatrixMode ( GL_MODELVIEW );
 
-    return MVideoInterface::init();
+    return true;
 }
 
 MKey SDLVideoInterface::getKey ( uint64_t keysym )
