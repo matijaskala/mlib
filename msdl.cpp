@@ -96,7 +96,7 @@ bool SDLVideoInterface::setVideoMode ( int x, int y )
     SDL_Event ev;
     while ( SDL_PollEvent ( &ev ) );
 
-    screen_size = { screen->w, screen->h };
+    screen_size = MSize ( screen->w, screen->h );
 
     glViewport ( 0, 0, screen_size.width(), screen_size.height() );
     glMatrixMode ( GL_PROJECTION );
