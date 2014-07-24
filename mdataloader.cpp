@@ -19,8 +19,20 @@
 
 #include "mdataloader.h"
 
-std::deque<MDataLoader*>& MDataLoader::loaders()
+#include <list>
+
+static std::list< MDataLoader* >& loaders()
 {
-    static std::deque<MDataLoader*> loaders;
+    static std::list< MDataLoader* > loaders;
     return loaders;
+}
+
+MDataLoader::MDataLoader()
+{
+    loaders().push_back ( this );
+}
+
+MDataLoader::~MDataLoader()
+{
+    loaders().remove ( this );
 }

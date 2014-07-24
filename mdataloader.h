@@ -22,14 +22,13 @@
 
 #include "mplugin.h"
 
-#include <deque>
-
 struct MDataFile;
 struct MDataLoader : MPlugin
 {
+    MDataLoader();
+    virtual ~MDataLoader();
     virtual MDataFile* load ( const std::string& file ) = 0;
     virtual bool valid ( const std::string& file ) = 0;
-    static std::deque<MDataLoader*>& loaders();
 };
 
 #endif // MDATALOADER_H
