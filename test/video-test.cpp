@@ -53,10 +53,11 @@ void EventHandler::key_pressed ( uint64_t keysym )
 void EventHandler::key_released ( uint64_t keysym )
 {
     MKey key = video->getKey(keysym);
+    (void) key;
 }
 
 struct Menu : public MObject {
-    int current = 0;
+    uint16_t current = 0;
     struct EventHandler : public MEventHandler {
         Menu* menu;
         EventHandler ( Menu* menu ) : menu ( menu ) {}
