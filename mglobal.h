@@ -46,6 +46,7 @@ namespace M
     std::string typeName ( const _Class& object ) {
         return non_std::demangle ( typeid ( object ).name() );
     }
+    void init ( int& argc, char**& argv );
 }
 
 #endif // MGLOBAL_H
