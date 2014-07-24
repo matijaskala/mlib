@@ -19,8 +19,13 @@
 
 #include "mglobal.h"
 
+#include <nonstd/filesystem>
+#include <nonstd/module>
+
 void M::init ( int& argc, char**& argv )
 {
-
+    non_std::directory dir ( LIBDIR );
+    for ( non_std::file f: dir )
+        non_std::module ( f.path + f.name );
 }
 
