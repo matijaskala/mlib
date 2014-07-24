@@ -22,12 +22,13 @@
 
 #include <string>
 #include "msize.h"
+#include "mdatafile.h"
 
-class MTexture
+class MTexture : public MDataFile
 {
-    MTexture ( MSize size, unsigned int tex );
-    ~MTexture();
 public:
+    MTexture ( MSize size, unsigned int tex );
+    virtual ~MTexture() override;
     unsigned int texture() const;
     const MSize& size() const;
     void draw ( int x1, int y1, int x2, int y2 ) const;
