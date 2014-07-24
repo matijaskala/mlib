@@ -27,7 +27,6 @@
 class SDLVideoInterface : public MVideoInterface
 {
     virtual ~SDLVideoInterface() override;
-    virtual void beginPaint() override;
     virtual void endPaint() override;
     virtual void handleEvents() override;
     virtual bool init() override;
@@ -59,11 +58,6 @@ void SDLVideoInterface::handleEvents()
 SDLVideoInterface::~SDLVideoInterface()
 {
     SDL_Quit();
-}
-
-void SDLVideoInterface::beginPaint()
-{
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
 void SDLVideoInterface::endPaint()
