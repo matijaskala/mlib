@@ -91,8 +91,8 @@ public:
         receiver->disconnect_private ( signal, reinterpret_cast< Connection::Slot > ( slot ) );
     }
 
-    template< typename... _Args >
-    void _emit ( Signal< _Args... >* signal, _Args... __args ) {
+    template< typename... _Args, typename... _Args2 >
+    void _emit ( Signal< _Args... >* signal, _Args2... __args ) {
         for ( Connection* connection: signal->connections )
             connection->wrapper< _Args... >() ( this, __args... );
     }
