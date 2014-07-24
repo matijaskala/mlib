@@ -103,11 +103,8 @@ bool SDLVideoInterface::setVideoMode ( int x, int y )
     glLoadIdentity();
     glOrtho ( 0, screen_size.width(), screen_size.height(), 0, -1, 1 );
     glMatrixMode ( GL_MODELVIEW );
-    glEnable(GL_BLEND);
-    glEnable ( GL_TEXTURE_2D );
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    return true;
+    return MVideoInterface::init();
 }
 
 MKey SDLVideoInterface::getKey ( uint64_t keysym )

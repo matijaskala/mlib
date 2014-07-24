@@ -193,8 +193,7 @@ bool WaylandVideoInterface::init()
     if ( !eglMakeCurrent ( egl_display, nullptr, nullptr, egl_context ) )
         return false;
 
-    MVideoInterface::init();
-    return true;
+    return MVideoInterface::init();
 }
 
 bool WaylandVideoInterface::setVideoMode ( int x, int y )

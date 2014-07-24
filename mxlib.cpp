@@ -127,11 +127,7 @@ bool XlibVideoInterface::init()
     context = glXCreateContext ( xdisplay, vi, 0, GL_TRUE );
     glXMakeCurrent ( xdisplay, xwindow, context );
 
-    glEnable ( GL_BLEND );
-    glEnable ( GL_TEXTURE_2D );
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    return true;
+    return MVideoInterface::init();
 }
 
 bool XlibVideoInterface::setVideoMode ( int x, int y )
