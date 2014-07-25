@@ -22,6 +22,7 @@
 
 #include "mimageloader.h"
 #include "mimage.h"
+#include "mdataloader.h"
 #include <map>
 
 static std::map< std::string, MTexture* > map;
@@ -67,6 +68,10 @@ void MTexture::draw ( int x1, int y1, int x2, int y2 ) const
 
 bool MTexture::load ( const std::string& file )
 {
+    auto loader__ = MDataLoader::get ( "png" );
+    auto texture__ = loader__->load ( file );
+    map[file] = dynamic_cast< MTexture* > ( texture__ );
+    return true;
     static MImageLoader* loader = MPlugin::load< MImageLoader > ( "mimageloader" );
     MImage* image = loader->load ( file );
     if ( !image )

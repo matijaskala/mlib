@@ -1,15 +1,18 @@
 #include "mimageloader.h"
 #include "mdebug.h"
 #include "mimage.h"
+#include "mtextureloader.h"
 #include <fstream>
 #include <png.h>
 
-class MPNG : public MImagePlugin {
+class MPNG : public MTextureLoader {
     virtual bool valid ( const std::string& file ) override;
-    virtual MImage* load ( const std::string& file ) override;
+    virtual MDataFile* load ( const std::string& file ) override;
+    virtual std::string name() override { return "png"; }
 };
 
 M_PLUGIN_EXPORT ( MImagePlugin, MPNG )
+MPNG png;
 
 bool MPNG::valid ( const std::string& file )
 {
@@ -28,7 +31,7 @@ static void readData ( png_structp png, png_bytep data, png_size_t length )
     stream->read ( reinterpret_cast<char*> ( data ), length );
 }
 
-MImage* MPNG::load ( const std::string& file )
+MDataFile* MPNG::load ( const std::string& file )
 {
     png_structp png = png_create_read_struct ( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL );
     if ( !png )
@@ -73,14 +76,6 @@ MImage* MPNG::load ( const std::string& file )
     png_read_image ( png, rowPointers );
     delete[] rowPointers;
     png_destroy_read_struct ( &png, &info, nullptr );
-    MImage* image = new MImage;
-    image->size = MSize ( width, height );
-    image->depth = bitDepth * channels;
-    image->stride = stride;
-    image->data = data;
-    image->rMask = 0x0000ff;
-    image->gMask = 0x00ff00;
-    image->bMask = 0xff0000;
-    return image;
+    return MTextureLoader::load ( MSize ( width, height ), bitDepth * channels, data );
 }
 
