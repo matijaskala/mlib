@@ -35,7 +35,7 @@ add_library(mlib SHARED
     mvideointerface.cpp
 )
 target_link_libraries(mlib nonstdcxx)
-add_library(mimageloader MODULE mimageloader.cpp)
+add_library(mtextureloader MODULE mtextureloader.cpp)
 add_library(mpng MODULE mpng.cpp)
 target_link_libraries(mpng png)
 add_library(msdl MODULE msdl.cpp)
@@ -45,7 +45,7 @@ target_link_libraries(mxlib X11)
 add_library(mwl MODULE mwl.cpp)
 target_link_libraries(mwl wayland-egl EGL)
 
-install(TARGETS mimageloader mpng msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
+install(TARGETS mtextureloader mpng msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
 
 target_link_libraries(mlib dl ${OPENGL_gl_LIBRARY} ${FREETYPE_LIBRARIES} ftgl)
 
