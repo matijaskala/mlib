@@ -36,3 +36,11 @@ MDataLoader::~MDataLoader()
 {
     loaders().remove ( this );
 }
+
+MDataLoader* MDataLoader::get ( std::string name )
+{
+    for ( MDataLoader* loader: loaders() )
+        if ( loader->name() == name )
+            return loader;
+    return nullptr;
+}
