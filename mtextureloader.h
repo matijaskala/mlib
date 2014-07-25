@@ -24,13 +24,10 @@
 #include <msize.h>
 
 class MTexture;
-class MTextureLoader : MDataLoader
+class MTextureLoader : public MDataLoader
 {
-public:
-    virtual bool valid ( const std::string& file ) override;
-    virtual MDataFile* load ( const std::string& file ) override;
 protected:
-    MDataFile* load ( MSize size, std::uint16_t depth, std::uint8_t* data );
+    static MDataFile* load ( MSize size, std::uint16_t depth, std::uint8_t* data );
 };
 
 #endif // MTEXTURELOADER_H
