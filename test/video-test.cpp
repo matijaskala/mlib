@@ -123,7 +123,8 @@ public:
     }
 };
 
-int main() {
+int main ( int argc, char** argv ) {
+    M::init ( argc, argv );
     FTGLPixmapFont font ( DATADIR "fonts/DejaVuSans.ttf" );
     if ( font.Error() )
         return 1;
