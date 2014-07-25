@@ -1,6 +1,4 @@
-#include "mimageloader.h"
 #include "mdebug.h"
-#include "mimage.h"
 #include "mtextureloader.h"
 #include <fstream>
 #include <png.h>
@@ -11,7 +9,6 @@ class MPNG : public MTextureLoader {
     virtual std::string name() override { return "png"; }
 };
 
-M_PLUGIN_EXPORT ( MImagePlugin, MPNG )
 MPNG png;
 
 bool MPNG::valid ( const std::string& file )

@@ -20,8 +20,6 @@
 #include "mtexture.h"
 #include "mtexture_p.h"
 
-#include "mimageloader.h"
-#include "mimage.h"
 #include "mdataloader.h"
 #include <map>
 
@@ -68,30 +66,11 @@ void MTexture::draw ( int x1, int y1, int x2, int y2 ) const
 
 bool MTexture::load ( const std::string& file )
 {
-    auto loader__ = MDataLoader::get ( "png" );
-    auto texture__ = loader__->load ( file );
-    map[file] = dynamic_cast< MTexture* > ( texture__ );
-    return true;
-    static MImageLoader* loader = MPlugin::load< MImageLoader > ( "mimageloader" );
-    MImage* image = loader->load ( file );
-    if ( !image )
+    auto loader = MDataLoader::get ( "png" );
+    auto texture = dynamic_cast< MTexture* > ( loader->load ( file ) );
+    if ( !texture )
         return false;
-
-    GLuint tex;
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-    GLenum format = image->depth == 24 ? GL_RGB : GL_RGBA;
-    glTexImage2D(GL_TEXTURE_2D, 0, format, image->size.width(), image->size.height(), 0, format, GL_UNSIGNED_BYTE, image->data);
-    delete image->data;
-    delete image;
-
-    MTexture* texture = new MTexture ( image->size, tex );
     map[file] = texture;
-
     return true;
 }
 
