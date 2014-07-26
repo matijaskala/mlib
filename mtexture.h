@@ -35,7 +35,7 @@ public:
     static bool load ( const std::string& file );
     static void unload ( const std::string& file );
     static void unload ( const MTexture* texture );
-    static const MTexture* get ( const std::string& file );
+    static MTexture* get ( const std::string& file );
 private:
     class MTexturePrivate* d;
 };

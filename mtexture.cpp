@@ -89,7 +89,7 @@ void MTexture::unload ( const MTexture* texture )
     delete texture;
 }
 
-const MTexture* MTexture::get ( const std::string& file )
+MTexture* MTexture::get ( const std::string& file )
 {
     return map[file];
 }
