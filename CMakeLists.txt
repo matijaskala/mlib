@@ -33,6 +33,7 @@ add_library(mlib SHARED
     mreflection.cpp
     mtexture.cpp
     mtextureloader.cpp
+    mvideo.cpp
     mvideointerface.cpp
 )
 target_link_libraries(mlib nonstdcxx)
