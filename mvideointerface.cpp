@@ -22,6 +22,16 @@
 #include <GL/gl.h>
 #include <unistd.h>
 
+MVideoInterface::MVideoInterface()
+{
+    interfaces().push_back ( this );
+}
+
+MVideoInterface::~MVideoInterface()
+{
+    interfaces().remove ( this );
+}
+
 void MVideoInterface::beginPaint()
 {
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -56,4 +66,10 @@ void MVideoInterface::test ()
         glVertex2d(m_rect.x+w, m_rect.y-h);
         glEnd();
         glFlush();
+}
+
+std::list< MVideoInterface* >& MVideoInterface::interfaces()
+{
+    static std::list< MVideoInterface* > interfaces;
+    return interfaces;
 }

@@ -23,10 +23,13 @@
 #include "mplugin.h"
 #include "msize.h"
 #include "mkeys.h"
+#include <list>
 
 class MVideoInterface : public MPlugin
 {
 public:
+    MVideoInterface();
+    virtual ~MVideoInterface();
     MSize screen_size;
     void test ();
     virtual void beginPaint();
@@ -35,6 +38,7 @@ public:
     virtual void handleEvents() {}
     virtual bool setVideoMode ( int x, int y ) = 0;
     virtual MKey getKey ( std::uint64_t keysym ) = 0;
+    static std::list< MVideoInterface* >& interfaces();
 };
 
 #endif // MVIDEOINTERFACE_H
