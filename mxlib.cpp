@@ -18,7 +18,7 @@
  */
 
 #include <mglobal.h>
-#include "mvideointerface.h"
+#include <MVideoInterface>
 #include <MEventHandler>
 #include <MKeys>
 #include <GL/glx.h>

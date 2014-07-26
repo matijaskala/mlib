@@ -21,7 +21,7 @@
 #define MTEXTURELOADER_H
 
 #include <mdataloader.h>
-#include <msize.h>
+#include <MSize>
 
 class MTexture;
 class MTextureLoader : public MDataLoader

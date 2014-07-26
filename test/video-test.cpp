@@ -18,14 +18,14 @@
  */
 
 #include <mglobal.h>
-#include <mtexture.h>
+#include <MTexture>
 #include <MEventHandler>
 #include <FTGL/ftgl.h>
 #include <GL/gl.h>
 #include <nonstd/filesystem>
-#include <mdebug.h>
+#include <MDebug>
 #include <MObject>
-#include <mvideo.h>
+#include <MVideo>
 #include <MKeys>
 #include <vector>
 

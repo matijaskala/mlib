@@ -20,7 +20,7 @@
 #ifndef MVIDEOINTERFACE_H
 #define MVIDEOINTERFACE_H
 
-#include "msize.h"
+#include <MSize>
 #include <list>
 
 class MVideoInterface

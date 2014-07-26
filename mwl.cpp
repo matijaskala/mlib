@@ -17,10 +17,10 @@
  *
  */
 
-#include "mvideointerface.h"
+#include <MVideoInterface>
 #include <mglobal.h>
 #include <MEventHandler>
-#include "mdebug.h"
+#include <MDebug>
 #include <wayland-egl.h>
 #include <dlfcn.h>
 #include <unistd.h>

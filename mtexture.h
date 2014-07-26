@@ -21,7 +21,7 @@
 #define MTEXTURE_H
 
 #include <string>
-#include "msize.h"
+#include <MSize>
 #include <MDataFile>
 
 class MTexture : public MDataFile
