@@ -80,7 +80,7 @@ void XlibVideoInterface::handleEvents()
     glMatrixMode ( GL_MODELVIEW );
                 break;
             case KeyPress:
-                handler.key_pressed(ev.xkey.keycode);
+                handler.key_pressed ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
                 break;
             case KeyRelease:
                 if ( XEventsQueued ( xdisplay, QueuedAfterReading ) ) {
@@ -91,7 +91,7 @@ void XlibVideoInterface::handleEvents()
                         break;
                     }
                 }
-                handler.key_released(ev.xkey.keycode);
+                handler.key_released ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
                 break;
         }
     }

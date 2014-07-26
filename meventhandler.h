@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <stack>
 
+enum class MKey;
 class MEventHandler
 {
     class Stack {
@@ -42,6 +43,8 @@ public:
     static Stack handlers;
 
     virtual void quit() {}
+    virtual void key_pressed ( MKey keysym, std::uint32_t mods ) {}
+    virtual void key_released ( MKey keysym, std::uint32_t mods ) {}
     virtual void key_pressed ( std::uint64_t keysym ) {}
     virtual void key_released ( std::uint64_t keysym ) {}
 

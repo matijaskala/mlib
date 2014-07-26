@@ -47,10 +47,10 @@ void SDLVideoInterface::handleEvents()
                 setVideoMode(ev.resize.w,ev.resize.h);
                 break;
             case SDL_KEYDOWN:
-                handler.key_pressed(ev.key.keysym.sym << 16 | ev.key.keysym.mod);
+                handler.key_pressed ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
                 break;
             case SDL_KEYUP:
-                handler.key_released(ev.key.keysym.sym << 16 | ev.key.keysym.mod);
+                handler.key_released ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
                 break;
         }
 }
