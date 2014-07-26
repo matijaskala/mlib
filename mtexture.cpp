@@ -20,7 +20,7 @@
 #include "mtexture.h"
 #include "mtexture_p.h"
 
-#include "mdataloader.h"
+#include "mtextureloader.h"
 #include <map>
 
 static std::map< std::string, MTexture* > map;
@@ -66,12 +66,16 @@ void MTexture::draw ( int x1, int y1, int x2, int y2 ) const
 
 bool MTexture::load ( const std::string& file )
 {
-    auto loader = MDataLoader::get ( "png" );
-    auto texture = dynamic_cast< MTexture* > ( loader->load ( file ) );
-    if ( !texture )
-        return false;
-    map[file] = texture;
-    return true;
+    for ( auto loader: MDataLoader::loaders() ) {
+        if ( dynamic_cast< MTextureLoader* > ( loader ) == nullptr )
+            continue;
+        auto texture = dynamic_cast< MTexture* > ( loader->load ( file ) );
+        if ( !texture )
+            continue;
+        map[file] = texture;
+        return true;
+    }
+    return false;
 }
 
 void MTexture::unload ( const std::string& file )
