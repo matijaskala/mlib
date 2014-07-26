@@ -26,7 +26,7 @@
 #include <MObject>
 #include <MVideo>
 #include <MKeys>
-#include <mfont.h>
+#include <MFont>
 #include <vector>
 
 class EventHandler : public MEventHandler {
