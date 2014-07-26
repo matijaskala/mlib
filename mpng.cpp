@@ -9,7 +9,7 @@ class MPNG : public MTextureLoader {
     virtual std::string name() override { return "png"; }
 };
 
-MPNG png;
+M_EXPORT MPNG png;
 
 bool MPNG::valid ( const std::string& file )
 {
