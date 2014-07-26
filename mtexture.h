@@ -22,7 +22,7 @@
 
 #include <string>
 #include "msize.h"
-#include "mdatafile.h"
+#include <MDataFile>
 
 class MTexture : public MDataFile
 {

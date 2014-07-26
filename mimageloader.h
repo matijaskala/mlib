@@ -20,7 +20,7 @@
 #ifndef MIMAGELOADER_H
 #define MIMAGELOADER_H
 
-#include "mplugin.h"
+#include <MPlugin>
 
 struct MImage;
 

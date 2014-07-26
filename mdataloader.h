@@ -20,8 +20,7 @@
 #ifndef MDATALOADER_H
 #define MDATALOADER_H
 
-#include "mplugin.h"
-
+#include "mglobal.h"
 #include <list>
 
 struct MDataFile;

@@ -17,9 +17,10 @@
  *
  */
 
+#include <mglobal.h>
 #include "mvideointerface.h"
-#include "meventhandler.h"
-#include "mkeys.h"
+#include <MEventHandler>
+#include <MKeys>
 #include <GL/glx.h>
 #include <unistd.h>
 

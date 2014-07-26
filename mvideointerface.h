@@ -20,7 +20,6 @@
 #ifndef MVIDEOINTERFACE_H
 #define MVIDEOINTERFACE_H
 
-#include "mplugin.h"
 #include "msize.h"
 #include <list>
 

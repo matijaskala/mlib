@@ -18,7 +18,8 @@
  */
 
 #include "mvideointerface.h"
-#include "meventhandler.h"
+#include <mglobal.h>
+#include <MEventHandler>
 #include "mdebug.h"
 #include <wayland-egl.h>
 #include <dlfcn.h>

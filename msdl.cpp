@@ -17,9 +17,10 @@
  *
  */
 
+#include "mglobal.h"
 #include "mvideointerface.h"
 #include "mdebug.h"
-#include "meventhandler.h"
+#include <MEventHandler>
 #include "msize.h"
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
