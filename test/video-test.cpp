@@ -36,6 +36,8 @@ class EventHandler : public MEventHandler {
 };
 
 static std::string text = "Hello World!";
+static MFont* font = nullptr;
+MTexture* tex = nullptr;
 
 void EventHandler::quit()
 {
@@ -55,7 +57,12 @@ void EventHandler::key_released ( MKey key, std::uint32_t mod )
     (void) key;
 }
 
-struct Menu : public MObject {
+class Drawable {
+public:
+    virtual void draw() = 0;
+};
+
+struct Menu : public MObject, public Drawable {
     uint16_t current = 0;
     struct EventHandler : public MEventHandler {
         Menu* menu;
@@ -84,6 +91,7 @@ struct Menu : public MObject {
     virtual ~Menu() {
         MEventHandler::handlers.pop();
     }
+    virtual void draw();
     void confirmed() {
         emit ( activated, current );
     }
@@ -121,6 +129,35 @@ public:
     }
 };
 
+class Text : public Drawable {
+    virtual void draw();
+};
+
+class Texture : public Drawable {
+    virtual void draw();
+};
+
+void Menu::draw()
+{
+    render(font);
+}
+
+void Text::draw()
+{
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glColor4d(0,0,1,1);
+    glRasterPos2i(72,72);
+    font->setFaceSize(72);
+    font->render(text);
+    glPopAttrib();
+}
+
+void Texture::draw()
+{
+    MSize size = MVideo::screenSize();
+    tex->draw(0,0,size.width(),size.height());
+}
+
 int main ( int argc, char** argv ) {
     M::init ( argc, argv );
     MVideo::init();
@@ -145,26 +182,23 @@ int main ( int argc, char** argv ) {
         else
             debug << "failed";
     }
-    MTexture* tex = MTexture::get ( DATADIR "images/sample.png" );
-    MFont* font = MFont::get ( DATADIR "fonts/DejaVuSans.ttf" );
+    tex = MTexture::get ( DATADIR "images/sample.png" );
+    font = MFont::get ( DATADIR "fonts/DejaVuSans.ttf" );
     MVideo::setVideoMode(200,200);
     Menu* menu = new Menu;
     menu->items.push_back("ITEM1");
     menu->items.push_back("ITEM2");
     menu->items.push_back("ITEM3");
     new Listener ( menu );
+    std::list<Drawable*> drawables;
+    drawables.push_back(menu);
+    drawables.push_back(new Text);
+    drawables.push_back(new Texture);
     for(;;) {
         MVideo::handleEvents();
         MVideo::beginPaint();
-        MSize size = MVideo::screenSize();
-        tex->draw(0,0,size.width(),size.height());
-        glPushAttrib(GL_ALL_ATTRIB_BITS);
-        glColor4d(0,0,1,1);
-        glRasterPos2i(72,72);
-        font->setFaceSize(72);
-        font->render(text);
-        glPopAttrib();
-        menu->render(font);
+        for ( Drawable* drawable: drawables )
+            drawable->draw();
         MVideo::endPaint();
     }
 }
