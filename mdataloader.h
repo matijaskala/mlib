@@ -29,7 +29,7 @@ struct MDataLoader
 {
     MDataLoader();
     virtual ~MDataLoader();
-    virtual MDataFile* load ( const std::string& file ) = 0;
+    virtual MDataFile* M_WARN_UNUSED_RESULT load ( const std::string& file ) = 0;
     virtual bool valid ( const std::string& file ) = 0;
     virtual std::string name() = 0;
     static MDataLoader* get ( std::string name );
