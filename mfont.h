@@ -32,6 +32,8 @@ public:
     static void unload ( const std::string& file );
     static void unload ( const MFont* texture );
     static MFont* get ( const std::string& file );
+    bool setFaceSize ( std::uint16_t size, std::uint16_t res = 72 );
+    void render ( std::string text );
 
 private:
     class MFontPrivate* const d;

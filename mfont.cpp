@@ -73,3 +73,13 @@ MFont* MFont::get ( const std::string& file )
 {
     return map[file];
 }
+
+bool MFont::setFaceSize ( std::uint16_t size, std::uint16_t res )
+{
+    return d->font.FaceSize ( size, res );
+}
+
+void MFont::render ( std::string text )
+{
+    d->font.Render ( text.c_str() );
+}
