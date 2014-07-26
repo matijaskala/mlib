@@ -22,6 +22,8 @@
 
 #include "mplugin.h"
 
+#include <list>
+
 struct MDataFile;
 struct MDataLoader
 {
@@ -31,6 +33,7 @@ struct MDataLoader
     virtual bool valid ( const std::string& file ) = 0;
     virtual std::string name() = 0;
     static MDataLoader* get ( std::string name );
+    static std::list< MDataLoader* >& loaders();
 };
 
 #endif // MDATALOADER_H

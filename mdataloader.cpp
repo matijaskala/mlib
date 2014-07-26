@@ -19,14 +19,6 @@
 
 #include "mdataloader.h"
 
-#include <list>
-
-static std::list< MDataLoader* >& loaders()
-{
-    static std::list< MDataLoader* > loaders;
-    return loaders;
-}
-
 MDataLoader::MDataLoader()
 {
     loaders().push_back ( this );
@@ -43,4 +35,10 @@ MDataLoader* MDataLoader::get ( std::string name )
         if ( loader->name() == name )
             return loader;
     return nullptr;
+}
+
+std::list< MDataLoader* >& MDataLoader::loaders()
+{
+    static std::list< MDataLoader* > loaders;
+    return loaders;
 }
