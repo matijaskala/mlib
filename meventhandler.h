@@ -45,8 +45,6 @@ public:
     virtual void quit() {}
     virtual void key_pressed ( MKey keysym, std::uint32_t mods ) {}
     virtual void key_released ( MKey keysym, std::uint32_t mods ) {}
-    virtual void key_pressed ( std::uint64_t keysym ) {}
-    virtual void key_released ( std::uint64_t keysym ) {}
 
 protected:
     virtual ~MEventHandler() = default;

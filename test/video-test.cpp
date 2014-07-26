@@ -26,6 +26,7 @@
 #include <mdebug.h>
 #include <mobject.h>
 #include <mvideo.h>
+#include <mkeys.h>
 #include <vector>
 
 class EventHandler : public MEventHandler {

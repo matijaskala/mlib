@@ -31,7 +31,6 @@ class SDLVideoInterface : public MVideoInterface
     virtual void handleEvents() override;
     virtual bool init() override;
     virtual bool setVideoMode ( int x, int y ) override;
-    virtual MKey getKey ( uint64_t keysym ) override;
 };
 
 void SDLVideoInterface::handleEvents()
@@ -105,11 +104,6 @@ bool SDLVideoInterface::setVideoMode ( int x, int y )
     glMatrixMode ( GL_MODELVIEW );
 
     return true;
-}
-
-MKey SDLVideoInterface::getKey ( uint64_t keysym )
-{
-    return MKey ( keysym >> 16 );
 }
 
 M_PLUGIN_EXPORT ( MVideoInterface, SDLVideoInterface )

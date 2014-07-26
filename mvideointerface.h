@@ -22,7 +22,6 @@
 
 #include "mplugin.h"
 #include "msize.h"
-#include "mkeys.h"
 #include <list>
 
 class MVideoInterface : public MPlugin
@@ -37,7 +36,6 @@ public:
     virtual bool init();
     virtual void handleEvents() {}
     virtual bool setVideoMode ( int x, int y ) = 0;
-    virtual MKey getKey ( std::uint64_t keysym ) = 0;
     static std::list< MVideoInterface* >& interfaces();
 };
 

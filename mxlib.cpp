@@ -19,6 +19,7 @@
 
 #include "mvideointerface.h"
 #include "meventhandler.h"
+#include "mkeys.h"
 #include <GL/glx.h>
 #include <unistd.h>
 
@@ -30,7 +31,7 @@ class XlibVideoInterface : public MVideoInterface
     virtual void handleEvents() override;
     virtual bool init() override;
     virtual bool setVideoMode ( int x, int y ) override;
-    virtual MKey getKey ( uint64_t keycode ) override;
+    MKey getKey ( unsigned int keycode );
     Display* xdisplay;
     Window xwindow;
     GLXContext context;
@@ -142,7 +143,7 @@ bool XlibVideoInterface::setVideoMode ( int x, int y )
     return true;
 }
 
-MKey XlibVideoInterface::getKey ( uint64_t keycode )
+MKey XlibVideoInterface::getKey ( unsigned int keycode )
 {
     KeySym xsym = XKeycodeToKeysym ( xdisplay, keycode, 0 );
     if ( ( xsym & 0xff00 ) == 0xff00 )
