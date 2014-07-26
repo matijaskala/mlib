@@ -19,14 +19,14 @@
 
 #include <mglobal.h>
 #include <mtexture.h>
-#include <meventhandler.h>
+#include <MEventHandler>
 #include <FTGL/ftgl.h>
 #include <GL/gl.h>
 #include <nonstd/filesystem>
 #include <mdebug.h>
-#include <mobject.h>
+#include <MObject>
 #include <mvideo.h>
-#include <mkeys.h>
+#include <MKeys>
 #include <vector>
 
 class EventHandler : public MEventHandler {
