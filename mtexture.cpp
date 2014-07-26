@@ -69,6 +69,8 @@ bool MTexture::load ( const std::string& file )
     for ( auto loader: MDataLoader::loaders() ) {
         if ( dynamic_cast< MTextureLoader* > ( loader ) == nullptr )
             continue;
+        if ( !loader->valid ( file ) )
+            continue;
         auto texture = dynamic_cast< MTexture* > ( loader->load ( file ) );
         if ( !texture )
             continue;
