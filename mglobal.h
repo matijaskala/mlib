@@ -36,6 +36,12 @@
 #define M_DEPRECATED __attribute__ ((__deprecated__))
 #endif
 
+#ifdef __GNUC__
+#define M_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#else
+#define M_WARN_UNUSED_RESULT
+#endif
+
 namespace M
 {
     template< typename _Class >
