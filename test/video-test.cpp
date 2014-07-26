@@ -20,13 +20,13 @@
 #include <mglobal.h>
 #include <MTexture>
 #include <MEventHandler>
-#include <FTGL/ftgl.h>
 #include <GL/gl.h>
 #include <nonstd/filesystem>
 #include <MDebug>
 #include <MObject>
 #include <MVideo>
 #include <MKeys>
+#include <mfont.h>
 #include <vector>
 
 class EventHandler : public MEventHandler {
@@ -89,7 +89,7 @@ struct Menu : public MObject {
     }
     std::vector< std::string > items;
     Signal<int> activated;
-    void render(FTGLPixmapFont& font) {
+    void render(MFont* font) {
         int x = 100;
         int y = 100;
         int i = 0;
@@ -100,8 +100,8 @@ struct Menu : public MObject {
             else
                 glColor4d(0,1,1,1);
             glRasterPos2i(x,y);
-            font.FaceSize ( 20 );
-            font.Render ( item.c_str() );
+            font->setFaceSize ( 20 );
+            font->render ( item.c_str() );
             i++;
             y += 20;
         }
@@ -124,9 +124,6 @@ public:
 int main ( int argc, char** argv ) {
     M::init ( argc, argv );
     MVideo::init();
-    FTGLPixmapFont font ( DATADIR "fonts/DejaVuSans.ttf" );
-    if ( font.Error() )
-        return 1;
     MEventHandler::handlers.push< EventHandler > ();
     for ( non_std::file f: non_std::directory ( DATADIR "images" ) ) {
         if ( f.name[0] == '.' )
@@ -138,7 +135,18 @@ int main ( int argc, char** argv ) {
         else
             debug << "failed";
     }
+    for ( non_std::file f: non_std::directory ( DATADIR "fonts" ) ) {
+        if ( f.name[0] == '.' )
+            continue;
+        MDebug debug;
+        debug << "Loading font " << f.name << " ... ";
+        if ( MFont::load ( f.path + "/" + f.name ) )
+            debug << "done";
+        else
+            debug << "failed";
+    }
     MTexture* tex = MTexture::get ( DATADIR "images/sample.png" );
+    MFont* font = MFont::get ( DATADIR "fonts/DejaVuSans.ttf" );
     MVideo::setVideoMode(200,200);
     Menu* menu = new Menu;
     menu->items.push_back("ITEM1");
@@ -153,8 +161,8 @@ int main ( int argc, char** argv ) {
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glColor4d(0,0,1,1);
         glRasterPos2i(72,72);
-        font.FaceSize(72);
-        font.Render(text.c_str());
+        font->setFaceSize(72);
+        font->render(text);
         glPopAttrib();
         menu->render(font);
         MVideo::endPaint();
