@@ -23,7 +23,7 @@
 #include "mplugin.h"
 
 struct MDataFile;
-struct MDataLoader : MPlugin
+struct MDataLoader
 {
     MDataLoader();
     virtual ~MDataLoader();
