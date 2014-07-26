@@ -19,7 +19,7 @@
 
 #include "mdebug.h"
 
-#include "nonstd/xterm"
+#include <nonstd/xterm>
 
 using namespace non_std::xterm;
 

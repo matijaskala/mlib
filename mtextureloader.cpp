@@ -18,7 +18,7 @@
  */
 
 #include "mtextureloader.h"
-#include "mtexture.h"
+#include <MTexture>
 
 #include <GL/gl.h>
 

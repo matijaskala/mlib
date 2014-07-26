@@ -1,5 +1,5 @@
-#include "mdebug.h"
-#include "mtextureloader.h"
+#include <MDebug>
+#include <MTextureLoader>
 #include <fstream>
 #include <png.h>
 

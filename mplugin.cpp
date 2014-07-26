@@ -19,8 +19,8 @@
 
 #include "mplugin.h"
 
-#include "mdebug.h"
-#include "nonstd/module"
+#include <MDebug>
+#include <nonstd/module>
 #include <map>
 
 static std::map < std::string, non_std::module > loaded;

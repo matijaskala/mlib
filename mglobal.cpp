@@ -21,7 +21,7 @@
 
 #include <nonstd/filesystem>
 #include <nonstd/module>
-#include "mdebug.h"
+#include <MDebug>
 
 void M::init ( int& argc, char**& argv )
 {

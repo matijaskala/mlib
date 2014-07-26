@@ -19,7 +19,7 @@
 
 #include "mvideo.h"
 
-#include <mvideointerface.h>
+#include <MVideoInterface>
 
 static MVideoInterface* videoInterface = nullptr;
 

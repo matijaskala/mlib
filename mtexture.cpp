@@ -20,7 +20,7 @@
 #include "mtexture.h"
 #include "mtexture_p.h"
 
-#include "mtextureloader.h"
+#include <MTextureLoader>
 #include <map>
 
 static std::map< std::string, MTexture* > map;
