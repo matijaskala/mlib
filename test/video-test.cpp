@@ -25,6 +25,7 @@
 #include <nonstd/filesystem>
 #include <mdebug.h>
 #include <mobject.h>
+#include <mvideo.h>
 #include <vector>
 
 class EventHandler : public MEventHandler {
@@ -131,7 +132,7 @@ int main ( int argc, char** argv ) {
     MEventHandler::handlers.push< EventHandler > ();
     const MTexture* tex;
     video = MPlugin::load<MVideoInterface> ( "msdl" );
-    video->init();
+    MVideo::init();
     for ( non_std::file f: non_std::directory ( DATADIR "images" ) ) {
         if ( f.name[0] == '.' )
             continue;
