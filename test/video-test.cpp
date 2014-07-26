@@ -30,8 +30,8 @@
 
 class EventHandler : public MEventHandler {
     virtual void quit();
-    virtual void key_pressed ( uint64_t keysym );
-    virtual void key_released ( uint64_t keysym );
+    virtual void key_pressed ( MKey key, std::uint32_t mod );
+    virtual void key_released ( MKey key, std::uint32_t mod );
 };
 
 static std::string text = "Hello World!";
@@ -42,18 +42,16 @@ void EventHandler::quit()
 }
 
 MVideoInterface* video;
-void EventHandler::key_pressed ( uint64_t keysym )
+void EventHandler::key_pressed ( MKey key, std::uint32_t mod )
 {
-    MKey key = video->getKey(keysym);
     if ( key == MKey::BACKSPACE && !text.empty() )
         text.pop_back();
     else if ( static_cast<int> ( key ) >= 32 && static_cast<int> ( key ) < 256 )
         text += static_cast<char> ( key );
 }
 
-void EventHandler::key_released ( uint64_t keysym )
+void EventHandler::key_released ( MKey key, std::uint32_t mod )
 {
-    MKey key = video->getKey(keysym);
     (void) key;
 }
 
@@ -62,8 +60,7 @@ struct Menu : public MObject {
     struct EventHandler : public MEventHandler {
         Menu* menu;
         EventHandler ( Menu* menu ) : menu ( menu ) {}
-        virtual void key_pressed ( uint64_t keysym ) override {
-            MKey key = video->getKey ( keysym );
+        virtual void key_pressed ( MKey key, std::uint32_t mod ) override {
             if ( key == MKey::UP ) {
                 if ( menu->current == 0 )
                     menu->current = menu->items.size();
