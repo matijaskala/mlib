@@ -123,12 +123,11 @@ public:
 
 int main ( int argc, char** argv ) {
     M::init ( argc, argv );
+    MVideo::init();
     FTGLPixmapFont font ( DATADIR "fonts/DejaVuSans.ttf" );
     if ( font.Error() )
         return 1;
     MEventHandler::handlers.push< EventHandler > ();
-    const MTexture* tex;
-    MVideo::init();
     for ( non_std::file f: non_std::directory ( DATADIR "images" ) ) {
         if ( f.name[0] == '.' )
             continue;
@@ -139,7 +138,7 @@ int main ( int argc, char** argv ) {
         else
             debug << "failed";
     }
-    tex = MTexture::get ( DATADIR "images/sample.png" );
+    MTexture* tex = MTexture::get ( DATADIR "images/sample.png" );
     MVideo::setVideoMode(200,200);
     Menu* menu = new Menu;
     menu->items.push_back("ITEM1");
