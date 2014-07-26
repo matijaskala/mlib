@@ -27,6 +27,7 @@ add_library(mlib SHARED
     mdebug.cpp
     melapsedtimer.cpp
     meventhandler.cpp
+    mfont.cpp
     mglobal.cpp
     mobject.cpp
     mplugin.cpp
