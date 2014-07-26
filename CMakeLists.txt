@@ -21,7 +21,7 @@ endif()
 add_definitions(-DLIBDIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/mlib/")
 add_definitions(-DDATADIR="${CMAKE_INSTALL_PREFIX}/share/mlib/")
 
-include_directories(.)
+include_directories(include .)
 add_library(mlib SHARED
     mdataloader.cpp
     mdebug.cpp
