@@ -20,11 +20,16 @@
 #ifndef MVIDEO_H
 #define MVIDEO_H
 
+class MSize;
 namespace MVideo
 {
 
 bool init ();
 bool setVideoMode ( int x, int y );
+void beginPaint ();
+void endPaint ();
+void handleEvents ();
+const MSize& screenSize();
 }
 
 #endif // MVIDEO_H

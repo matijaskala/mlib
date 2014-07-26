@@ -31,11 +31,11 @@ using namespace std;
 
 class WaylandVideoInterface : public MVideoInterface
 {
-    virtual ~WaylandVideoInterface();
     virtual void beginPaint();
     virtual void endPaint();
     virtual void handleEvents();
     virtual bool init();
+    virtual void fini();
     virtual bool setVideoMode ( int x, int y );
     struct wl_display *wl_display;
     struct wl_compositor *wl_compositor;
@@ -51,17 +51,6 @@ class WaylandVideoInterface : public MVideoInterface
     EGLConfig egl_config;
     EGLContext egl_context;
 };
-
-WaylandVideoInterface::~WaylandVideoInterface()
-{
-    eglMakeCurrent ( egl_display, nullptr, nullptr, egl_context );
-    eglDestroySurface ( egl_display, egl_surface );
-    eglDestroyContext ( egl_display, egl_context );
-    wl_egl_window_destroy ( wl_egl_window );
-    wl_shell_surface_destroy ( wl_shell_surface );
-    wl_surface_destroy ( wl_surface );
-    wl_display_disconnect ( wl_display );
-}
 
 void WaylandVideoInterface::beginPaint()
 {
@@ -195,6 +184,17 @@ bool WaylandVideoInterface::init()
     return MVideoInterface::init();
 }
 
+void WaylandVideoInterface::fini()
+{
+    eglMakeCurrent ( egl_display, nullptr, nullptr, egl_context );
+    eglDestroySurface ( egl_display, egl_surface );
+    eglDestroyContext ( egl_display, egl_context );
+    wl_egl_window_destroy ( wl_egl_window );
+    wl_shell_surface_destroy ( wl_shell_surface );
+    wl_surface_destroy ( wl_surface );
+    wl_display_disconnect ( wl_display );
+}
+
 bool WaylandVideoInterface::setVideoMode ( int x, int y )
 {
     screen_size = MSize ( x, y );
@@ -223,6 +223,6 @@ bool WaylandVideoInterface::setVideoMode ( int x, int y )
     return true;
 }
 
-M_PLUGIN_EXPORT ( MVideoInterface, WaylandVideoInterface )
+M_EXPORT WaylandVideoInterface interface;
 
 

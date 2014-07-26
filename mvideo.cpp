@@ -37,3 +37,23 @@ bool MVideo::setVideoMode ( int x, int y )
 {
     return videoInterface->setVideoMode ( x, y );
 }
+
+void MVideo::beginPaint()
+{
+    videoInterface->beginPaint();
+}
+
+void MVideo::endPaint()
+{
+    videoInterface->endPaint();
+}
+
+void MVideo::handleEvents()
+{
+    videoInterface->handleEvents();
+}
+
+const MSize& MVideo::screenSize()
+{
+    return videoInterface->screen_size;
+}

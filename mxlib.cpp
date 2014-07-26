@@ -25,11 +25,11 @@
 
 class XlibVideoInterface : public MVideoInterface
 {
-    virtual ~XlibVideoInterface() override;
     virtual void beginPaint() override;
     virtual void endPaint() override;
     virtual void handleEvents() override;
     virtual bool init() override;
+    virtual void fini() override;
     virtual bool setVideoMode ( int x, int y ) override;
     MKey getKey ( unsigned int keycode );
     Display* xdisplay;
@@ -40,12 +40,6 @@ class XlibVideoInterface : public MVideoInterface
 };
 
 static Atom WM_DELETE_WINDOW;
-
-XlibVideoInterface::~XlibVideoInterface()
-{
-    XUnmapWindow ( xdisplay, xwindow );
-    XDestroyWindow ( xdisplay, xwindow );
-}
 
 void XlibVideoInterface::beginPaint()
 {
@@ -129,6 +123,12 @@ bool XlibVideoInterface::init()
     glXMakeCurrent ( xdisplay, xwindow, context );
 
     return MVideoInterface::init();
+}
+
+void XlibVideoInterface::fini()
+{
+    XUnmapWindow ( xdisplay, xwindow );
+    XDestroyWindow ( xdisplay, xwindow );
 }
 
 bool XlibVideoInterface::setVideoMode ( int x, int y )
@@ -243,5 +243,5 @@ void XlibVideoInterface::keymap_init()
     keymap[XK_Hyper_R&0xFF] = MKey::MENU;   /* Windows "Menu" key */
 }
 
-M_PLUGIN_EXPORT ( MVideoInterface, XlibVideoInterface )
+M_EXPORT XlibVideoInterface interface;
 

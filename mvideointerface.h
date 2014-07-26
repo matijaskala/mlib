@@ -24,7 +24,7 @@
 #include "msize.h"
 #include <list>
 
-class MVideoInterface : public MPlugin
+class MVideoInterface
 {
 public:
     MVideoInterface();
@@ -34,6 +34,7 @@ public:
     virtual void beginPaint();
     virtual void endPaint();
     virtual bool init();
+    virtual void fini() = 0;
     virtual void handleEvents() {}
     virtual bool setVideoMode ( int x, int y ) = 0;
     static std::list< MVideoInterface* >& interfaces();

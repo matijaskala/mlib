@@ -142,16 +142,16 @@ int main ( int argc, char** argv ) {
             debug << "failed";
     }
     tex = MTexture::get ( DATADIR "images/sample.png" );
-    video->setVideoMode(200,200);
+    MVideo::setVideoMode(200,200);
     Menu* menu = new Menu;
     menu->items.push_back("ITEM1");
     menu->items.push_back("ITEM2");
     menu->items.push_back("ITEM3");
     new Listener ( menu );
     for(;;) {
-        video->handleEvents();
-        video->beginPaint();
-        MSize size = video->screen_size;
+        MVideo::handleEvents();
+        MVideo::beginPaint();
+        MSize size = MVideo::screenSize();
         tex->draw(0,0,size.width(),size.height());
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glColor4d(0,0,1,1);
@@ -160,6 +160,6 @@ int main ( int argc, char** argv ) {
         font.Render(text.c_str());
         glPopAttrib();
         menu->render(font);
-        video->endPaint();
+        MVideo::endPaint();
     }
 }

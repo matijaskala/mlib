@@ -26,10 +26,10 @@
 
 class SDLVideoInterface : public MVideoInterface
 {
-    virtual ~SDLVideoInterface() override;
     virtual void endPaint() override;
     virtual void handleEvents() override;
     virtual bool init() override;
+    virtual void fini() override;
     virtual bool setVideoMode ( int x, int y ) override;
 };
 
@@ -52,11 +52,6 @@ void SDLVideoInterface::handleEvents()
                 handler.key_released ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
                 break;
         }
-}
-
-SDLVideoInterface::~SDLVideoInterface()
-{
-    SDL_Quit();
 }
 
 void SDLVideoInterface::endPaint()
@@ -84,6 +79,11 @@ bool SDLVideoInterface::init()
     return MVideoInterface::init();
 }
 
+void SDLVideoInterface::fini()
+{
+    SDL_Quit();
+}
+
 bool SDLVideoInterface::setVideoMode ( int x, int y )
 {
     SDL_Surface* screen = SDL_SetVideoMode ( x, y, 32, SDL_OPENGL | SDL_RESIZABLE );
@@ -106,6 +106,6 @@ bool SDLVideoInterface::setVideoMode ( int x, int y )
     return true;
 }
 
-M_PLUGIN_EXPORT ( MVideoInterface, SDLVideoInterface )
+M_EXPORT SDLVideoInterface interface;
 
 
