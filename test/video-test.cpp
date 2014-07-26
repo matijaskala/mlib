@@ -17,7 +17,7 @@
  *
  */
 
-#include <mvideointerface.h>
+#include <mglobal.h>
 #include <mtexture.h>
 #include <meventhandler.h>
 #include <FTGL/ftgl.h>
@@ -42,7 +42,6 @@ void EventHandler::quit()
     exit(0);
 }
 
-MVideoInterface* video;
 void EventHandler::key_pressed ( MKey key, std::uint32_t mod )
 {
     if ( key == MKey::BACKSPACE && !text.empty() )
@@ -129,7 +128,6 @@ int main ( int argc, char** argv ) {
         return 1;
     MEventHandler::handlers.push< EventHandler > ();
     const MTexture* tex;
-    video = MPlugin::load<MVideoInterface> ( "msdl" );
     MVideo::init();
     for ( non_std::file f: non_std::directory ( DATADIR "images" ) ) {
         if ( f.name[0] == '.' )
