@@ -45,7 +45,7 @@ target_link_libraries(msdl SDL)
 add_library(mxlib MODULE mxlib.cpp)
 target_link_libraries(mxlib X11)
 add_library(mwl MODULE mwl.cpp)
-target_link_libraries(mwl wayland-egl EGL)
+target_link_libraries(mwl wayland-egl EGL xkbcommon)
 
 install(TARGETS mpng msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
 
