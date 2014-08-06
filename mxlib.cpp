@@ -244,5 +244,5 @@ void XlibVideoInterface::keymap_init()
     keymap[XK_Hyper_R&0xFF] = MKey::MENU;   /* Windows "Menu" key */
 }
 
-M_EXPORT XlibVideoInterface interface;
+static XlibVideoInterface interface;
 

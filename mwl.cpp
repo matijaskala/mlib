@@ -340,6 +340,6 @@ void WaylandVideoInterface::keymap_init()
     keymap[XKB_KEY_Hyper_R&0xFF] = MKey::MENU;   /* Windows "Menu" key */
 }
 
-WaylandVideoInterface interface;
+static WaylandVideoInterface interface;
 
 

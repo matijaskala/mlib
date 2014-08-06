@@ -107,6 +107,6 @@ bool SDLVideoInterface::setVideoMode ( int x, int y )
     return true;
 }
 
-M_EXPORT SDLVideoInterface interface;
+static SDLVideoInterface interface;
 
 
