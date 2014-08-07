@@ -67,7 +67,7 @@ public:
         auto __f = _M_get< std::size_t ( _Args... ) > ();
         if ( !__f )
             std::__throw_bad_function_call();
-        return __f ( __args... );
+        return __f ( std::forward<_Args> ( __args )... );
     }
 
     void* get() {
