@@ -43,7 +43,7 @@ private:
         std::function< void ( MObject*, _Args... ) > __wrapper;
         Wrapper ( MObject* receiver, void ( MObject::* slot ) ( MObject*, _Args... ) )
             : __wrapper ( [slot, receiver] ( MObject* sender, _Args... __args ) {
-                (receiver->*slot) ( sender, __args... );
+                (receiver->*slot) ( sender, std::forward<_Args> ( __args )... );
             } ) {}
     };
 
@@ -94,7 +94,7 @@ public:
     template< typename... _Args, typename... _Args2 >
     void _emit ( Signal< _Args... >* signal, _Args2... __args ) {
         for ( Connection* connection: signal->connections )
-            connection->wrapper< _Args... >() ( this, __args... );
+            connection->wrapper< _Args... >() ( this, std::forward<_Args2> ( __args )... );
     }
 
 private:
