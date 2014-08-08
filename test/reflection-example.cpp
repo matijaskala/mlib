@@ -1,6 +1,6 @@
 #include <mreflection.h>
 #include <iostream>
-#include <func_id>
+#include <funcid>
 
 class Ukaz : public MReflection::Instance {
 public:
