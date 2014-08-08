@@ -20,7 +20,7 @@
 #ifndef FUNCID
 #define FUNCID
 
-#include "mglobal.h"
+#include <typenameid>
 
 template< typename... _Args >
 struct arg_id;
@@ -29,7 +29,7 @@ template< typename _FirstArg, typename... _OtherArgs >
 struct arg_id<_FirstArg, _OtherArgs...>
 {
     std::string name() {
-        return M::typeName<_FirstArg>() + "," + arg_id<_OtherArgs...>::name();
+        return typename_id<_FirstArg>().name() + "," + arg_id<_OtherArgs...>::name();
     }
     constexpr int count() {
         return 1 + arg_id<_OtherArgs...>::count();
@@ -40,7 +40,7 @@ template< typename _OnlyOneArg >
 struct arg_id<_OnlyOneArg>
 {
     std::string name() {
-        return M::typeName<_OnlyOneArg>();
+        return typename_id<_OnlyOneArg>().name();
     }
     constexpr int count() {
         return 1;
@@ -74,7 +74,7 @@ struct func_id<_ReturnType(_Args...)>
 {
     arg_id<_Args...> args;
     std::string return_type() {
-        return M::typeName<_ReturnType>();
+        return typename_id<_ReturnType>().name();
     }
 };
 

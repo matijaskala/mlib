@@ -20,7 +20,7 @@
 #ifndef MPLUGIN_H
 #define MPLUGIN_H
 
-#include "mglobal.h"
+#include <typenameid>
 
 #define M_PLUGIN_EXPORT(TYPE,NAME) \
 extern "C" M_EXPORT \
@@ -33,7 +33,7 @@ class MPlugin
 public:
     template< typename _Plugin >
     static _Plugin* load ( const std::string& file ) {
-        MPlugin* plugin = _load ( file, M::typeName< _Plugin > () );
+        MPlugin* plugin = _load ( file, typename_id< _Plugin > ().name() );
         return dynamic_cast< _Plugin* > ( plugin );
     }
     static void unload ( MPlugin* plugin );

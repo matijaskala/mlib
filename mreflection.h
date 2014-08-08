@@ -24,7 +24,7 @@
 #include <functional>
 #include <unordered_map>
 #include <stdexcept>
-#include "mglobal.h"
+#include <typenameid>
 
 #define reflected reflect ( this )
 #define reflect(...) { MReflection::invoke_pretty ( __PRETTY_FUNCTION__, __VA_ARGS__ ); }
@@ -52,7 +52,7 @@ public:
             try {
                 getClass().funcs< void ( Instance*, _Args... ) > () [function_name] ( this, __args... );
             } catch(std::bad_function_call) {
-                throw std::runtime_error ( M::typeName(this) + ": an error occurred while calling " + function_name + "<" + typeid(void ( Instance*, _Args... )).name() + ">" );
+                throw std::runtime_error ( typenameid(this).name() + ": an error occurred while calling " + function_name + "<" + typeid(void ( Instance*, _Args... )).name() + ">" );
             }
         }
     };
@@ -74,7 +74,7 @@ public:
 
 protected:
     template < typename _Class >
-    MReflection ( _Class* ) : MReflection ( M::typeName<_Class> () ) {
+    MReflection ( _Class* ) : MReflection ( typename_id<_Class> ().name() ) {
         funcs<_Class* ()>()["new"] = [] () { return new _Class; };
     }
     Map< int* > variables;
