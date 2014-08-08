@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef FUNC_ID
-#define FUNC_ID
+#ifndef FUNCID
+#define FUNCID
 
 #include "mglobal.h"
 
@@ -73,7 +73,7 @@ template< typename _ReturnType, typename... _Args >
 struct func_id<_ReturnType(_Args...)>
 {
     arg_id<_Args...> args;
-    constexpr std::string return_type() {
+    std::string return_type() {
         return M::typeName<_ReturnType>();
     }
 };
@@ -82,4 +82,4 @@ struct func_id<_ReturnType(_Args...)>
 #define func_name(FUNC) (#FUNC + ( "(" + funcid(FUNC).args.name() + ")" ) )
 #define method_name(CLASS,METHOD) (#METHOD + ( "(" + funcid(CLASS::METHOD).args.name() + ")" ) )
 
-#endif // FUNC_ID
+#endif // FUNCID
