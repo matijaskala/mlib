@@ -21,6 +21,7 @@
 #define FUNCID
 
 #include <typenameid>
+#include <stdexcept>
 
 template< typename... _Args >
 struct arg_id;
@@ -28,8 +29,11 @@ struct arg_id;
 template< typename _FirstArg, typename... _OtherArgs >
 struct arg_id<_FirstArg, _OtherArgs...>
 {
+    std::string operator[] ( int i ) {
+        return i == 0 ? typename_id<_FirstArg>().name() : arg_id<_OtherArgs...>()[i - 1];
+    }
     std::string name() {
-        return typename_id<_FirstArg>().name() + "," + arg_id<_OtherArgs...>::name();
+        return typename_id<_FirstArg>().name() + "," + arg_id<_OtherArgs...>().name();
     }
     constexpr int count() {
         return 1 + arg_id<_OtherArgs...>::count();
@@ -39,6 +43,11 @@ struct arg_id<_FirstArg, _OtherArgs...>
 template< typename _OnlyOneArg >
 struct arg_id<_OnlyOneArg>
 {
+    std::string operator[] ( int i ) {
+        if ( i != 0 )
+            throw std::out_of_range ( "arg_id::operator[]" );
+        return name();
+    }
     std::string name() {
         return typename_id<_OnlyOneArg>().name();
     }
