@@ -41,4 +41,37 @@ inline _Res lexical_cast ( const _Arg& s ) throw ( non_std::bad_lexical_cast ) {
     return r;
 }
 
+template< typename _Res, typename _Arg >
+struct auto_cast_helper {
+    static _Res cast ( _Arg s ) {
+        return s;
+    }
+};
+
+template< typename _Arg >
+struct auto_cast_helper<std::string, _Arg> {
+    static std::string cast ( _Arg s ) {
+        return lexical_cast<std::string> ( s );
+    }
+};
+
+template< typename _Res >
+struct auto_cast_helper<_Res, std::string> {
+    static _Res cast ( std::string s ) {
+        return lexical_cast<_Res> ( s );
+    }
+};
+
+template<>
+struct auto_cast_helper<std::string, std::string> {
+    static std::string cast ( std::string s ) {
+        return s;
+    }
+};
+
+template< typename _Res, typename _Arg >
+inline _Res auto_cast ( _Arg s ) {
+    return auto_cast_helper<_Res,_Arg>::cast ( s );
+}
+
 #endif // NON_STD_CASTS
