@@ -44,14 +44,6 @@
 
 namespace M
 {
-    template< typename _Class >
-    std::string typeName() {
-        return non_std::demangle ( typeid ( _Class ).name() );
-    }
-    template< typename _Class >
-    std::string typeName ( const _Class& object ) {
-        return non_std::demangle ( typeid ( object ).name() );
-    }
     void init ( int& argc, char**& argv );
 }
 
