@@ -1,0 +1,80 @@
+/*
+ * This file is part of MLib
+ * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#ifndef NON_STD_BASIC_MULTIPTR
+#define NON_STD_BASIC_MULTIPTR
+
+#include <typeindex>
+#include <stdexcept>
+#include <cstddef>
+
+namespace non_std
+{
+
+template< typename... _Types >
+class basic_multiptr;
+
+template< typename _FirstType, typename... _OtherTypes >
+class basic_multiptr<_FirstType,_OtherTypes...> : public basic_multiptr<_OtherTypes...> {
+    using next = basic_multiptr<_OtherTypes...>;
+
+    static std::type_index current_type() { return typeid(_FirstType); }
+
+public:
+    using next::create;
+
+    static void create ( _FirstType __value, std::type_index& type, void*& data ) {
+        data = new _FirstType ( __value );
+        type = current_type();
+    }
+
+    template< class Visitor >
+    static void apply_visitor ( Visitor& visitor, std::type_index type, void* data ) {
+        if ( type == current_type() )
+            visitor ( static_cast<_FirstType*> ( data ) );
+        else
+            next::apply_visitor ( visitor, type, data );
+    }
+};
+
+template<>
+class basic_multiptr<> {
+    static std::type_index current_type() { return typeid(void); }
+
+public:
+    using null_t = nullptr_t;
+    static std::type_index nulltype() { return current_type(); }
+    static constexpr null_t null() { return nullptr; }
+
+    static void create ( null_t, std::type_index& type, void*& data ) { /* leave null */ }
+
+    template< class Visitor >
+    static void apply_visitor ( Visitor& visitor, std::type_index type, void* data ) {
+        if ( type == current_type() ) {
+            if ( data )
+                throw std::runtime_error ( "data != null" );
+            visitor ( null() );
+        }
+        else
+            throw std::runtime_error ( std::string{} + "unhandled data type '" + type.name() + "'" );
+    }
+};
+}
+
+#endif // NON_STD_BASIC_MULTIPTR
