@@ -65,13 +65,13 @@ public:
     bool close();
 
     template < typename _Res >
-    std::function< _Res > symbol ( const char* __s ) const {
+    _Res* symbol ( const char* __s ) const {
         void* __sym = _M_symbol ( __s );
         return reinterpret_cast<_Res*&> ( __sym );
     }
 
     template < typename _Res >
-    std::function< _Res > symbol ( const std::string& __s ) const {
+    _Res* symbol ( const std::string& __s ) const {
         void* __sym = _M_symbol ( __s.c_str() );
         return reinterpret_cast<_Res*&> ( __sym );
     }
