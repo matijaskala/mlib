@@ -21,7 +21,6 @@
 #define NON_STD_MODULE
 
 #include <string>
-#include "abstract_function"
 
 namespace non_std
 {

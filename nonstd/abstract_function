@@ -21,11 +21,10 @@
 #define NON_STD_ABSTRACT_FUNCTION
 
 #include <functional>
+#include "module"
 
 namespace non_std
 {
-
-class module;
 
 class abstract_function
 {
@@ -57,10 +56,11 @@ public:
         _M_set ( __f );
     }
 
-    abstract_function ( const char* __s );
+    abstract_function ( const char* __s )
+        : _M_func ( module{}.symbol<void> ( __s ) ) {}
 
     abstract_function ( const std::string& __s )
-        : abstract_function ( __s.c_str() ) {}
+        : _M_func ( module{}.symbol<void> ( __s ) ) {}
 
     template< typename... _Args >
     std::size_t operator() ( _Args... __args ) {

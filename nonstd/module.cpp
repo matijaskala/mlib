@@ -108,8 +108,3 @@ void* non_std::module::_M_symbol ( const char* __s ) const
     return dlsym ( _M_handle, __s );
 #endif
 }
-
-non_std::abstract_function::abstract_function ( const char* __s )
-{
-    _M_set ( dlsym ( nullptr, __s ) );
-}
