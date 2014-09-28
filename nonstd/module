@@ -78,12 +78,6 @@ public:
 
     static const char* last_error();
 
-    abstract_function operator->* ( const char* __s );
-
-    abstract_function operator->* ( const std::string& __s ) {
-        return *this->*__s.c_str();
-    }
-
 private:
     void* _M_symbol ( const char* __s ) const;
 };
