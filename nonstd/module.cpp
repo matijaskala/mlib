@@ -19,16 +19,17 @@
 
 #include "module"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
+#include "cxxabi"
 #endif
 
 using namespace non_std;
 
 std::string non_std::module::prefix() {
-#if defined WIN32
+#if defined _WIN32
     return "";
 #else
     return "lib";
@@ -36,7 +37,7 @@ std::string non_std::module::prefix() {
 }
 
 std::string non_std::module::suffix() {
-#if defined WIN32
+#if defined _WIN32
     return ".dll";
 #elif defined __APPLE__
     return ".dylib";
@@ -45,19 +46,18 @@ std::string non_std::module::suffix() {
 #endif
 }
 
-bool non_std::module::open ( const char* __s )
+bool non_std::module::open ( std::string s )
 {
     if ( is_open() )
         close();
-#ifdef WIN32
-    std::string str = __s;
-    if ( str.empty() )
-        _M_handle = GetModuleHandle ( NULL );
+#ifdef _WIN32
+    if ( s.empty() )
+        handle = GetModuleHandle ( NULL );
     else
     {
         std::string fileName;
 
-        for ( char c: str )
+        for ( char c: s )
         {
             if( !c )
                 break;
@@ -69,42 +69,50 @@ bool non_std::module::open ( const char* __s )
 
         fileName += suffix();
 
-        _M_handle = LoadLibraryExA ( (LPSTR) fileName.c_str(), NULL, 
+        handle = LoadLibraryExA ( (LPSTR) fileName.c_str(), NULL, 
                                  LOAD_WITH_ALTERED_SEARCH_PATH );
     }
 #else
-    _M_handle = dlopen ( __s, RTLD_NOW | RTLD_GLOBAL );
+    handle = dlopen ( s.empty() ? nullptr : s.c_str(), RTLD_NOW | RTLD_GLOBAL );
 #endif
-    return _M_handle;
+    return is_open();
 }
 
 bool non_std::module::close()
 {
     if ( !is_open() )
         return false;
-    __handle_type handle = _M_handle;
-    _M_handle = nullptr;
-#ifdef WIN32
-    return FreeLibrary ( handle );
+    bool ret =
+#ifdef _WIN32
+    FreeLibrary ( handle );
 #else
-    return dlclose ( handle ) == 0;
+    dlclose ( handle ) == 0;
 #endif
+    handle = nullptr;
+    return ret;
 }
 
 const char* non_std::module::last_error()
 {
-#ifdef WIN32
+#ifdef _WIN32
     return GetLastError();
 #else
     return dlerror();
 #endif
 }
 
-void* non_std::module::_M_symbol ( const char* __s ) const
+void* non_std::module::symbol_private ( const char* s ) const
 {
-#ifdef WIN32
-    return GetProcAddress ( _M_handle, __s );
+#ifdef _WIN32
+    return GetProcAddress ( handle, s );
 #else
-    return dlsym ( _M_handle, __s );
+    std::string str = s;
+    bool mangle = false;
+    for ( char c: str )
+        if ( c != '_' && !isalnum(c) )
+            mangle = true;
+    if ( mangle )
+        str = non_std::mangle_symbol(str);
+    return dlsym ( handle, str.c_str() );
 #endif
 }

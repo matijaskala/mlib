@@ -27,58 +27,45 @@ namespace non_std
 
 class module
 {
-public:
-    typedef void*       __handle_type;
-
-private:
-    __handle_type _M_handle;
+    void* handle{nullptr};
 
 public:
-    module()
-        : _M_handle() {}
+    module ( std::string s ) { open ( s ); }
 
-    module ( const std::string& __s )
-        : _M_handle() {
-        open ( __s );
-    }
+    module ( const char* s = nullptr ) { open ( s ); }
 
-    module ( const char* __s )
-        : _M_handle() {
-        open ( __s );
-    }
+    ~module() { close(); }
 
     static std::string prefix();
 
     static std::string suffix();
 
-    bool is_open() {
-        return _M_handle;
+    bool is_open() { return handle; }
+
+    bool open ( const char* s ) {
+        return open ( s ? static_cast<std::string> ( s ) : std::string{} );
     }
 
-    bool open ( const char* __s );
-
-    bool open ( const std::string& __s ) {
-        return open ( __s.c_str() );
-    }
+    bool open ( std::string s );
 
     bool close();
 
     template < typename _Res >
-    _Res* symbol ( const char* __s ) const {
-        void* __sym = _M_symbol ( __s );
-        return reinterpret_cast<_Res*&> ( __sym );
+    _Res* symbol ( const char* s ) const {
+        auto sym = symbol_private ( s );
+        return reinterpret_cast<_Res*&> ( sym );
     }
 
     template < typename _Res >
-    _Res* symbol ( const std::string& __s ) const {
-        void* __sym = _M_symbol ( __s.c_str() );
-        return reinterpret_cast<_Res*&> ( __sym );
+    _Res* symbol ( const std::string& s ) const {
+        auto sym = symbol_private ( s.c_str() );
+        return reinterpret_cast<_Res*&> ( sym );
     }
 
     static const char* last_error();
 
 private:
-    void* _M_symbol ( const char* __s ) const;
+    void* symbol_private ( const char* s ) const;
 };
 }
 
