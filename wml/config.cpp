@@ -26,84 +26,72 @@ using namespace wml;
 
 void config::attribute::clear()
 {
-    value = nullvalue;
+    value = make_tuple(-1,numeric_limits< double >::quiet_NaN(),"");
 }
 
 config::attribute& config::attribute::operator= ( const string& val )
 {
-    clear();
-    value.set<string> ( val );
+    if ( val.empty() ) {
+        clear();
+        return *this;
+    }
     char* endptr;
     double d = strtod ( val.c_str(), &endptr );
-    if ( !*endptr ) {
-        value.set<double> ( d );
-        long l = d;
-        if ( l == d )
-            value.set<long> ( l );
-    }
+    if ( *endptr )
+        value = make_tuple(-1,numeric_limits< double >::quiet_NaN(),val);
+    else
+        value = make_tuple(d,d,val);
     return *this;
 }
 
-config::attribute& config::attribute::operator= ( double val )
+config::attribute& config::attribute::operator= ( double d )
 {
-    clear();
-    value.set<string> ( to_string ( val ) );
-    value.set<double> ( val );
-    long l = val;
-    if ( l == val )
-        value.set<long> ( l );
+    value = make_tuple(d,d,to_string(d));
     return *this;
 }
 
-config::attribute& config::attribute::operator= ( long int val )
+config::attribute& config::attribute::operator= ( long int l )
 {
-    clear();
-    value.set<string> ( to_string ( val ) );
-    value.set<double> ( val );
-    value.set<long> ( val );
+    value = make_tuple(l,l,to_string(l));
     return *this;
 }
 
 void config::attribute::set_if_empty ( const string& val )
 {
-    if ( !value.valid<string> () )
+    if ( empty() )
         *this = val;
 }
 
 void config::attribute::set_if_empty ( double val )
 {
-    if ( !value.valid<double> () )
+    if ( empty() )
         *this = val;
 }
 
 void config::attribute::set_if_empty ( long val )
 {
-    if ( !value.valid<long> () )
+    if ( empty() )
         *this = val;
+}
+
+bool config::attribute::empty() const
+{
+    return get<2>(value).empty();
 }
 
 string config::attribute::str() const
 {
-    if ( value.valid<string> () )
-        return value.get<string> ();
-    else
-        return "";
+    return get<2>(value);
 }
 
 double config::attribute::to_double() const
 {
-    if ( value.valid<double> () )
-        return value.get<double> ();
-    else
-        return numeric_limits< double >::quiet_NaN();
+    return get<1>(value);
 }
 
 long config::attribute::to_long() const
 {
-    if ( value.valid<long> () )
-        return value.get<long> ();
-    else
-        return -1;
+    return get<0>(value);
 }
 
 

@@ -33,7 +33,7 @@ class config
 public:
     class attribute {
         friend class config;
-        using value_type = non_std::variant<long, double, std::string>;
+        using value_type = std::tuple<long, double, std::string>;
         value_type value;
         std::string name;
     public:
@@ -44,6 +44,7 @@ public:
         void set_if_empty ( const std::string& val );
         void set_if_empty ( double val );
         void set_if_empty ( long val );
+        bool empty() const;
         std::string str() const;
         double to_double() const;
         long to_long() const;
