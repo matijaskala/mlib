@@ -170,7 +170,7 @@ std::string non_std::mangle_symbol (std::string symbol)
             std::vector<std::string> params;
             params.reserve ( params_str.length() / 2 );
             std::size_t c = 0;
-            for ( auto t = params_str.find_first_of(','); t != std::string::npos; c = t, t = params_str.find_first_of(',', t + 1) )
+            for ( auto t = params_str.find_first_of(','); t != std::string::npos; c = t + 1, t = params_str.find_first_of(',', c) )
                 params.push_back ( params_str.substr ( c, t - c ) );
             params.push_back ( params_str.substr(c) );
 
