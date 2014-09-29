@@ -26,6 +26,8 @@ namespace non_std
 {
 
 std::string demangle ( const char* symbol );
+
+std::string mangle_symbol (std::string symbol);
 }
 
 #endif // NON_STD_CXXABI
