@@ -20,7 +20,7 @@
 #include "mglobal.h"
 
 #include <nonstd/filesystem>
-#include <nonstd/module>
+#include <MDL>
 #include <MDebug>
 
 void M::init ( int& argc, char**& argv )
@@ -28,7 +28,6 @@ void M::init ( int& argc, char**& argv )
     non_std::directory dir ( LIBDIR );
     for ( non_std::file f: dir )
         if ( f.name[0] != '.' )
-            if ( !non_std::module ( f.path + f.name ).is_open() )
-                mDebug(ERROR) << non_std::module::last_error();
+            MDL::open(f.path + f.name);
 }
 
