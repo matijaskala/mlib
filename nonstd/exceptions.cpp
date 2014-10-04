@@ -18,7 +18,7 @@
  */
 
 #include "casts"
-#include "variant"
+#include "basic_variant"
 
 const char* non_std::bad_lexical_cast::what() const noexcept {
     return "non_std::bad_lexical_cast";

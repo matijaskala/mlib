@@ -23,7 +23,6 @@
 #include <string>
 #include <map>
 #include <list>
-#include <nonstd/variant>
 
 namespace wml
 {
