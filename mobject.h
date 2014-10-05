@@ -58,16 +58,15 @@ private:
         }
     };
 
-protected:
     struct SignalBase {
         std::list< Connection* > connections;
         ~SignalBase();
     };
 
+protected:
     template< typename... _Args >
     struct Signal : public SignalBase{};
 
-public:
     template< typename _Object, typename... _Args >
     using _Method = void ( _Object::* ) ( _Args... );
 
