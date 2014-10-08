@@ -36,15 +36,16 @@ class MSlot
 
     std::list<MSignal<Args...>*> m_signals;
 
+    void* m_data{nullptr};
+
 public:
     template< typename Functor >
     MSlot ( Functor func ) : m_func{func} {}
     ~MSlot();
 
-    void operator() ( Args... args ) { m_func ( args... ); m_data = nullptr; }
+    void operator() ( Args... args ) { m_func ( args... ); }
 
-protected:
-    void* m_data{nullptr};
+    void* data() { return m_data; }
 };
 
 template< typename... Args >
@@ -69,6 +70,7 @@ MSignal<Args...>::MSignal ( void* data )
             for ( Slot* slot: m_slots ) {
                 slot->m_data = data;
                 (*slot) ( args... );
+                slot->m_data = nullptr;
             }
         }
     } {}
