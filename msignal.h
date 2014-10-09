@@ -43,7 +43,7 @@ public:
     MSlot ( Functor func ) : m_func{func} {}
     ~MSlot();
 
-    void operator() ( Args... args ) { m_func ( args... ); }
+    void operator() ( Args&&... args ) { m_func ( std::forward<Args> ( args )... ); }
 
     void* data() { return m_data; }
 };
@@ -66,10 +66,10 @@ public:
 template< typename... Args >
 MSignal<Args...>::MSignal ( void* data )
     : Slot {
-        [data,this] ( Args... args ) {
+        [data,this] ( Args&&... args ) {
             for ( Slot* slot: m_slots ) {
                 slot->m_data = data;
-                (*slot) ( args... );
+                (*slot) ( std::forward<Args> ( args )... );
                 slot->m_data = nullptr;
             }
         }
