@@ -64,6 +64,8 @@ bool MDL::open ( string file )
 
 bool MDL::close ( string file )
 {
+    if ( file.empty() )
+        return true;
     void*& module = modules[file];
     if ( module == nullptr ) {
         mDebug() << "Module '" << file << "' was not loaded";
@@ -86,6 +88,8 @@ bool MDL::close ( string file )
 
 MDL MDL::get ( string file )
 {
+    if ( file.empty() )
+        return MDL{nullptr};
     void* module = modules[file];
     if ( module == nullptr )
         mDebug() << "Module '" << file << "' not loaded";

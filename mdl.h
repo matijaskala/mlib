@@ -36,7 +36,10 @@ public:
     static MDL get ( std::string file );
 
     template< typename T >
-    T* symbol ( std::string name ) { return symbol<void> ( name ); }
+    T* symbol ( std::string name ) {
+        auto sym = symbol<void> ( name );
+        return reinterpret_cast<T*&> ( sym );
+    }
 
     static constexpr const char* libprefix =
 #if defined _WIN32
