@@ -45,7 +45,7 @@ class basic_variant {
             _Type value;
             template< typename _Arg >
             void operator() ( _Arg* __arg ) { value = runtime_cast<_Type> ( *__arg ); }
-            void operator() ( nullptr_t ) { throw bad_get(); }
+            void operator() ( null_t ) { throw bad_get(); }
         };
 
         struct copy {
