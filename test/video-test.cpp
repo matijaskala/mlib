@@ -93,10 +93,10 @@ struct Menu : public MObject, public Drawable {
     }
     virtual void draw();
     void confirmed() {
-        emit ( activated, current );
+        activated ( current );
     }
     std::vector< std::string > items;
-    Signal<int> activated;
+    MSignal<int> activated{this};
     void render(MFont* font) {
         int x = 100;
         int y = 100;
@@ -118,14 +118,15 @@ struct Menu : public MObject, public Drawable {
 };
 
 class Listener : public MObject {
-    void activated(MObject* sender, int z) {
-        Menu* menu = dynamic_cast<Menu*> ( sender );
+    MSlot<int> activated = [this] (int z) {
+        Menu* menu = static_cast<Menu*> ( activated.data() );
         menu->items.push_back ( "ACTIVATED: " + menu->items[z] );
-    }
+    };
 public:
     Listener ( MObject* parent = nullptr ) : MObject(parent) {
         Menu* menu = dynamic_cast<Menu*> ( parent );
-        connect(menu, activated, this, activated);
+#undef connect
+        menu->activated.connect(activated);
     }
 };
 
