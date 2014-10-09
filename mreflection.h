@@ -30,12 +30,24 @@
 #define reflect(...) { MReflection::invoke_pretty ( __PRETTY_FUNCTION__, __VA_ARGS__ ); }
 #define reflect_func(FUNC_NAME,FUNC_TYPE) funcs< void FUNC_TYPE >() [FUNC_NAME] = [] FUNC_TYPE
 
+#define M_LAMBDA(...) _Caster<void(__VA_ARGS__)>{}%[](__VA_ARGS__)
+
 class MReflection
 {
     template< typename _Var >
     class Map : public std::unordered_map< std::string, _Var > {};
     template< typename _Func >
     class FunctionMap : public Map< std::function< _Func> > {};
+    struct Symbol {
+        void* ptr;
+        template<typename T = void> Symbol ( T* ptr = nullptr )
+            : ptr { reinterpret_cast<void*&> ( ptr ) } {}
+        template<typename R, typename O, typename... A> Symbol ( R (O::*ptr)(A...) )
+            : ptr { reinterpret_cast<void*&> ( ptr ) } {}
+        template<typename T> T* as()
+            { return reinterpret_cast<T*&> ( ptr ); }
+    };
+    using SymbolMap = std::unordered_map< std::string, Symbol >;
 
 public:
     template< typename _Instance, typename... _Args >
@@ -45,53 +57,50 @@ public:
         size_t r_begin = pretty_function_name.rfind("::", b_begin) + 2;
         _This->invoke ( pretty_function_name.substr( r_begin ), __args... );
     }
-    struct Instance {
-        virtual MReflection& getClass() = 0;
-        template< typename... _Args >
-        void invoke ( const std::string& function_name, _Args... __args ) {
-            try {
-                getClass().funcs< void ( Instance*, _Args... ) > () [function_name] ( this, __args... );
-            } catch(std::bad_function_call) {
-                throw std::runtime_error ( typenameid(this).name() + ": an error occurred while calling " + function_name + "<" + typeid(void ( Instance*, _Args... )).name() + ">" );
-            }
-        }
-    };
+
     static MReflection* get ( const std::string& name );
+
     template< typename... _Args >
     void invoke ( const std::string& function_name, _Args... __args ) {
         try {
-            funcs< void ( _Args... ) >() [function_name] ( __args... );
+            symbol<void(_Args...)>(function_name)(__args...);
         } catch(std::bad_function_call) {
-            throw std::runtime_error ( name + ": an error occurred while calling " + function_name + "<" + typeid(void ( _Args... )).name() + ">" );
+            throw std::runtime_error ( name + ": an error occurred while calling " + function_name + "<" + typename_id<void ( _Args... )>{}.name() + ">" );
         }
     }
-    template< typename _Class = Instance >
+
+    template< typename _Class = void >
     _Class* newInstance() {
-        return dynamic_cast<_Class*> ( newInstance() );
+        return symbol<_Class*()>("new")();
     }
+
     ~MReflection();
+
     std::string name;
 
 protected:
     template < typename _Class >
     MReflection ( _Class* ) : MReflection ( typename_id<_Class> ().name() ) {
-        funcs<_Class* ()>()["new"] = [] () { return new _Class; };
+        m_symbols["new"] = _Caster<_Class*()>{}% [] () { return new _Class; };
     }
     Map< int* > variables;
     template< typename _Func >
-    FunctionMap < _Func >& funcs() {
+    [[gnu::__deprecated__]] FunctionMap < _Func >& funcs() {
         return reinterpret_cast<FunctionMap< _Func >&> (m_pool);
     }
+
+    template< typename T >
+    T* symbol ( std::string name ) {
+        return m_symbols[name].as<T> ();
+    }
+
+    template<typename T> struct _Caster { template<typename L> T* operator% ( L l ) { return l; } };
+
+    SymbolMap m_symbols;
 
 private:
     MReflection ( std::string&& name );
     FunctionMap< void() > m_pool;
 };
-
-
-template<>
-MReflection::Instance* MReflection::newInstance() {
-    return funcs<Instance*()>()["new"]();
-}
 
 #endif // MREFLECTION_H
