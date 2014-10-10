@@ -123,7 +123,7 @@ public:
 
     template< typename _Type >
     _Type as () const {
-        visitors::get<_Type> visitor;
+        typename visitors::template get<_Type> visitor;
         if ( type == typeid ( _Type ) )
             return get<_Type> ();
         apply_visitor ( visitor );
