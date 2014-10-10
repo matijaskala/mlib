@@ -43,7 +43,7 @@ class MSlot
         void (Object::*method) (Args...);
         Object* obj;
         simple_bind(void (Object::*method) (Args...), Object* obj) : method{method}, obj{obj} {}
-        void operator() (Args... args) { (obj->*method) (args...); }
+        void operator() (Args... args) { (obj->*method) ( std::forward<Args> (args)... ); }
     };
 
 public:
