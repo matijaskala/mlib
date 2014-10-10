@@ -15,7 +15,7 @@ public:
         }
 };
 
-Ukaz::Reflection::Reflection() : MReflection ( static_cast<Ukaz*>(0) ) {
+Ukaz::Reflection::Reflection() : M_REFLECTION_CONSTRUCT(Ukaz) {
     M_REFLECT_METHOD(Ukaz,izpisi_stevilo,());
     M_REFLECT_METHOD(Ukaz,izpisi_stevilo,(int));
 }
