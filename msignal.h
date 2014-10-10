@@ -38,9 +38,21 @@ class MSlot
 
     void* m_data{nullptr};
 
+    template< class Object >
+    struct simple_bind {
+        void (Object::*method) (Args...);
+        Object* obj;
+        simple_bind(void (Object::*method) (Args...), Object* obj) : method{method}, obj{obj} {}
+        void operator() (Args... args) { (obj->*method) (args...); }
+    };
+
 public:
     template< typename Functor >
     MSlot ( Functor func ) : m_func{func} {}
+
+    template< typename Object >
+    MSlot ( void (Object::*method) (Args...), Object* obj ) : m_func{simple_bind<Object>{method,obj}} {}
+
     ~MSlot();
 
     void operator() ( Args&&... args ) { m_func ( std::forward<Args> ( args )... ); }
