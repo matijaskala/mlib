@@ -32,6 +32,10 @@
 
 #define M_LAMBDA(...) _Caster<void(__VA_ARGS__)>{}%[](__VA_ARGS__)
 
+#define M_REFLECT_METHOD(CLASS,METHOD,ARGS) m_symbols[std::string{}+#METHOD+#ARGS] = \
+        static_cast<void(CLASS::*)ARGS>(&CLASS::METHOD)
+#define M_REFLECT_METHOD_SIMPLE(CLASS,METHOD) m_symbols[#METHOD] = &CLASS::METHOD
+
 class MReflection
 {
     template< typename _Var >
