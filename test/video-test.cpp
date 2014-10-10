@@ -118,15 +118,16 @@ struct Menu : public MObject, public Drawable {
 };
 
 class Listener : public MObject {
-    MSlot<int> activated = [this] (int z) {
-        Menu* menu = static_cast<Menu*> ( activated.data() );
+    Menu* menu;
+    void activated ( int z ) {
         menu->items.push_back ( "ACTIVATED: " + menu->items[z] );
-    };
+    }
+    MSlot<int> slotActivated{&Listener::activated, this};
 public:
     Listener ( MObject* parent = nullptr ) : MObject(parent) {
-        Menu* menu = dynamic_cast<Menu*> ( parent );
+        menu = dynamic_cast<Menu*> ( parent );
 #undef connect
-        menu->activated.connect(activated);
+        menu->activated.connect(slotActivated);
     }
 };
 
