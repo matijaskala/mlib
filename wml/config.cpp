@@ -116,7 +116,7 @@ const config::attribute& config::operator[] ( const string& key ) const
     auto it = attributes.find ( key );
     if ( it != attributes.end() )
         return it->second;
-    static const attribute empty;
+    static const attribute empty{};
     return empty;
 }
 
