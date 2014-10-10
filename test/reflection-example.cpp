@@ -26,7 +26,6 @@ MReflection& Ukaz::getClass() {
 	return Class;
 }
 
-#include <MDL>
 int main ( int argc, char** argv ) {
     MReflection* reflection = MReflection::get ( "Ukaz" );
     Ukaz* instance = reflection->newInstance<Ukaz>();
