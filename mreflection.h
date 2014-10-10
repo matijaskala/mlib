@@ -21,27 +21,20 @@
 #define MREFLECTION_H
 
 #include <string>
-#include <functional>
 #include <unordered_map>
 #include <stdexcept>
-#include <typenameid>
 
 #define reflected reflect ( this )
 #define reflect(...) { MReflection::invoke_pretty ( __PRETTY_FUNCTION__, __VA_ARGS__ ); }
-#define reflect_func(FUNC_NAME,FUNC_TYPE) funcs< void FUNC_TYPE >() [FUNC_NAME] = [] FUNC_TYPE
-
-#define M_LAMBDA(...) _Caster<void(__VA_ARGS__)>{}%[](__VA_ARGS__)
 
 #define M_REFLECT_METHOD(CLASS,METHOD,ARGS) m_symbols[std::string{}+#METHOD+#ARGS] = \
         static_cast<void(CLASS::*)ARGS>(&CLASS::METHOD)
 #define M_REFLECT_METHOD_SIMPLE(CLASS,METHOD) m_symbols[#METHOD] = &CLASS::METHOD
 
+#define M_REFLECTION_CONSTRUCT(CLASS) MReflection { static_cast<CLASS*>(0), #CLASS }
+
 class MReflection
 {
-    template< typename _Var >
-    class Map : public std::unordered_map< std::string, _Var > {};
-    template< typename _Func >
-    class FunctionMap : public Map< std::function< _Func> > {};
     struct Symbol {
         void* ptr;
         template<typename T = void> Symbol ( T* ptr = nullptr )
@@ -51,6 +44,7 @@ class MReflection
         template<typename T> T* as()
             { return reinterpret_cast<T*&> ( ptr ); }
     };
+
     using SymbolMap = std::unordered_map< std::string, Symbol >;
 
 public:
@@ -68,8 +62,8 @@ public:
     void invoke ( const std::string& function_name, _Args... __args ) {
         try {
             symbol<void(_Args...)>(function_name)(__args...);
-        } catch(std::bad_function_call) {
-            throw std::runtime_error ( name + ": an error occurred while calling " + function_name + "<" + typename_id<void ( _Args... )>{}.name() + ">" );
+        } catch(std::exception) {
+            throw std::runtime_error ( name + ": an error occurred while calling " + function_name );
         }
     }
 
@@ -84,13 +78,8 @@ public:
 
 protected:
     template < typename _Class >
-    MReflection ( _Class* ) : MReflection ( typename_id<_Class> ().name() ) {
-        m_symbols["new"] = _Caster<_Class*()>{}% [] () { return new _Class; };
-    }
-    Map< int* > variables;
-    template< typename _Func >
-    [[gnu::__deprecated__]] FunctionMap < _Func >& funcs() {
-        return reinterpret_cast<FunctionMap< _Func >&> (m_pool);
+    MReflection ( _Class*, const char* name ) : MReflection{name} {
+        m_symbols["new"] = static_cast<_Class*(*)()> ( [] () { return new _Class; } );
     }
 
     template< typename T >
@@ -98,13 +87,10 @@ protected:
         return m_symbols[name].as<T> ();
     }
 
-    template<typename T> struct _Caster { template<typename L> T* operator% ( L l ) { return l; } };
-
     SymbolMap m_symbols;
 
 private:
     MReflection ( std::string&& name );
-    FunctionMap< void() > m_pool;
 };
 
 #endif // MREFLECTION_H
