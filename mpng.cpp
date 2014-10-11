@@ -1,9 +1,10 @@
+#include <MDataLoader>
 #include <MDebug>
-#include <MTextureLoader>
+#include <MImage>
 #include <fstream>
 #include <png.h>
 
-class MPNG : public MTextureLoader {
+class MPNG : public MDataLoader {
     virtual bool valid ( std::string file ) override;
     virtual MDataFile* load ( std::string file ) override;
     virtual std::string name() override { return "png"; }
@@ -73,6 +74,6 @@ MDataFile* MPNG::load ( std::string file )
     png_read_image ( png, rowPointers );
     delete[] rowPointers;
     png_destroy_read_struct ( &png, &info, nullptr );
-    return MTextureLoader::load ( MSize ( width, height ), bitDepth * channels, data );
+    return new MImage{MSize ( width, height ), bitDepth * channels == 32, data};
 }
 
