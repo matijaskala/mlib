@@ -22,6 +22,8 @@
 
 struct MDataFile
 {
+    MDataFile() = default;
+    MDataFile(const MDataFile&) = delete;
     virtual ~MDataFile() = 0;
 };
 
