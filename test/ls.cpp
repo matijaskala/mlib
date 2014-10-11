@@ -18,6 +18,7 @@
  */
 
 #include <iostream>
+#include <vector>
 #include <nonstd/filesystem>
 #include <nonstd/xterm>
 
@@ -35,7 +36,7 @@ void list ( const file& f ) {
 }
 
 int main ( int argc, char** argv ) {
-    string t[argc > 1 ? argc - 1 : 1];
+    vector<string> t(argc > 1 ? argc - 1 : 1);
     if ( argc > 1 )
         for ( int i = 1; i < argc; i++ )
             t[i-1] = argv[i];
