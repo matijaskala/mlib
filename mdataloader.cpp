@@ -19,6 +19,9 @@
 
 #include "mdataloader.h"
 
+#include <MDebug>
+#include <fstream>
+
 MDataLoader::MDataLoader()
 {
     loaders().push_back ( this );
@@ -27,6 +30,14 @@ MDataLoader::MDataLoader()
 MDataLoader::~MDataLoader()
 {
     loaders().remove ( this );
+}
+
+bool MDataLoader::valid ( std::string file )
+{
+    std::ifstream stream ( file );
+    if ( !stream.is_open() )
+        mDebug() << file << ": No such file or directory.";
+    return stream.good();
 }
 
 MDataLoader* MDataLoader::get ( std::string name )
