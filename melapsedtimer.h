@@ -29,7 +29,7 @@ public:
     ~MElapsedTimer();
     std::int64_t elapsed();
 private:
-    class MElapsedTimerPrivate* const d;
+    struct MElapsedTimerPrivate* const d;
 };
 
 #endif // MELAPSEDTIMER_H
