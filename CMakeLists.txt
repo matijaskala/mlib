@@ -25,6 +25,7 @@ include_directories(include .)
 add_library(mlib SHARED
     mdataloader.cpp
     mdebug.cpp
+    mdl.cpp
     melapsedtimer.cpp
     meventhandler.cpp
     mfont.cpp
@@ -40,6 +41,8 @@ add_library(mlib SHARED
 target_link_libraries(mlib nonstdcxx)
 add_library(mpng MODULE mpng.cpp)
 target_link_libraries(mpng png)
+add_library(mtype MODULE mtype.cpp)
+target_link_libraries(mtype ${FREETYPE_LIBRARIES})
 add_library(msdl MODULE msdl.cpp)
 target_link_libraries(msdl SDL)
 add_library(mxlib MODULE mxlib.cpp)
