@@ -22,7 +22,6 @@
 
 #include <typeindex>
 #include <stdexcept>
-#include <cstddef>
 
 namespace non_std
 {
@@ -58,7 +57,7 @@ class basic_multiptr<> {
     static std::type_index current_type() { return typeid(void); }
 
 public:
-    using null_t = nullptr_t;
+    using null_t = std::nullptr_t;
     static std::type_index nulltype() { return current_type(); }
     static constexpr null_t null() { return nullptr; }
 
