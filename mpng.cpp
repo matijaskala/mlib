@@ -4,14 +4,14 @@
 #include <png.h>
 
 class MPNG : public MTextureLoader {
-    virtual bool valid ( const std::string& file ) override;
-    virtual MDataFile* load ( const std::string& file ) override;
+    virtual bool valid ( std::string file ) override;
+    virtual MDataFile* load ( std::string file ) override;
     virtual std::string name() override { return "png"; }
 };
 
 M_EXPORT MPNG png;
 
-bool MPNG::valid ( const std::string& file )
+bool MPNG::valid ( std::string file )
 {
     png_byte header[8];
     std::ifstream stream ( file );
@@ -28,7 +28,7 @@ static void readData ( png_structp png, png_bytep data, png_size_t length )
     stream->read ( reinterpret_cast<char*> ( data ), length );
 }
 
-MDataFile* MPNG::load ( const std::string& file )
+MDataFile* MPNG::load ( std::string file )
 {
     png_structp png = png_create_read_struct ( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL );
     if ( !png )
