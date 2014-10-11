@@ -23,11 +23,25 @@
 #include <MDataFile>
 #include <MSize>
 
-struct MImage : MDataFile
+class MImage : public MDataFile
 {
-    MSize size;
-    bool alpha;
-    std::uint8_t* data;
+public:
+    MImage ( MSize size, bool alpha, std::uint8_t* data )
+        : m_size{size}
+        , m_alpha{alpha}
+        , m_data{data}
+        {}
+
+    virtual ~MImage() { delete m_data; }
+
+    const MSize& size() { return m_size; }
+    bool hasAlpha() { return m_alpha; }
+    std::uint8_t* data() { return m_data; }
+
+private:
+    MSize m_size;
+    bool m_alpha;
+    std::uint8_t* m_data;
 };
 
 #endif // MIMAGE_H
