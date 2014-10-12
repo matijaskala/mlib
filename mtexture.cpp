@@ -20,11 +20,6 @@
 #include "mtexture.h"
 #include "mtexture_p.h"
 
-#include <MTextureLoader>
-#include <map>
-
-static std::map< std::string, MTexture* > map;
-
 MTexture::MTexture( MSize size, unsigned int tex )
 {
     d = new MTexturePrivate;
@@ -33,10 +28,21 @@ MTexture::MTexture( MSize size, unsigned int tex )
     d->tex = tex;
 }
 
+MTexture::MTexture()
+    : d{new MTexturePrivate}
+{
+    glGenTextures(1, &d->tex);
+}
+
 MTexture::~MTexture()
 {
     glDeleteTextures(1, &d->tex);
     delete d;
+}
+
+void MTexture::bind() const
+{
+    glBindTexture(GL_TEXTURE_2D, d->tex);
 }
 
 unsigned int MTexture::texture() const
@@ -49,9 +55,14 @@ const MSize& MTexture::size() const
     return d->size;
 }
 
+void MTexture::setSize ( MSize size )
+{
+    d->size = size;
+}
+
 void MTexture::draw ( int x1, int y1, int x2, int y2 ) const
 {
-    glBindTexture(GL_TEXTURE_2D,texture());
+    bind();
     glBegin(GL_QUADS);
         glTexCoord2f(0,0);
         glVertex2f(x1,y1);
@@ -62,40 +73,4 @@ void MTexture::draw ( int x1, int y1, int x2, int y2 ) const
         glTexCoord2f(0,1);
         glVertex2f(x1,y2);
     glEnd();
-}
-
-bool MTexture::load ( const std::string& file )
-{
-    for ( auto loader: MDataLoader::loaders() ) {
-        if ( dynamic_cast< MTextureLoader* > ( loader ) == nullptr )
-            continue;
-        if ( !loader->valid ( file ) )
-            continue;
-        auto texture = dynamic_cast< MTexture* > ( loader->load ( file ) );
-        if ( !texture )
-            continue;
-        map[file] = texture;
-        return true;
-    }
-    return false;
-}
-
-void MTexture::unload ( const std::string& file )
-{
-    auto i = map.find ( file );
-    delete i->second;
-    map.erase ( i );
-}
-
-void MTexture::unload ( const MTexture* texture )
-{
-    for ( auto position: map )
-        if ( position.second == texture )
-            map.erase ( position.first );
-    delete texture;
-}
-
-MTexture* MTexture::get ( const std::string& file )
-{
-    return map[file];
 }

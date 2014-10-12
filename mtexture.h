@@ -20,22 +20,19 @@
 #ifndef MTEXTURE_H
 #define MTEXTURE_H
 
-#include <string>
 #include <MSize>
-#include <MDataFile>
 
-class MTexture : public MDataFile
+class MTexture
 {
 public:
-    MTexture ( MSize size, unsigned int tex );
-    virtual ~MTexture() override;
+    [[gnu::__deprecated__]]MTexture ( MSize size, unsigned int tex );
+    MTexture();
+    virtual ~MTexture();
+    void bind() const;
     unsigned int texture() const;
     const MSize& size() const;
+    void setSize ( MSize size );
     void draw ( int x1, int y1, int x2, int y2 ) const;
-    static bool load ( const std::string& file );
-    static void unload ( const std::string& file );
-    static void unload ( const MTexture* texture );
-    static MTexture* get ( const std::string& file );
 private:
     class MTexturePrivate* d;
 };
