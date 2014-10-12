@@ -22,6 +22,12 @@
 
 struct MDataFile
 {
+    enum Type {
+        Audio,
+        Font,
+        Image,
+    };
+
     MDataFile() = default;
     MDataFile(const MDataFile&) = delete;
     virtual ~MDataFile() = 0;

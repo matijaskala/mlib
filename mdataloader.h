@@ -21,9 +21,9 @@
 #define MDATALOADER_H
 
 #include "mglobal.h"
+#include <MDataFile>
 #include <list>
 
-struct MDataFile;
 struct MDataLoader
 {
     MDataLoader();
@@ -31,6 +31,7 @@ struct MDataLoader
     virtual bool valid ( std::string file );
     virtual MDataFile* M_WARN_UNUSED_RESULT load ( std::string file ) = 0;
     virtual std::string name() = 0;
+    virtual MDataFile::Type type() = 0;
     static MDataLoader* get ( std::string name );
     static std::list< MDataLoader* >& loaders();
 };

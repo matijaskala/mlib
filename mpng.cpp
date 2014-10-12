@@ -7,6 +7,7 @@
 class MPNG : public MDataLoader {
     virtual bool valid ( std::string file ) override;
     virtual MDataFile* load ( std::string file ) override;
+    virtual MDataFile::Type type() override { return MDataFile::Image; }
     virtual std::string name() override { return "png"; }
 };
 

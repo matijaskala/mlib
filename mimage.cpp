@@ -40,8 +40,8 @@ MImage::~MImage()
 bool MImage::load ( std::string file )
 {
     for ( auto loader: MDataLoader::loaders() ) {
-        //if ( dynamic_cast< MImageLoader* > ( loader ) == nullptr )
-        //    continue;
+        if ( loader->type() != Image )
+            continue;
         if ( !loader->valid ( file ) )
             continue;
         auto res = loader->load ( file );
