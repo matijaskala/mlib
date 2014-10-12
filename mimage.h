@@ -22,21 +22,22 @@
 
 #include <MDataFile>
 #include <MSize>
+#include <string>
 
 class MImage : public MDataFile
 {
 public:
-    MImage ( MSize size, bool alpha, std::uint8_t* data )
-        : m_size{size}
-        , m_alpha{alpha}
-        , m_data{data}
-        {}
-
-    virtual ~MImage() { delete m_data; }
+    MImage ( MSize size, bool alpha, std::uint8_t* data );
+    virtual ~MImage();
 
     const MSize& size() { return m_size; }
     bool hasAlpha() { return m_alpha; }
     std::uint8_t* data() { return m_data; }
+
+    static bool load ( std::string file );
+    static void unload ( std::string file );
+    static void unload ( const MImage* image );
+    static MImage* get ( std::string file );
 
 private:
     MSize m_size;

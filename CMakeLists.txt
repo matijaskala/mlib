@@ -30,6 +30,7 @@ add_library(mlib SHARED
     meventhandler.cpp
     mfont.cpp
     mglobal.cpp
+    mimage.cpp
     mobject.cpp
     mplugin.cpp
     mreflection.cpp
@@ -50,7 +51,7 @@ target_link_libraries(mxlib X11)
 add_library(mwl MODULE mwl.cpp)
 target_link_libraries(mwl wayland-egl EGL xkbcommon)
 
-install(TARGETS mpng msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
+install(TARGETS mpng mtype msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
 
 target_link_libraries(mlib dl ${OPENGL_gl_LIBRARY} ${FREETYPE_LIBRARIES} ftgl)
 
