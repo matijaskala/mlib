@@ -27,6 +27,7 @@
 #include <MVideo>
 #include <MKeys>
 #include <MFont>
+#include <MImage>
 #include <vector>
 
 class EventHandler : public MEventHandler {
@@ -169,7 +170,7 @@ int main ( int argc, char** argv ) {
             continue;
         MDebug debug;
         debug << "Loading image " << f.name << " ... ";
-        if ( MTexture::load ( f.path + "/" + f.name ) )
+        if ( MImage::load ( f.path + "/" + f.name ) )
             debug << "done";
         else
             debug << "failed";
@@ -184,7 +185,8 @@ int main ( int argc, char** argv ) {
         else
             debug << "failed";
     }
-    tex = MTexture::get ( DATADIR "images/sample.png" );
+    auto img = MImage::get ( DATADIR "images/sample.png" );
+    tex = img->createTexture();
     font = MFont::get ( DATADIR "fonts/DejaVuSans.ttf" );
     MVideo::setVideoMode(200,200);
     Menu* menu = new Menu;
