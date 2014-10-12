@@ -1,5 +1,5 @@
 /*
- * <one line to give the program's name and a brief idea of what it does.>
+ * This file is part of MLib
  * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,19 +21,44 @@
 #define MFONT_H
 
 #include <MDataFile>
+#include <MSize>
 #include <string>
 
+class MTexture;
 class MFont : public MDataFile
 {
 public:
-    MFont ( std::string file );
+    class Glyph
+    {
+        struct { long x; long y; } m_advance;
+        struct { long x1; long y1; long x2; long y2; } m_bounds;
+    public:
+        Glyph ( MSize size, std::uint8_t* data, decltype(m_advance)* advance = nullptr, decltype(m_bounds)* bounds = nullptr );
+        ~Glyph();
+
+        const MSize& size() const { return m_size; }
+        std::uint8_t* data() const { return m_data; }
+        const MTexture* texture();
+        const decltype(m_advance)& advance() const { return m_advance; }
+        const decltype(m_bounds)& bounds() const { return m_bounds; }
+
+    private:
+        MSize m_size;
+        std::uint8_t* m_data;
+        MTexture* m_texture;
+    };
+
+    MFont ( void* face );
     virtual ~MFont();
-    static bool load ( const std::string& file );
-    static void unload ( const std::string& file );
-    static void unload ( const MFont* texture );
-    static MFont* get ( const std::string& file );
-    bool setFaceSize ( std::uint16_t size, std::uint16_t res = 72 );
+
+    static bool load ( std::string file );
+    static void unload ( std::string file );
+    static void unload ( const MFont* font );
+    static MFont* get ( std::string file );
+
+    bool setFaceSize ( std::uint16_t size, std::uint16_t res = 0 );
     void render ( std::string text );
+    Glyph* glyph ( wchar_t code, std::uint16_t size );
 
 private:
     class MFontPrivate* const d;

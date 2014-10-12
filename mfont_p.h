@@ -20,13 +20,19 @@
 #ifndef MFONTPRIVATE_H
 #define MFONTPRIVATE_H
 
-#include <FTGL/ftgl.h>
+#include <map>
+#include <string>
+#include <MDataLoader>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 class MFontPrivate
 {
 public:
-    MFontPrivate ( const char* f );
-    FTGLPixmapFont font;
+    FT_Face face;
+
+    std::map<std::tuple<wchar_t,std::uint16_t>,MFont::Glyph*> glyphs;
 
 private:
 };

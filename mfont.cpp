@@ -1,5 +1,5 @@
 /*
- * <one line to give the program's name and a brief idea of what it does.>
+ * This file is part of MLib
  * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,66 +20,182 @@
 #include "mfont.h"
 #include "mfont_p.h"
 
-#include <map>
+#include <MDebug>
+#include <MTexture>
+#include <locale>
 
-static std::map< std::string, MFont* > map;
+#include FT_OUTLINE_H
+#include <GL/gl.h>
 
-MFontPrivate::MFontPrivate ( const char* f )
-    : font(f)
+#define STIRIINSESTDESET 64
+
+using namespace std;
+
+static map< string, MFont* > fonts;
+
+MFont::Glyph::Glyph ( MSize size, uint8_t* data, decltype(m_advance)* advance, decltype(m_bounds)* bounds )
+    : m_size{size}
+    , m_data{data}
+    , m_texture{}
+    , m_advance{}
+    , m_bounds{}
 {
+    if ( advance )
+        m_advance = *advance;
+    if ( bounds )
+        m_bounds = *bounds;
 }
 
-MFont::MFont ( std::string file )
-    : d ( new MFontPrivate ( file.c_str() ) )
+MFont::Glyph::~Glyph()
 {
+    if ( m_texture )
+        delete m_texture;
+}
 
+const MTexture* MFont::Glyph::texture()
+{
+    if ( m_texture )
+        return m_texture;
+
+    glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+
+    GLuint tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, size().width(), size().height(), 0, GL_ALPHA, GL_UNSIGNED_BYTE, data());
+
+    glPopClientAttrib();
+
+    return m_texture = new MTexture{size(),tex};
+}
+
+MFont::MFont ( void* face )
+    : d{new MFontPrivate}
+{
+    d->face = static_cast<FT_Face> ( face );
+
+    setFaceSize ( 20 );
 }
 
 MFont::~MFont()
 {
-    delete d;
+    FT_Done_Face ( d->face );
+    for ( auto pair: d->glyphs )
+        delete pair.second;
 
+    delete d;
 }
 
-bool MFont::load ( const std::string& file )
+bool MFont::load ( string file )
 {
-    MFont* font = new MFont ( file );
-    if ( font->d->font.Error() ) {
-        delete font;
-        return false;
-    }
-    else {
-        map[file] = font;
+    for ( auto loader: MDataLoader::loaders() ) {
+        if ( loader->type() != Font )
+            continue;
+        MDataFile* res = loader->load(file);
+        if ( !res )
+            continue;
+        MFont* font = dynamic_cast<MFont*> ( res );
+        if ( !font ) {
+            delete res;
+            continue;
+        }
+        fonts[file] = font;
         return true;
     }
+    return false;
 }
 
-void MFont::unload ( const std::string& file )
+void MFont::unload ( string file )
 {
-    auto i = map.find ( file );
+    auto i = fonts.find ( file );
     delete i->second;
-    map.erase ( i );
+    fonts.erase ( i );
 }
 
-void MFont::unload ( const MFont* texture )
+void MFont::unload ( const MFont* font )
 {
-    for ( auto position: map )
-        if ( position.second == texture )
-            map.erase ( position.first );
-    delete texture;
+    for ( auto position: fonts )
+        if ( position.second == font )
+            fonts.erase ( position.first );
+    delete font;
 }
 
-MFont* MFont::get ( const std::string& file )
+MFont* MFont::get ( string file )
 {
-    return map[file];
+    return fonts[file];
 }
 
-bool MFont::setFaceSize ( std::uint16_t size, std::uint16_t res )
+bool MFont::setFaceSize ( uint16_t size, uint16_t res )
 {
-    return d->font.FaceSize ( size, res );
+    if ( size == d->face->size->metrics.x_ppem )
+        return true;
+    return FT_Set_Char_Size ( d->face, 0, size * STIRIINSESTDESET, res, res ) == 0;
 }
 
-void MFont::render ( std::string text )
+void MFont::render ( string text )
 {
-    d->font.Render ( text.c_str() );
+    wstring wstr;
+    {
+        locale l{""};
+        using cvt_t = std::codecvt< wchar_t, char, mbstate_t >;
+        const cvt_t& cvt = std::use_facet< cvt_t > ( l );
+        wchar_t* pwc;
+        const char* pc;
+        auto dest = new wchar_t[text.length() + 1];
+        auto state = mbstate_t{};
+        switch ( cvt.in(state, text.c_str(), text.c_str() + text.length() + 1, pc, dest, dest + text.length() + 1, pwc) )
+        {
+            case cvt_t::ok:
+                break;
+            case cvt_t::error:
+                mDebug() << "an error occurred while extracting characters from string '" << text << "'";
+        }
+        wstr = dest;
+        delete[] dest;
+    }
+
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_TEXTURE_2D);
+
+    long off{};
+    for ( wchar_t c: wstr ) {
+        auto g = glyph(c, d->face->size->metrics.x_ppem);
+        g->texture()->draw ( off + g->bounds().x1/STIRIINSESTDESET, g->bounds().y2/STIRIINSESTDESET,
+                             off + g->bounds().x2/STIRIINSESTDESET, g->bounds().y1/STIRIINSESTDESET );
+        off += g->advance().x/STIRIINSESTDESET;
+    }
+
+    glPopAttrib();
+}
+
+MFont::Glyph* MFont::glyph ( wchar_t code, uint16_t size )
+{
+    auto& glyph = d->glyphs[std::make_tuple(code,size)];
+    if ( glyph )
+        return glyph;
+    setFaceSize(size);
+    FT_Load_Char ( d->face, code, FT_LOAD_RENDER );
+    FT_BBox bbox;
+    FT_Outline_Get_CBox(&d->face->glyph->outline, &bbox);
+    using advance_t = std::remove_cv<decltype(glyph->advance())>::type;
+    using bounds_t = std::remove_cv<decltype(glyph->bounds())>::type;
+    auto advance = (advance_t)d->face->glyph->advance;
+    auto bounds = (bounds_t)bbox;
+    auto& bitmap = d->face->glyph->bitmap;
+    return glyph = new Glyph{{bitmap.width,bitmap.rows},bitmap.buffer,&advance,&bounds};
 }
