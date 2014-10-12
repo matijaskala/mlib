@@ -17,4 +17,49 @@
  *
  */
 
-#include "mtype.h"
+#include <MDataLoader>
+#include <MFont>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+static class MType : public MDataLoader
+{
+public:
+    MType();
+    virtual ~MType();
+    virtual MDataFile::Type type() override { return MDataFile::Font; }
+
+private:
+    virtual MDataFile* load ( std::string file );
+    virtual std::string name();
+
+    FT_Library library;
+} freetype;
+
+MType::MType()
+{
+    FT_Init_FreeType ( &library );
+}
+
+MType::~MType()
+{
+    FT_Done_FreeType ( library );
+}
+
+MDataFile* MType::load ( std::string file )
+{
+    FT_Face face;
+    if ( FT_New_Face ( library, file.c_str(), 0, &face ) )
+        return nullptr;
+    if ( FT_Set_Char_Size ( face, 0, 1280, 0, 0 ) ) {
+        FT_Done_Face ( face );
+        return nullptr;
+    }
+    return new MFont{face};
+}
+
+std::string MType::name()
+{
+    return "ttf";
+}
