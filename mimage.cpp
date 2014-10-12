@@ -20,8 +20,10 @@
 #include "mimage.h"
 
 #include <MDataLoader>
+#include <MTexture>
 
 #include <map>
+#include <GL/gl.h>
 
 static std::map< std::string, MImage* > map;
 
@@ -35,6 +37,20 @@ MImage::MImage ( MSize size, bool alpha, uint8_t* data )
 MImage::~MImage()
 {
     delete[] m_data;
+}
+
+MTexture* MImage::createTexture() const
+{
+    auto texture = new MTexture;
+    texture->bind();
+    texture->setSize(size());
+    glTexParameterf ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameterf ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameterf ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameterf ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    GLenum format = hasAlpha() ? GL_RGBA : GL_RGB;
+    glTexImage2D ( GL_TEXTURE_2D, 0, format, size().width(), size().height(), 0, format, GL_UNSIGNED_BYTE, data() );
+    return texture;
 }
 
 bool MImage::load ( std::string file )

@@ -24,15 +24,18 @@
 #include <MSize>
 #include <string>
 
+class MTexture;
 class MImage : public MDataFile
 {
 public:
     MImage ( MSize size, bool alpha, std::uint8_t* data );
     virtual ~MImage();
 
-    const MSize& size() { return m_size; }
-    bool hasAlpha() { return m_alpha; }
-    std::uint8_t* data() { return m_data; }
+    const MSize& size() const { return m_size; }
+    bool hasAlpha() const { return m_alpha; }
+    std::uint8_t* data() const { return m_data; }
+
+    MTexture* createTexture() const;
 
     static bool load ( std::string file );
     static void unload ( std::string file );
