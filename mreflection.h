@@ -72,6 +72,11 @@ public:
         }
     }
 
+    template< typename T, typename O >
+    T& access ( O* obj, std::string field_name ) {
+        return obj->*symbol<O,T> ( field_name );
+    }
+
     template< typename _Class = void >
     _Class* newInstance() {
         return symbol<_Class*()>("new")();
