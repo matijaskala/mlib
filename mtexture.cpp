@@ -20,14 +20,6 @@
 #include "mtexture.h"
 #include "mtexture_p.h"
 
-MTexture::MTexture( MSize size, unsigned int tex )
-{
-    d = new MTexturePrivate;
-
-    d->size = size;
-    d->tex = tex;
-}
-
 MTexture::MTexture()
     : d{new MTexturePrivate}
 {

@@ -25,9 +25,8 @@
 class MTexture
 {
 public:
-    [[gnu::__deprecated__]]MTexture ( MSize size, unsigned int tex );
     MTexture();
-    virtual ~MTexture();
+    ~MTexture();
     void bind() const;
     unsigned int texture() const;
     const MSize& size() const;
