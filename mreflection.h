@@ -37,12 +37,17 @@ class MReflection
 {
     struct Symbol {
         void* ptr;
-        template<typename T = void> Symbol ( T* ptr = nullptr )
+        Symbol() : ptr{nullptr} {}
+        template<typename T> Symbol ( T* ptr )
+            : ptr { reinterpret_cast<void*&> ( ptr ) } {}
+        template<typename O, typename T> Symbol ( T O::*ptr )
             : ptr { reinterpret_cast<void*&> ( ptr ) } {}
         template<typename R, typename O, typename... A> Symbol ( R (O::*ptr)(A...) )
             : ptr { reinterpret_cast<void*&> ( ptr ) } {}
         template<typename T> T* as()
             { return reinterpret_cast<T*&> ( ptr ); }
+        template<typename O, typename T> T O::* as()
+            { return reinterpret_cast<T O::*&> ( ptr ); }
     };
 
     using SymbolMap = std::unordered_map< std::string, Symbol >;
@@ -80,11 +85,17 @@ protected:
     template < typename _Class >
     MReflection ( _Class*, const char* name ) : MReflection{name} {
         m_symbols["new"] = static_cast<_Class*(*)()> ( [] () { return new _Class; } );
+        m_symbols["delete"] = static_cast<void(*)(_Class*)> ( [] ( _Class* obj ) { delete obj; } );
     }
 
     template< typename T >
     T* symbol ( std::string name ) {
         return m_symbols[name].as<T> ();
+    }
+
+    template< typename O, typename T >
+    T O::* symbol ( std::string name ) {
+        return m_symbols[name].as<O,T> ();
     }
 
     SymbolMap m_symbols;
