@@ -104,15 +104,18 @@ struct Menu : public MObject, public Drawable {
         int i = 0;
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         for ( std::string item: items ) {
+        glPushMatrix();
             if ( current == i )
                 glColor4d(1,0,0,1);
             else
                 glColor4d(0,1,1,1);
-            glRasterPos2i(x,y);
+            glTranslated(x,y,0);
+            glRotated(180,1,0,0);
             font->setFaceSize ( 20 );
             font->render ( item.c_str() );
             i++;
             y += 20;
+        glPopMatrix();
         }
         glPopAttrib();
     }
@@ -148,10 +151,13 @@ void Menu::draw()
 void Text::draw()
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glPushMatrix();
     glColor4d(0,0,1,1);
-    glRasterPos2i(72,72);
+    glTranslated(0,72,0);
+    glRotated(180,1,0,0);
     font->setFaceSize(72);
     font->render(text);
+    glPopMatrix();
     glPopAttrib();
 }
 
