@@ -59,9 +59,9 @@ const MTexture* MFont::Glyph::texture()
 
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 
-    GLuint tex;
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    m_texture = new MTexture;
+    m_texture->bind();
+    m_texture->setSize(size());
 
     glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
@@ -77,7 +77,7 @@ const MTexture* MFont::Glyph::texture()
 
     glPopClientAttrib();
 
-    return m_texture = new MTexture{size(),tex};
+    return m_texture;
 }
 
 MFont::MFont ( void* face )
