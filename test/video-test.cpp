@@ -23,7 +23,7 @@
 #include <GL/gl.h>
 #include <nonstd/filesystem>
 #include <MDebug>
-#include <MObject>
+#include <MSignal>
 #include <MVideo>
 #include <MKeys>
 #include <MFont>
@@ -63,7 +63,7 @@ public:
     virtual void draw() = 0;
 };
 
-struct Menu : public MObject, public Drawable {
+struct Menu : public Drawable {
     uint16_t current = 0;
     struct EventHandler : public MEventHandler {
         Menu* menu;
@@ -86,7 +86,7 @@ struct Menu : public MObject, public Drawable {
             exit(0);
         }
     };
-    Menu ( MObject* parent = nullptr ) : MObject(parent) {
+    Menu (  ) {
         MEventHandler::handlers.push<EventHandler> ( this );
     }
     virtual ~Menu() {
@@ -121,15 +121,14 @@ struct Menu : public MObject, public Drawable {
     }
 };
 
-class Listener : public MObject {
+class Listener {
     Menu* menu;
     void activated ( int z ) {
         menu->items.push_back ( "ACTIVATED: " + menu->items[z] );
     }
     MSlot<int> slotActivated{&Listener::activated, this};
 public:
-    Listener ( MObject* parent = nullptr ) : MObject(parent) {
-        menu = dynamic_cast<Menu*> ( parent );
+    Listener ( Menu* menu ) : menu{menu} {
 #undef connect
         menu->activated.connect(slotActivated);
     }
