@@ -35,7 +35,6 @@ add_library(mlib SHARED
     mplugin.cpp
     mreflection.cpp
     mtexture.cpp
-    mtextureloader.cpp
     mvideo.cpp
     mvideointerface.cpp
 )
@@ -53,7 +52,7 @@ target_link_libraries(mwl wayland-egl EGL xkbcommon)
 
 install(TARGETS mpng mtype msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
 
-target_link_libraries(mlib dl ${OPENGL_gl_LIBRARY} ${FREETYPE_LIBRARIES} ftgl)
+target_link_libraries(mlib dl ${OPENGL_gl_LIBRARY} ${FREETYPE_LIBRARIES})
 
 install(TARGETS mlib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY data/ DESTINATION share/mlib)
