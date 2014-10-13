@@ -20,9 +20,7 @@
 #ifndef MGLOBAL_H
 #define MGLOBAL_H
 
-#include <string>
-#include <typeinfo>
-#include "nonstd/cxxabi"
+#include <MSignal>
 
 #ifdef WIN32
 #define M_NO_EXPORT
@@ -45,6 +43,7 @@
 namespace M
 {
     void init ( int& argc, char**& argv );
+    extern MSlot<> quit;
 }
 
 #endif // MGLOBAL_H
