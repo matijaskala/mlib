@@ -62,6 +62,8 @@ void SDLVideoInterface::endPaint()
 
 bool SDLVideoInterface::init()
 {
+    return false;
+
     if ( SDL_Init ( SDL_INIT_VIDEO ) < 0 ) {
         mDebug ( ERROR ) << SDL_GetError();
         return false;
