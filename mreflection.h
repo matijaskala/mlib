@@ -29,7 +29,7 @@
 
 #define M_REFLECT_METHOD(CLASS,METHOD,ARGS) m_symbols[std::string{}+#METHOD+#ARGS] = \
         static_cast<void(CLASS::*)ARGS>(&CLASS::METHOD)
-#define M_REFLECT_METHOD_SIMPLE(CLASS,METHOD) m_symbols[#METHOD] = &CLASS::METHOD
+#define M_REFLECT_FIELD(CLASS,METHOD) m_symbols[#METHOD] = &CLASS::METHOD
 
 #define M_REFLECTION_CONSTRUCT(CLASS) MReflection { static_cast<CLASS*>(0), #CLASS }
 
