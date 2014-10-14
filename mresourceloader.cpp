@@ -17,22 +17,22 @@
  *
  */
 
-#include "mdataloader.h"
+#include "mresourceloader.h"
 
 #include <MDebug>
 #include <fstream>
 
-MDataLoader::MDataLoader()
+MResourceLoader::MResourceLoader()
 {
     loaders().push_back ( this );
 }
 
-MDataLoader::~MDataLoader()
+MResourceLoader::~MResourceLoader()
 {
     loaders().remove ( this );
 }
 
-bool MDataLoader::valid ( std::string file )
+bool MResourceLoader::valid ( std::string file )
 {
     std::ifstream stream ( file );
     if ( !stream.is_open() )
@@ -40,16 +40,16 @@ bool MDataLoader::valid ( std::string file )
     return stream.good();
 }
 
-MDataLoader* MDataLoader::get ( std::string name )
+MResourceLoader* MResourceLoader::get ( std::string name )
 {
-    for ( MDataLoader* loader: loaders() )
+    for ( MResourceLoader* loader: loaders() )
         if ( loader->name() == name )
             return loader;
     return nullptr;
 }
 
-std::list< MDataLoader* >& MDataLoader::loaders()
+std::list< MResourceLoader* >& MResourceLoader::loaders()
 {
-    static std::list< MDataLoader* > loaders;
+    static std::list< MResourceLoader* > loaders;
     return loaders;
 }

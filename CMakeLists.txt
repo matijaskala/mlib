@@ -23,7 +23,6 @@ add_definitions(-DDATADIR="${CMAKE_INSTALL_PREFIX}/share/mlib/")
 
 include_directories(include .)
 add_library(mlib SHARED
-    mdataloader.cpp
     mdebug.cpp
     mdl.cpp
     melapsedtimer.cpp
@@ -34,6 +33,7 @@ add_library(mlib SHARED
     mobject.cpp
     mplugin.cpp
     mreflection.cpp
+    mresourceloader.cpp
     mtexture.cpp
     mvideo.cpp
     mvideointerface.cpp

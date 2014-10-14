@@ -20,12 +20,12 @@
 #ifndef MIMAGE_H
 #define MIMAGE_H
 
-#include <MDataFile>
+#include <MResource>
 #include <MSize>
 #include <string>
 
 class MTexture;
-class MImage : public MDataFile
+class MImage : public MResource
 {
 public:
     MImage ( MSize size, bool alpha, std::uint8_t* data );

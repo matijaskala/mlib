@@ -22,6 +22,7 @@
 
 #include <MDebug>
 #include <MTexture>
+#include <MResourceLoader>
 #include <locale>
 
 #include FT_OUTLINE_H
@@ -99,10 +100,10 @@ MFont::~MFont()
 
 bool MFont::load ( string file )
 {
-    for ( auto loader: MDataLoader::loaders() ) {
+    for ( auto loader: MResourceLoader::loaders() ) {
         if ( loader->type() != Font )
             continue;
-        MDataFile* res = loader->load(file);
+        MResource* res = loader->load(file);
         if ( !res )
             continue;
         MFont* font = dynamic_cast<MFont*> ( res );

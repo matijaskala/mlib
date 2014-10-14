@@ -19,7 +19,7 @@
 
 #include "mimage.h"
 
-#include <MDataLoader>
+#include <MResourceLoader>
 #include <MTexture>
 
 #include <map>
@@ -55,7 +55,7 @@ MTexture* MImage::createTexture() const
 
 bool MImage::load ( std::string file )
 {
-    for ( auto loader: MDataLoader::loaders() ) {
+    for ( auto loader: MResourceLoader::loaders() ) {
         if ( loader->type() != Image )
             continue;
         if ( !loader->valid ( file ) )

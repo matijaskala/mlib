@@ -1,13 +1,13 @@
-#include <MDataLoader>
+#include <MResourceLoader>
 #include <MDebug>
 #include <MImage>
 #include <fstream>
 #include <png.h>
 
-class MPNG : public MDataLoader {
+class MPNG : public MResourceLoader {
     virtual bool valid ( std::string file ) override;
-    virtual MDataFile* load ( std::string file ) override;
-    virtual MDataFile::Type type() override { return MDataFile::Image; }
+    virtual MResource* load ( std::string file ) override;
+    virtual MResource::Type type() override { return MResource::Image; }
     virtual std::string name() override { return "png"; }
 };
 
@@ -30,7 +30,7 @@ static void readData ( png_structp png, png_bytep data, png_size_t length )
     stream->read ( reinterpret_cast<char*> ( data ), length );
 }
 
-MDataFile* MPNG::load ( std::string file )
+MResource* MPNG::load ( std::string file )
 {
     png_structp png = png_create_read_struct ( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL );
     if ( !png )

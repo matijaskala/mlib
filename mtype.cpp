@@ -17,21 +17,21 @@
  *
  */
 
-#include <MDataLoader>
+#include <MResourceLoader>
 #include <MFont>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-static class MType : public MDataLoader
+static class MType : public MResourceLoader
 {
 public:
     MType();
     virtual ~MType();
-    virtual MDataFile::Type type() override { return MDataFile::Font; }
+    virtual MResource::Type type() override { return MResource::Font; }
 
 private:
-    virtual MDataFile* load ( std::string file );
+    virtual MResource* load ( std::string file );
     virtual std::string name();
 
     FT_Library library;
@@ -47,7 +47,7 @@ MType::~MType()
     FT_Done_FreeType ( library );
 }
 
-MDataFile* MType::load ( std::string file )
+MResource* MType::load ( std::string file )
 {
     FT_Face face;
     if ( FT_New_Face ( library, file.c_str(), 0, &face ) )

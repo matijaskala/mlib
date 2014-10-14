@@ -20,7 +20,7 @@
 #ifndef MDATAFILE_H
 #define MDATAFILE_H
 
-struct MDataFile
+struct MResource
 {
     enum Type {
         Audio,
@@ -28,11 +28,11 @@ struct MDataFile
         Image,
     };
 
-    MDataFile() = default;
-    MDataFile(const MDataFile&) = delete;
-    virtual ~MDataFile() = 0;
+    MResource() = default;
+    MResource(const MResource&) = delete;
+    virtual ~MResource() = 0;
 };
 
-inline MDataFile::~MDataFile() = default;
+inline MResource::~MResource() = default;
 
 #endif // MDATAFILE_H

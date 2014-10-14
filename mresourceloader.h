@@ -21,19 +21,19 @@
 #define MDATALOADER_H
 
 #include "mglobal.h"
-#include <MDataFile>
+#include <MResource>
 #include <list>
 
-struct MDataLoader
+struct MResourceLoader
 {
-    MDataLoader();
-    virtual ~MDataLoader();
+    MResourceLoader();
+    virtual ~MResourceLoader();
     virtual bool valid ( std::string file );
-    virtual MDataFile* M_WARN_UNUSED_RESULT load ( std::string file ) = 0;
+    virtual MResource* M_WARN_UNUSED_RESULT load ( std::string file ) = 0;
     virtual std::string name() = 0;
-    virtual MDataFile::Type type() = 0;
-    static MDataLoader* get ( std::string name );
-    static std::list< MDataLoader* >& loaders();
+    virtual MResource::Type type() = 0;
+    static MResourceLoader* get ( std::string name );
+    static std::list< MResourceLoader* >& loaders();
 };
 
 #endif // MDATALOADER_H
