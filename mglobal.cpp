@@ -22,6 +22,7 @@
 #include <nonstd/filesystem>
 #include <MDL>
 #include <MDebug>
+#include <alc.h>
 
 void M::init ( int& argc, char**& argv )
 {
@@ -29,5 +30,21 @@ void M::init ( int& argc, char**& argv )
     for ( non_std::file f: dir )
         if ( f.name[0] != '.' )
             MDL::open(f.path + f.name);
+
+    auto device = alcOpenDevice ( nullptr );
+    auto context = alcCreateContext ( device, nullptr );
+    alcMakeContextCurrent ( context );
+}
+
+void M::quit()
+{
+    auto context = alcGetCurrentContext ();
+    auto device = alcGetContextsDevice ( context );
+
+    alcMakeContextCurrent ( nullptr );
+    alcDestroyContext ( context );
+    alcCloseDevice ( device );
+
+    exit(0);
 }
 
