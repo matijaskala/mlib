@@ -43,6 +43,8 @@ add_library(mpng MODULE mpng.cpp)
 target_link_libraries(mpng png)
 add_library(mtype MODULE mtype.cpp)
 target_link_libraries(mtype ${FREETYPE_LIBRARIES})
+add_library(mvorbis MODULE mvorbis.cpp)
+target_link_libraries(mvorbis vorbisfile)
 add_library(msdl MODULE msdl.cpp)
 target_link_libraries(msdl SDL)
 add_library(mxlib MODULE mxlib.cpp)
@@ -50,7 +52,7 @@ target_link_libraries(mxlib X11)
 add_library(mwl MODULE mwl.cpp)
 target_link_libraries(mwl wayland-egl EGL xkbcommon)
 
-install(TARGETS mpng mtype msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
+install(TARGETS mpng mtype mvorbis msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
 
 target_link_libraries(mlib dl ${OPENGL_gl_LIBRARY} ${FREETYPE_LIBRARIES})
 
