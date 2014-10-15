@@ -198,5 +198,5 @@ MFont::Glyph* MFont::glyph ( wchar_t code, uint16_t size )
     auto advance = (advance_t)d->face->glyph->advance;
     auto bounds = (bounds_t)bbox;
     auto& bitmap = d->face->glyph->bitmap;
-    return glyph = new Glyph{{bitmap.width,bitmap.rows},bitmap.buffer,&advance,&bounds};
+    return glyph = new Glyph{MSize(bitmap.width,bitmap.rows),bitmap.buffer,&advance,&bounds};
 }
