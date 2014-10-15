@@ -20,8 +20,6 @@
 #ifndef MGLOBAL_H
 #define MGLOBAL_H
 
-#include <MSignal>
-
 #ifdef WIN32
 #define M_NO_EXPORT
 #define M_EXPORT __declspec(dllexport)
@@ -43,7 +41,7 @@
 namespace M
 {
     void init ( int& argc, char**& argv );
-    extern MSlot<> quit;
+    void quit ();
 }
 
 #endif // MGLOBAL_H
