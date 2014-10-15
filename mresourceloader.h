@@ -23,6 +23,7 @@
 #include "mglobal.h"
 #include <MResource>
 #include <list>
+#include <string>
 
 struct MResourceLoader
 {
