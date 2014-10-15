@@ -7,6 +7,7 @@ if(__${CMAKE_BUILD_TYPE}__ STREQUAL __Debug__)
 endif()
 
 find_package(Freetype REQUIRED)
+find_package(OpenAL REQUIRED)
 find_package(OpenGL REQUIRED)
 
 include_directories(${FREETYPE_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR})
@@ -54,7 +55,7 @@ target_link_libraries(mwl wayland-egl EGL xkbcommon)
 
 install(TARGETS mpng mtype mvorbis msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
 
-target_link_libraries(mlib dl ${OPENGL_gl_LIBRARY} ${FREETYPE_LIBRARIES})
+target_link_libraries(mlib dl ${FREETYPE_LIBRARIES} ${OPENAL_LIBRARY} ${OPENGL_gl_LIBRARY})
 
 install(TARGETS mlib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY data/ DESTINATION share/mlib)
