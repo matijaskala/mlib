@@ -28,6 +28,8 @@ public:
     MElapsedTimer();
     ~MElapsedTimer();
     std::int64_t elapsed();
+    std::int64_t elapsedus();
+    void reset();
 private:
     struct MElapsedTimerPrivate* const d;
 };

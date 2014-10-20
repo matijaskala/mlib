@@ -30,7 +30,7 @@ struct MElapsedTimerPrivate {
 MElapsedTimer::MElapsedTimer()
     : d ( new MElapsedTimerPrivate )
 {
-    d->start = system_clock::now();
+    reset();
 }
 
 MElapsedTimer::~MElapsedTimer()
@@ -42,4 +42,15 @@ std::int64_t MElapsedTimer::elapsed()
 {
     system_clock::time_point now = system_clock::now();
     return duration_cast<milliseconds> ( now - d->start ).count();
+}
+
+int64_t MElapsedTimer::elapsedus()
+{
+    system_clock::time_point now = system_clock::now();
+    return duration_cast<microseconds> ( now - d->start ).count();
+}
+
+void MElapsedTimer::reset()
+{
+    d->start = system_clock::now();
 }
