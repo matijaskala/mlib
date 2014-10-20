@@ -28,7 +28,7 @@ MAudioStream* MAudioStream::create ( std::istream* stream )
     return nullptr;
 }
 
-MAudioStream::Interface::List MAudioStream::interfaces() {
+MAudioStream::Interface::List& MAudioStream::interfaces() {
     static Interface::List interfaces;
     return interfaces;
 }

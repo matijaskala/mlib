@@ -60,7 +60,7 @@ private:
     int m_freq{};
     bool m_stereo{};
 
-    static Interface::List interfaces();
+    static Interface::List& interfaces();
 };
 
 #endif // MAUDIOSTREAM_H
