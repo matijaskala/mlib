@@ -19,9 +19,105 @@
 
 #include <MResourceLoader>
 #include <MAudioFile>
+#include <MAudioStream>
+#include <MDebug>
 
 #include <vorbis/vorbisfile.h>
 #include <fstream>
+
+struct MVorbisStream : public MAudioStream
+{
+    static struct Interface : public MAudioStream::Interface
+    {
+        virtual bool valid ( std::istream* stream );
+        virtual MAudioStream* create ( std::istream* stream );
+    } interface;
+    virtual ~MVorbisStream();
+    virtual void read();
+    OggVorbis_File vorbisFile;
+};
+
+MVorbisStream::Interface MVorbisStream::interface;
+
+bool MVorbisStream::Interface::valid ( std::istream* stream )
+{
+    stream->seekg(0);
+    char header[5]{};
+    stream->read ( header, 4 );
+    return header == std::string{"OggS"};
+}
+
+MAudioStream* MVorbisStream::Interface::create ( std::istream* stream )
+{
+    auto vorbisStream = new MVorbisStream;
+    ov_callbacks callbacks{
+        [] (void *ptr, std::size_t size, std::size_t nmemb, void *datasource) -> std::size_t {
+            auto stream = static_cast<std::istream*> ( datasource );
+            if ( stream->eof() )
+                return 0;
+            auto buf = static_cast<char*> ( ptr );
+            stream->read ( buf, size * nmemb );
+            return stream->gcount() / size;
+        },
+        [] (void *datasource, ogg_int64_t offset, int whence) -> int {
+            auto stream = static_cast<std::istream*> ( datasource );
+            std::ios::seekdir dir;
+            switch ( whence ) {
+                case SEEK_SET:
+                    dir = std::ios::beg;
+                    break;
+                case SEEK_CUR:
+                    dir = std::ios::cur;
+                    break;
+                case SEEK_END:
+                    dir = std::ios::end;
+                    break;
+                default:
+                    return -1;
+            }
+            stream->seekg ( offset, dir );
+            return stream->fail() ? -1 : 0;
+        },
+        [] (void *datasource) -> int {
+            return 0;
+        },
+        [] (void *datasource) -> long {
+            auto stream = static_cast<std::istream*> ( datasource );
+            return stream->tellg();
+        },
+    };
+    stream->seekg(0);
+    if ( ov_open_callbacks ( stream, &vorbisStream->vorbisFile, nullptr, 0, callbacks ) < 0 )
+        return nullptr;
+    auto info = ov_info ( &vorbisStream->vorbisFile, -1 );
+    vorbisStream->setFreq ( info->rate );
+    vorbisStream->setStereo ( info->channels > 1 );
+    return vorbisStream;
+}
+
+MVorbisStream::~MVorbisStream()
+{
+    ov_clear(&vorbisFile);
+}
+
+void MVorbisStream::read()
+{
+    buffer_size = 0;
+    long read;
+    do {
+        read = ov_read ( &vorbisFile, buffer + buffer_size, sizeof(buffer) - buffer_size, 0, 2, 1, nullptr );
+        if ( read <= 0 )
+            switch ( read ) {
+                case 0:
+                    return setEOF();
+                case OV_HOLE:
+                    mDebug(ERROR) << "OV_HOLE";
+                    break;
+            }
+        else
+            buffer_size += read;
+    } while ( buffer_size + read < sizeof(buffer) );
+}
 
 class MVorbis : public MResourceLoader
 {
@@ -33,37 +129,28 @@ class MVorbis : public MResourceLoader
 
 bool MVorbis::valid ( std::string file )
 {
-    char header[4];
     std::ifstream stream ( file );
     if ( !stream.is_open() )
         return false;
-    stream.read ( header, 4 );
-    return header == std::string{"OggS"};
+    return MVorbisStream::interface.valid(&stream);
 }
 
 MResource* MVorbis::load ( std::string file )
 {
-    OggVorbis_File oggFile;
-    FILE* f = fopen ( file.c_str(), "r" );
-    if ( !f )
+    std::ifstream stream{file};
+    if ( !stream.is_open() )
         return nullptr;
-    if ( ov_open ( f, &oggFile, nullptr, 0 ) < 0 ) {
-        fclose ( f );
+    auto oggStream = MVorbisStream::interface.create(&stream);
+    if ( !oggStream )
         return nullptr;
-    }
     auto res = new MAudioFile;
-    auto info = ov_info ( &oggFile, -1 );
-    res->stereo = info->channels > 1;
-    res->freq = info->rate;
-#define BUFFER_SIZE 8192
-    char buffer[BUFFER_SIZE];
-    for (;;) {
-        auto bytes = ov_read ( &oggFile, buffer, BUFFER_SIZE, 0, 2, 1, nullptr );
-        if ( bytes > 0 )
-            res->buffer.insert ( res->buffer.end(), buffer, buffer + bytes );
-        else
-            break;
+    while ( !oggStream->eof() ) {
+        oggStream->initRead();
+        oggStream->waitRead();
+        res->buffer.insert ( res->buffer.end(), oggStream->buffer, oggStream->buffer + oggStream->buffer_size );
     }
-    ov_clear ( &oggFile );
+    res->stereo = oggStream->stereo();
+    res->freq = oggStream->freq();
+    delete oggStream;
     return res;
 }
