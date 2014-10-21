@@ -19,7 +19,7 @@
 
 #include <mglobal.h>
 #include <MVideoInterface>
-#include <MEventHandler>
+#include <MEvents>
 #include <MKeys>
 #include <GL/glx.h>
 #include <unistd.h>
@@ -55,7 +55,6 @@ void XlibVideoInterface::endPaint()
 
 void XlibVideoInterface::handleEvents()
 {
-    MEventHandler& handler = MEventHandler::handlers.top();
     while ( XPending ( xdisplay ) ) {
         XEvent ev;
         XNextEvent ( xdisplay, &ev );
@@ -64,7 +63,7 @@ void XlibVideoInterface::handleEvents()
                 break;
             case ClientMessage:
                 if ( ev.xclient.data.l[0] == WM_DELETE_WINDOW ) {
-                    handler.quit();
+                    MEvents::quit();
                 }
                 break;
             case ConfigureNotify:
@@ -76,7 +75,7 @@ void XlibVideoInterface::handleEvents()
     glMatrixMode ( GL_MODELVIEW );
                 break;
             case KeyPress:
-                handler.key_pressed ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
+                MEvents::keyPressed ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
                 break;
             case KeyRelease:
                 if ( XEventsQueued ( xdisplay, QueuedAfterReading ) ) {
@@ -87,7 +86,7 @@ void XlibVideoInterface::handleEvents()
                         break;
                     }
                 }
-                handler.key_released ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
+                MEvents::keyReleased ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
                 break;
         }
     }

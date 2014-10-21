@@ -20,7 +20,7 @@
 #include "mglobal.h"
 #include <MVideoInterface>
 #include <MDebug>
-#include <MEventHandler>
+#include <MEvents>
 #include <MSize>
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
@@ -37,20 +37,19 @@ class SDLVideoInterface : public MVideoInterface
 void SDLVideoInterface::handleEvents()
 {
     SDL_Event ev;
-    MEventHandler& handler = MEventHandler::handlers.top();
     while ( SDL_PollEvent ( &ev ) )
         switch ( ev.type ) {
             case SDL_QUIT:
-                handler.quit();
+                MEvents::quit();
                 break;
             case SDL_VIDEORESIZE:
                 setVideoMode(ev.resize.w,ev.resize.h);
                 break;
             case SDL_KEYDOWN:
-                handler.key_pressed ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
+                MEvents::keyPressed ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
                 break;
             case SDL_KEYUP:
-                handler.key_released ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
+                MEvents::keyReleased ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
                 break;
         }
 }

@@ -19,7 +19,7 @@
 
 #include <MVideoInterface>
 #include <mglobal.h>
-#include <MEventHandler>
+#include <MEvents>
 #include <MDebug>
 #include <MKeys>
 #include <wayland-egl.h>
@@ -87,7 +87,7 @@ bool WaylandVideoInterface::init()
         [] ( void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state ) {
             auto _This = static_cast<WaylandVideoInterface*> ( data );
             if ( button == 274 && state == WL_POINTER_BUTTON_STATE_RELEASED ) {
-                MEventHandler::handlers.top().quit();
+                MEvents::quit();
             }
         },
         [] ( void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value ) {},
@@ -112,9 +112,9 @@ bool WaylandVideoInterface::init()
                 sym = syms[0];
             MKey mKey = ( ( sym & 0xff00 ) == 0xff00 ) ? _This->keymap[sym & 0xff] : MKey ( sym & 0xff );
             if ( state )
-                MEventHandler::handlers.top().key_pressed ( mKey, 0 );
+                MEvents::keyPressed ( mKey, 0 );
             else
-                MEventHandler::handlers.top().key_released ( mKey, 0 );
+                MEvents::keyReleased ( mKey, 0 );
         },
         [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group ) {},
     };
