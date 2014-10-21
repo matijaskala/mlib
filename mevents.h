@@ -26,6 +26,7 @@
 enum class MKey;
 template<class base>
 struct MEventBase : base {
+    using base::base;
     template<typename... Args>
     void operator() ( Args&&... args ) {
         if ( !base::empty() && base::top() )

@@ -18,9 +18,10 @@
  */
 
 #include "mevents.h"
+#include "mglobal.h"
 
 namespace MEvents {
-    MEvent<> quit;
-    MEvent<MKey,std::uint32_t> keyPressed;
-    MEvent<MKey,std::uint32_t> keyReleased;
+    MEvent<> quit{{M::quit}};
+    MEvent<MKey,std::uint32_t> keyPressed{};
+    MEvent<MKey,std::uint32_t> keyReleased{};
 }

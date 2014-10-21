@@ -22,7 +22,6 @@
 #include <nonstd/filesystem>
 #include <MDL>
 #include <MDebug>
-#include <MEvents>
 
 #include <alc.h>
 
@@ -44,8 +43,6 @@ void M::init ( int& argc, char**& argv )
     auto device = alcOpenDevice ( nullptr );
     auto context = alcCreateContext ( device, nullptr );
     alcMakeContextCurrent ( context );
-
-    MEvents::quit.push(quit);
 }
 
 void M::quit()
