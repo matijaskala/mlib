@@ -22,10 +22,20 @@
 #include <nonstd/filesystem>
 #include <MDL>
 #include <MDebug>
+#include <MEvents>
+
 #include <alc.h>
+
+static bool initialized{false};
 
 void M::init ( int& argc, char**& argv )
 {
+    if ( initialized ) {
+        mDebug() << "MLib already initialized";
+        return;
+    }
+    initialized = true;
+
     non_std::directory dir ( LIBDIR );
     for ( non_std::file f: dir )
         if ( f.name[0] != '.' )
@@ -34,6 +44,8 @@ void M::init ( int& argc, char**& argv )
     auto device = alcOpenDevice ( nullptr );
     auto context = alcCreateContext ( device, nullptr );
     alcMakeContextCurrent ( context );
+
+    MEvents::quit.push(quit);
 }
 
 void M::quit()
