@@ -19,7 +19,7 @@
 
 #include <mglobal.h>
 #include <MTexture>
-#include <MEventHandler>
+#include <MEvents>
 #include <GL/gl.h>
 #include <nonstd/filesystem>
 #include <MDebug>
@@ -30,33 +30,10 @@
 #include <MImage>
 #include <vector>
 
-class EventHandler : public MEventHandler {
-    virtual void quit();
-    virtual void key_pressed ( MKey key, std::uint32_t mod );
-    virtual void key_released ( MKey key, std::uint32_t mod );
-};
-
 static std::string text = "Hello World!";
 static MFont* font = nullptr;
 MTexture* tex = nullptr;
 
-void EventHandler::quit()
-{
-    exit(0);
-}
-
-void EventHandler::key_pressed ( MKey key, std::uint32_t mod )
-{
-    if ( key == MKey::BACKSPACE && !text.empty() )
-        text.pop_back();
-    else if ( static_cast<int> ( key ) >= 32 && static_cast<int> ( key ) < 256 )
-        text += static_cast<char> ( key );
-}
-
-void EventHandler::key_released ( MKey key, std::uint32_t mod )
-{
-    (void) key;
-}
 
 class Drawable {
 public:
@@ -65,37 +42,28 @@ public:
 
 struct Menu : public Drawable {
     uint16_t current = 0;
-    struct EventHandler : public MEventHandler {
-        Menu* menu;
-        EventHandler ( Menu* menu ) : menu ( menu ) {}
-        virtual void key_pressed ( MKey key, std::uint32_t mod ) override {
-            if ( key == MKey::UP ) {
-                if ( menu->current == 0 )
-                    menu->current = menu->items.size();
-                menu->current--;
-            }
-            else if ( key == MKey::DOWN ) {
-                menu->current++;
-                if ( menu->current == menu->items.size() )
-                    menu->current = 0;
-            }
-            else if ( key == MKey::RETURN )
-                menu->confirmed();
-        }
-        virtual void quit() {
-            exit(0);
-        }
-    };
     Menu (  ) {
-        MEventHandler::handlers.push<EventHandler> ( this );
+        MEvents::keyPressed.push(
+            [this] ( MKey key, std::uint32_t mod ) {
+                if ( key == MKey::UP ) {
+                    if ( current == 0 )
+                        current = items.size();
+                    current--;
+                }
+                else if ( key == MKey::DOWN ) {
+                    current++;
+                    if ( current == items.size() )
+                        current = 0;
+                }
+                else if ( key == MKey::RETURN )
+                    activated ( current );
+            }
+        );
     }
     virtual ~Menu() {
-        MEventHandler::handlers.pop();
+        MEvents::keyPressed.pop();
     }
     virtual void draw();
-    void confirmed() {
-        activated ( current );
-    }
     std::vector< std::string > items;
     MSignal<int> activated{this};
     void render(MFont* font) {
@@ -169,7 +137,15 @@ void Texture::draw()
 int main ( int argc, char** argv ) {
     M::init ( argc, argv );
     MVideo::init();
-    MEventHandler::handlers.push< EventHandler > ();
+    MEvents::keyPressed.push(
+        [] ( MKey key, std::uint32_t mod )
+        {
+            if ( key == MKey::BACKSPACE && !text.empty() )
+                text.pop_back();
+            else if ( static_cast<int> ( key ) >= 32 && static_cast<int> ( key ) < 256 )
+                text += static_cast<char> ( key );
+        }
+    );
     for ( non_std::file f: non_std::directory ( DATADIR "images" ) ) {
         if ( f.name[0] == '.' )
             continue;
