@@ -24,8 +24,16 @@
 #include <stack>
 
 enum class MKey;
+template<class base>
+struct MEventBase : base {
+    template<typename... Args>
+    void operator() ( Args&&... args ) {
+        if ( !base::empty() && base::top() )
+            base::top() ( std::forward<Args>(args)... );
+    }
+};
 template<typename... Args>
-using MEvent = std::stack<std::function<void(Args...)>>;
+using MEvent = MEventBase<std::stack<std::function<void(Args...)>>>;
 
 namespace MEvents
 {
