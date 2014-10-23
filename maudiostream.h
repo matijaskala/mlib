@@ -39,8 +39,14 @@ public:
     void initRead() { m_thread = std::thread { [this] { read(); } }; }
     void waitRead() { m_thread.join(); }
 
+    template<typename _Rep, typename _Period>
+    void seek ( std::chrono::duration<_Rep, _Period> pos ) {
+        seek ( std::chrono::duration_cast<std::chrono::duration<double>> ( pos ).count() );
+    }
+
 protected:
     virtual void read () = 0;
+    virtual void seek (double sec) = 0;
 
     struct Interface {
         Interface();
