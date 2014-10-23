@@ -26,8 +26,6 @@
 
 class XlibVideoInterface : public MVideoInterface
 {
-    virtual void beginPaint() override;
-    virtual void endPaint() override;
     virtual void handleEvents() override;
     virtual bool init() override;
     virtual void fini() override;
@@ -41,17 +39,6 @@ class XlibVideoInterface : public MVideoInterface
 };
 
 static Atom WM_DELETE_WINDOW;
-
-void XlibVideoInterface::beginPaint()
-{
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-}
-
-void XlibVideoInterface::endPaint()
-{
-    glFlush();
-    usleep ( 20 );
-}
 
 void XlibVideoInterface::handleEvents()
 {
