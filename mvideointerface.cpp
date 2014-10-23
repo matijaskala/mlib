@@ -20,7 +20,11 @@
 #include "mvideointerface.h"
 
 #include <GL/gl.h>
-#include <unistd.h>
+
+#include <chrono>
+#include <thread>
+
+using namespace std;
 
 MVideoInterface::MVideoInterface()
 {
@@ -40,7 +44,7 @@ void MVideoInterface::beginPaint()
 void MVideoInterface::endPaint()
 {
     glFlush();
-    usleep ( 20 );
+    this_thread::sleep_for ( 20us );
 }
 
 bool MVideoInterface::init()
