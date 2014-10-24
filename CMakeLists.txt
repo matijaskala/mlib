@@ -28,6 +28,8 @@ add_library(mlib SHARED
     mdl.cpp
     melapsedtimer.cpp
     meventhandler.cpp
+    mevents.cpp
+    mfilesystem.cpp
     mfont.cpp
     mglobal.cpp
     mimage.cpp
