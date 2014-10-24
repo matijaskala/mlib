@@ -47,7 +47,9 @@ public:
         std::string str() const;
         double to_double() const;
         long to_long() const;
-        operator std::string() const { return str(); }
+        template <typename T>
+        T as() const { return std::get<T>(value); }
+        operator std::string() const { return as<std::string>(); }
     };
     config ( std::string name = "" );
     ~config() { clear(); }
