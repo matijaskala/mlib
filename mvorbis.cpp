@@ -34,6 +34,7 @@ struct MVorbisStream : public MAudioStream
     } interface;
     virtual ~MVorbisStream();
     virtual void read();
+    virtual void seek ( double );
     OggVorbis_File vorbisFile;
 };
 
@@ -98,6 +99,11 @@ MAudioStream* MVorbisStream::Interface::create ( std::istream* stream )
 MVorbisStream::~MVorbisStream()
 {
     ov_clear(&vorbisFile);
+}
+
+void MVorbisStream::seek ( double pos )
+{
+    ov_time_seek(&vorbisFile, pos);
 }
 
 void MVorbisStream::read()
