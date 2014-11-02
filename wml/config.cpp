@@ -76,22 +76,22 @@ void config::attribute::set_if_empty ( long val )
 
 bool config::attribute::empty() const
 {
-    return get<2>(value).empty();
+    return str().empty();
 }
 
 string config::attribute::str() const
 {
-    return get<2>(value);
+    return get<string>(value);
 }
 
 double config::attribute::to_double() const
 {
-    return get<1>(value);
+    return get<double>(value);
 }
 
 long config::attribute::to_long() const
 {
-    return get<0>(value);
+    return get<long>(value);
 }
 
 
