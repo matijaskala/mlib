@@ -22,7 +22,7 @@
 #include <MEvents>
 #include <traits>
 #include <GL/gl.h>
-#include <nonstd/filesystem>
+#include <MDirectory>
 #include <MDebug>
 #include <MSignal>
 #include <MVideo>
@@ -147,22 +147,22 @@ int main ( int argc, char** argv ) {
                 text += static_cast<char> ( key );
         }
     );
-    for ( non_std::file f: non_std::directory ( DATADIR "images" ) ) {
-        if ( f.name[0] == '.' )
+    for ( auto f: MDirectory ( DATADIR "images" ) ) {
+        if ( f.name()[0] == '.' )
             continue;
         MDebug debug;
-        debug << "Loading image " << f.name << " ... ";
-        if ( MImage::load ( f.path + "/" + f.name ) )
+        debug << "Loading image " << f.name() << " ... ";
+        if ( MImage::load ( f.path() + "/" + f.name() ) )
             debug << "done";
         else
             debug << "failed";
     }
-    for ( non_std::file f: non_std::directory ( DATADIR "fonts" ) ) {
-        if ( f.name[0] == '.' )
+    for ( auto f: MDirectory ( DATADIR "fonts" ) ) {
+        if ( f.name()[0] == '.' )
             continue;
         MDebug debug;
-        debug << "Loading font " << f.name << " ... ";
-        if ( MFont::load ( f.path + "/" + f.name ) )
+        debug << "Loading font " << f.name() << " ... ";
+        if ( MFont::load ( f.path() + "/" + f.name() ) )
             debug << "done";
         else
             debug << "failed";
