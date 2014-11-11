@@ -1,5 +1,5 @@
 /*
- * <one line to give the program's name and a brief idea of what it does.>
+ * This file is part of MLib
  * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -60,11 +60,18 @@ private:
 class MDirectory
 {
 public:
-    struct Entry {
-        Entry ( std::string name, std::string path ) : name{name}, path{path} {}
-        operator MFile() const { return {name,path}; }
-        std::string name;
-        std::string path;
+    class Entry {
+    public:
+        Entry ( std::string name, std::string path ) : m_name{name}, m_path{path} {}
+        operator MFile() const { return {name(),path()}; }
+
+        const std::string& name() const { return m_name; }
+        const std::string& path() const { return m_path; }
+        std::string fullname() const { return path() + "/" + name(); }
+
+    private:
+        std::string m_name;
+        std::string m_path;
     };
 
     MDirectory ( std::string path );
@@ -76,7 +83,7 @@ public:
 
 private:
     struct before : std::binary_function<Entry,Entry,bool> {
-        bool operator() (const Entry& x, const Entry& y) { return x.name < y.name; }
+        bool operator() (const Entry& x, const Entry& y) { return x.name() < y.name(); }
     };
 
     std::set<Entry,before> m_entries;
