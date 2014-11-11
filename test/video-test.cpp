@@ -20,6 +20,7 @@
 #include <mglobal.h>
 #include <MTexture>
 #include <MEvents>
+#include <traits>
 #include <GL/gl.h>
 #include <nonstd/filesystem>
 #include <MDebug>
@@ -94,7 +95,7 @@ class Listener {
     void activated ( int z ) {
         menu->items.push_back ( "ACTIVATED: " + menu->items[z] );
     }
-    MSlot<int> slotActivated{&Listener::activated, this};
+    MSlot<int> slotActivated{&THIS_T::activated, this};
 public:
     Listener ( Menu* menu ) : menu{menu} {
 #undef connect
