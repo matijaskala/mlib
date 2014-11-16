@@ -20,27 +20,14 @@
 #ifndef MEVENTS_H
 #define MEVENTS_H
 
-#include <functional>
-#include <stack>
+#include <MSignal>
 
 enum class MKey;
-template<class base>
-struct MEventBase : base {
-    using base::base;
-    template<typename... Args>
-    void operator() ( Args&&... args ) {
-        if ( !base::empty() && base::top() )
-            base::top() ( std::forward<Args>(args)... );
-    }
-};
-template<typename... Args>
-using MEvent = MEventBase<std::stack<std::function<void(Args...)>>>;
-
 namespace MEvents
 {
-    extern MEvent<> quit;
-    extern MEvent<MKey,std::uint32_t> keyPressed;
-    extern MEvent<MKey,std::uint32_t> keyReleased;
+    extern MSignal<> quit;
+    extern MSignal<MKey,std::uint32_t> keyPressed;
+    extern MSignal<MKey,std::uint32_t> keyReleased;
 }
 
 #endif // MEVENTS_H
