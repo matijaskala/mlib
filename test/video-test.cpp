@@ -24,7 +24,6 @@
 #include <GL/gl.h>
 #include <MDirectory>
 #include <MDebug>
-#include <MSignal>
 #include <MVideo>
 #include <MKeys>
 #include <MFont>
@@ -44,7 +43,9 @@ public:
 struct Menu : public Drawable {
     uint16_t current = 0;
     Menu (  ) {
-        MEvents::keyPressed.push(
+        MEvents::keyPressed.connect(onKeyPress);
+    }
+    MSlot<MKey,std::uint32_t> onKeyPress =
             [this] ( MKey key, std::uint32_t mod ) {
                 if ( key == MKey::UP ) {
                     if ( current == 0 )
@@ -58,12 +59,7 @@ struct Menu : public Drawable {
                 }
                 else if ( key == MKey::RETURN )
                     activated ( current );
-            }
-        );
-    }
-    virtual ~Menu() {
-        MEvents::keyPressed.pop();
-    }
+            };
     virtual void draw();
     std::vector< std::string > items;
     MSignal<int> activated{this};
@@ -138,15 +134,17 @@ void Texture::draw()
 int main ( int argc, char** argv ) {
     M::init ( argc, argv );
     MVideo::init();
-    MEvents::keyPressed.push(
+    MSlot<> onQuit{M::quit};
+    MEvents::quit.connect(onQuit);
+    MSlot<MKey,std::uint32_t> onKeyPress =
         [] ( MKey key, std::uint32_t mod )
         {
             if ( key == MKey::BACKSPACE && !text.empty() )
                 text.pop_back();
             else if ( static_cast<int> ( key ) >= 32 && static_cast<int> ( key ) < 256 )
                 text += static_cast<char> ( key );
-        }
-    );
+        };
+    MEvents::keyPressed.connect(onKeyPress);
     for ( auto f: MDirectory ( DATADIR "images" ) ) {
         if ( f.name()[0] == '.' )
             continue;
