@@ -34,7 +34,7 @@ class MSlot
 
     std::function<void(Args...)> m_func;
 
-    std::list<MSignal<Args...>*> m_signals;
+    std::list<Signal*> m_signals;
 
     void* m_data{nullptr};
 
@@ -55,7 +55,8 @@ public:
 
     ~MSlot();
 
-    void operator() ( Args&&... args ) { m_func ( std::forward<Args> ( args )... ); }
+    template<typename... Args2>
+    void operator() ( Args2&&... args ) { m_func ( std::forward<Args2> ( args )... ); }
 
     void* data() { return m_data; }
 };
@@ -69,9 +70,9 @@ class MSignal : public MSlot<Args...>
     std::list<Slot*> m_slots;
 
 public:
-    MSignal ( void* data );
+    MSignal ( void* data = nullptr );
     ~MSignal();
-    void connect ( Slot& slot ) { m_slots.push_back ( &slot ); slot.m_signals.push_back ( this ); }
+    void connect ( Slot& slot ) { m_slots.push_back ( &slot ); slot.m_signals.push_front ( this ); }
     void disconnect ( Slot& slot ) { m_slots.remove ( &slot ); slot.m_signals.remove ( this ); }
 };
 
