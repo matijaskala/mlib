@@ -37,7 +37,6 @@ add_library(mlib SHARED
     mimage.cpp
     mmusic.cpp
     mobject.cpp
-    mplugin.cpp
     mreflection.cpp
     mresourceloader.cpp
     mtexture.cpp
