@@ -35,6 +35,8 @@ public:
 
     static MDL get ( std::string file );
 
+    explicit operator bool () { return m_ptr; }
+
     template< typename T >
     T* symbol ( std::string name ) {
         auto sym = symbol<void> ( name );
