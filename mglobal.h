@@ -40,8 +40,8 @@
 
 namespace M
 {
-    void init ( int& argc, char**& argv );
-    void quit ();
+    M_EXPORT void init ( int& argc, char**& argv );
+    M_EXPORT void quit ();
 }
 
 #endif // MGLOBAL_H
