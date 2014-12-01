@@ -20,14 +20,15 @@
 #ifndef MEVENTS_H
 #define MEVENTS_H
 
+#include <MGlobal>
 #include <MSignal>
 
 enum class MKey;
 namespace MEvents
 {
-    extern MSignal<> quit;
-    extern MSignal<MKey,std::uint32_t> keyPressed;
-    extern MSignal<MKey,std::uint32_t> keyReleased;
+    extern MSignal<> quit M_EXPORT;
+    extern MSignal<MKey,std::uint32_t> keyPressed M_EXPORT;
+    extern MSignal<MKey,std::uint32_t> keyReleased M_EXPORT;
 }
 
 #endif // MEVENTS_H
