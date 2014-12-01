@@ -34,7 +34,7 @@ struct exception : public std::exception
     virtual const char* what() const noexcept override;
 };
 
-class parser
+class M_EXPORT parser
 {
 public:
     parser ( std::string file );

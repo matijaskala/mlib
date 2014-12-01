@@ -20,6 +20,7 @@
 #ifndef WML_TOKENIZER_H
 #define WML_TOKENIZER_H
 
+#include <MGlobal>
 #include <nonstd/buffered_ifstream>
 
 namespace wml
@@ -49,7 +50,7 @@ struct token
     std::string value;
 };
 
-class tokenizer
+class M_EXPORT tokenizer
 {
     using traits = std::char_traits< char >;
 

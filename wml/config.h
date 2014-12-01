@@ -20,6 +20,7 @@
 #ifndef WML_CONFIG_H
 #define WML_CONFIG_H
 
+#include <MGlobal>
 #include <string>
 #include <map>
 #include <list>
@@ -27,7 +28,7 @@
 namespace wml
 {
 
-class config
+class M_EXPORT config
 {
 public:
     class attribute {
