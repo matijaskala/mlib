@@ -23,6 +23,7 @@
 #include <memory>
 #include <vector>
 #include <iostream>
+#include <cstdlib>
 
 #ifdef __GNUG__
 std::string non_std::demangle ( const char* symbol ) {
