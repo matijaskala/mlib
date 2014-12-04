@@ -19,7 +19,7 @@
 
 #include "mglobal.h"
 
-#include <nonstd/filesystem>
+#include <MDirectory>
 #include <MDL>
 #include <MDebug>
 
@@ -35,10 +35,10 @@ void M::init ( int& argc, char**& argv )
     }
     initialized = true;
 
-    non_std::directory dir ( LIBDIR );
-    for ( non_std::file f: dir )
-        if ( f.name[0] != '.' )
-            MDL::open(f.path + f.name);
+    MDirectory dir ( LIBDIR );
+    for ( MDirectory::Entry f: dir )
+        if ( f.name()[0] != '.' )
+            MDL::open(f.path() + f.name());
 
     auto device = alcOpenDevice ( nullptr );
     auto context = alcCreateContext ( device, nullptr );
