@@ -20,6 +20,7 @@
 #include "config.h"
 
 #include <limits>
+#include <cstdlib>
 
 using namespace std;
 using namespace wml;
