@@ -18,7 +18,7 @@
  */
 
 #include <iostream>
-#include <nonstd/filesystem>
+#include <MFile>
 #include <nonstd/xterm>
 #include <functional>
 #include <list>
@@ -103,9 +103,9 @@ void refresh_commands() {
     commands.insert ( "cd" );
     commands.insert ( "ls" );
     commands.insert ( "pwd" );
-    for ( file f: directory ( "/bin" ) )
-        if ( f.is_regular() && f.mode & 0100 )
-            commands.insert ( f.name );
+    for ( MFile f: MDirectory ( "/bin" ) )
+        if ( f.type() == MFile::REGULAR && f.mode() & 0100 )
+            commands.insert ( f.name() );
 }
 
 winsize termsize() {
@@ -341,68 +341,67 @@ string get_command ( list<mstring>& history ) {
     }
 }
 
-void ls_files ( const directory& dir ) {
+void ls_files ( const MDirectory& dir ) {
     if ( dir.empty() )
         return;
     list< autocompletion_string > files;
-    for ( const file& f: dir ) {
+    for ( MFile f: dir ) {
         autocompletion_string out;
-        if ( f.mode & 0100 )
+        if ( f.mode() & 0100 )
             out.bold = true;
-        switch ( f.mode & file::type ) {
-            case file::regular:
-                if ( f.mode & 0100 )
+        switch ( f.type() ) {
+            case MFile::REGULAR:
+                if ( f.mode() & 0100 )
                     out.fgcolor = green;
                 break;
-            case file::symlink:
+            case MFile::SYMLINK:
                 out.fgcolor = cyan;
                 break;
-            case file::directory:
+            case MFile::DIRECTORY:
                 out.fgcolor = blue;
                 break;
-            case file::socket:
+            case MFile::SOCKET:
                 out.fgcolor = magenta;
                 break;
-            case file::character_device:
-            case file::block_device:
+            case MFile::CHARACTER_DEVICE:
+            case MFile::BLOCK_DEVICE:
                 out.bold = true;
-            case file::FIFO:
+            case MFile::PIPE:
                 out.fgcolor = yellow;
                 break;
-            case file::broken:
+            case -1:
                 out.fgcolor = white;
                 out.bgcolor = red;
                 break;
         }
-        if ( f.mode & 01000 ) {
+        if ( f.mode() & 01000 ) {
             out.fgcolor = black;
             out.bgcolor = green;
         }
         char indicator = ' ';
-        if ( f.mode & 0100 )
+        if ( f.mode() & 0100 )
             indicator = '*';
-        switch ( f.mode & file::type ) {
-            case file::symlink:
-            case file::broken:
+        switch ( f.type() ) {
+            case MFile::SYMLINK:
                 indicator = '@';
                 break;
-            case file::directory:
+            case MFile::DIRECTORY:
                 indicator = '/';
                 break;
-            case file::socket:
+            case MFile::SOCKET:
                 indicator = '=';
                 break;
-            case file::character_device:
+            case MFile::CHARACTER_DEVICE:
                 indicator = '%';
                 break;
-            case file::block_device:
+            case MFile::BLOCK_DEVICE:
                 indicator = '#';
                 break;
-            case file::FIFO:
+            case MFile::PIPE:
                 indicator = '|';
                 break;
         }
-        out.name = f.name;
+        out.name = f.name();
         out.suffix = indicator;
         files.push_back ( out );
     }
