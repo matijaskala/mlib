@@ -18,6 +18,7 @@
  */
 
 #include "xterm"
+#include <cstdlib>
 
 using namespace non_std;
 
