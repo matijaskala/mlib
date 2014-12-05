@@ -24,6 +24,7 @@
 
 #include <map>
 #include <GL/gl.h>
+#include <GL/glext.h>
 
 static std::map< std::string, MImage* > map;
 
