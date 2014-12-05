@@ -35,7 +35,7 @@ void M::init ( int& argc, char**& argv )
     }
     initialized = true;
 
-    MDirectory dir ( LIBDIR );
+    MDirectory dir ( MLIB_LIBRARY_DIR );
     for ( MDirectory::Entry f: dir )
         if ( f.name()[0] != '.' )
             MDL::open(f.path() + f.name());

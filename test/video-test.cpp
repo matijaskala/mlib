@@ -145,7 +145,7 @@ int main ( int argc, char** argv ) {
                 text += static_cast<char> ( key );
         };
     MEvents::keyPressed.connect(onKeyPress);
-    for ( auto f: MDirectory ( DATADIR "images" ) ) {
+    for ( auto f: MDirectory ( MLIB_DATA_DIR "images" ) ) {
         if ( f.name()[0] == '.' )
             continue;
         MDebug debug;
@@ -155,7 +155,7 @@ int main ( int argc, char** argv ) {
         else
             debug << "failed";
     }
-    for ( auto f: MDirectory ( DATADIR "fonts" ) ) {
+    for ( auto f: MDirectory ( MLIB_DATA_DIR "fonts" ) ) {
         if ( f.name()[0] == '.' )
             continue;
         MDebug debug;
@@ -165,9 +165,9 @@ int main ( int argc, char** argv ) {
         else
             debug << "failed";
     }
-    auto img = MImage::get ( DATADIR "images/sample.png" );
+    auto img = MImage::get ( MLIB_DATA_DIR "images/sample.png" );
     tex = img->createTexture();
-    font = MFont::get ( DATADIR "fonts/DejaVuSans.ttf" );
+    font = MFont::get ( MLIB_DATA_DIR "fonts/DejaVuSans.ttf" );
     MVideo::setVideoMode(200,200);
     Menu* menu = new Menu;
     menu->items.push_back("ITEM1");

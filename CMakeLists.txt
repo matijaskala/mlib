@@ -19,8 +19,8 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
     set(CMAKE_INSTALL_LIBDIR lib)
 endif()
 
-add_definitions(-DLIBDIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/mlib/")
-add_definitions(-DDATADIR="${CMAKE_INSTALL_PREFIX}/share/mlib/")
+add_definitions(-DMLIB_LIBRARY_DIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/mlib/")
+add_definitions(-DMLIB_DATA_DIR="${CMAKE_INSTALL_PREFIX}/share/mlib/")
 
 include_directories(include .)
 add_library(mlib SHARED
