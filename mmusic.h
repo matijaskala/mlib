@@ -30,7 +30,7 @@ void play ( MAudioStream* stream );
 void stop ();
 void pause ();
 void resume ();
-bool paused ();
+bool playing ();
 }
 
 #endif // MMUSIC_H

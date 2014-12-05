@@ -23,9 +23,10 @@
 
 using namespace std;
 
-static volatile bool m_paused{};
+static volatile bool m_pause{};
 static volatile bool m_stop{};
 static thread m_thread;
+static ALuint source{};
 
 void MMusic::play_sync ( MAudioStream* stream )
 {
@@ -34,10 +35,9 @@ void MMusic::play_sync ( MAudioStream* stream )
     ALenum format = stream->stereo() ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
     ALsizei n_buffers = 8;
     ALint state;
-    ALuint source;
     ALuint buffers[n_buffers];
 
-    alGenSources(1,&source);
+    alGenSources(1, &source);
     alGenBuffers(n_buffers, buffers);
 
     alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
@@ -52,15 +52,15 @@ void MMusic::play_sync ( MAudioStream* stream )
     }
     alSourceQueueBuffers(source, n_buffers, buffers);
 
-    if (!paused())
+    if (!m_pause)
         alSourcePlay(source);
 
     while (!stream->eof()) {
         ALint processed;
         alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
         ALuint buffers[processed];
-        alSourceUnqueueBuffers(source, processed, buffers);
 
+        alSourceUnqueueBuffers(source, processed, buffers);
         for ( ALuint buffer: buffers ) {
             stream->waitRead();
             alBufferData(buffer, format, stream->buffer, stream->buffer_size, stream->freq());
@@ -81,13 +81,10 @@ void MMusic::play_sync ( MAudioStream* stream )
             break;
         }
 
-        if (state == AL_STOPPED)
-            alSourcePlay(source);
-
-        if (paused() && state != AL_PAUSED)
+        if (m_pause && state == AL_PLAYING)
             alSourcePause(source);
 
-        if (!paused() && state == AL_PAUSED)
+        if (!m_pause && state != AL_PLAYING)
             alSourcePlay(source);
 
         if (stream->eof())
@@ -104,10 +101,10 @@ void MMusic::play_sync ( MAudioStream* stream )
 
         alGetSourcei(source, AL_SOURCE_STATE, &state);
 
-        if (paused() && state != AL_PAUSED)
+        if (m_pause && state == AL_PLAYING)
             alSourcePause(source);
 
-        if (!paused() && state == AL_PAUSED)
+        if (!m_pause && state != AL_PLAYING)
             alSourcePlay(source);
 
         this_thread::sleep_for(0.2s);
@@ -115,10 +112,13 @@ void MMusic::play_sync ( MAudioStream* stream )
 
     alDeleteBuffers(n_buffers, buffers);
     alDeleteSources(1, &source);
+    source = 0;
 }
 
 void MMusic::play ( MAudioStream* stream )
 {
+    if (source)
+        stop();
     m_thread = thread{play_sync,stream};
 }
 
@@ -132,15 +132,17 @@ void MMusic::stop()
 
 void MMusic::pause()
 {
-    m_paused = true;
+    m_pause = true;
 }
 
 void MMusic::resume()
 {
-    m_paused = false;
+    m_pause = false;
 }
 
-bool MMusic::paused()
+bool MMusic::playing()
 {
-    return m_paused;
+    ALint state;
+    alGetSourcei(source, AL_SOURCE_STATE, &state);
+    return state == AL_PLAYING;
 }
