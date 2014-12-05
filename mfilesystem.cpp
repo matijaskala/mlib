@@ -22,6 +22,10 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+#ifdef _WIN32
+#define lstat64 stat64
+#endif
+
 MFile::MFile ( std::string fullname )
 {
     while ( fullname.back() == '/' )
@@ -62,12 +66,11 @@ MDirectory::MDirectory ( std::string path )
     if ( !dir )
         return;
 
-    dirent64 entry, *ptr;
-    while ( !readdir64_r ( dir, &entry, &ptr ) ) {
-        if ( ptr )
-            m_entries.insert ( {entry.d_name,path} );
-        else
+    errno = 0;
+    while ( auto entry = readdir ( dir ) ) {
+        if ( errno )
             break;
+        m_entries.insert ( {entry->d_name,path} );
     }
 
     closedir ( dir );
