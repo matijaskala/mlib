@@ -59,7 +59,7 @@ target_link_libraries(mwl wayland-egl EGL xkbcommon)
 
 install(TARGETS mpng mtype mvorbis msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
 
-target_link_libraries(mlib dl ${FREETYPE_LIBRARIES} ${OPENAL_LIBRARY} ${OPENGL_gl_LIBRARY})
+target_link_libraries(mlib ${CMAKE_DL_LIBS} ${FREETYPE_LIBRARIES} ${OPENAL_LIBRARY} ${OPENGL_gl_LIBRARY})
 
 install(TARGETS mlib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY data/ DESTINATION share/mlib)
