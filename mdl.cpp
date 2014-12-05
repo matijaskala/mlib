@@ -45,7 +45,7 @@ bool MDL::open ( string file )
 #ifdef _WIN32
     string mspath;
     for ( char c: file )
-        maspath += ( c == '/' ) ? '\\' : c;
+        mspath += ( c == '/' ) ? '\\' : c;
     module = LoadLibraryExA ( (LPSTR) mspath.c_str(), NULL, 
                              LOAD_WITH_ALTERED_SEARCH_PATH );
     if ( !module )
@@ -72,7 +72,7 @@ bool MDL::close ( string file )
         return true;
     }
 #ifdef _WIN32
-    if ( !FreeLibrary(module) )
+    if ( !FreeLibrary ( static_cast<HMODULE> ( module ) ) )
         mDebug() << GetLastError();
 #else
     dlerror();
@@ -99,10 +99,10 @@ MDL MDL::get ( string file )
 template<>
 void* MDL::symbol ( string name )
 {
-    return
 #ifdef _WIN32
-        GetProcAddress(m_ptr, name.c_str());
+    FARPROC sym = GetProcAddress( static_cast<HMODULE> ( m_ptr ), name.c_str());
+    return reinterpret_cast<void*> ( sym );
 #else
-        dlsym(m_ptr, name.c_str());
+    return dlsym(m_ptr, name.c_str());
 #endif
 }
