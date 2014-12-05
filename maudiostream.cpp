@@ -21,9 +21,9 @@
 
 MAudioStream* MAudioStream::create ( std::istream* stream )
 {
-    for ( auto interface: interfaces() )
-        if ( interface->valid ( stream ) )
-            return interface->create ( stream );
+    for ( auto iface: interfaces() )
+        if ( iface->valid ( stream ) )
+            return iface->create ( stream );
 
     return nullptr;
 }
