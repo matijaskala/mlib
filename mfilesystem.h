@@ -20,6 +20,7 @@
 #ifndef MFILESYSTEM_H
 #define MFILESYSTEM_H
 
+#include <MGlobal>
 #include <set>
 #include <string>
 
@@ -57,7 +58,7 @@ private:
 
 };
 
-class MDirectory
+class M_EXPORT MDirectory
 {
 public:
     class Entry {
