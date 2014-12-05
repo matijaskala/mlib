@@ -61,7 +61,10 @@ install(TARGETS mpng mtype mvorbis msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_IN
 
 target_link_libraries(mlib ${CMAKE_DL_LIBS} ${FREETYPE_LIBRARIES} ${OPENAL_LIBRARY} ${OPENGL_gl_LIBRARY})
 
-install(TARGETS mlib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS mlib
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib${LIB_SUFFIX}
+)
 install(DIRECTORY data/ DESTINATION share/mlib)
 
 add_subdirectory(test)
