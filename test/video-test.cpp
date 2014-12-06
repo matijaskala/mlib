@@ -22,6 +22,7 @@
 #include <MEvents>
 #include <traits>
 #include <GL/gl.h>
+#include <GL/glext.h>
 #include <MDirectory>
 #include <MDebug>
 #include <MVideo>
@@ -47,17 +48,17 @@ struct Menu : public Drawable {
     }
     MSlot<MKey,std::uint32_t> onKeyPress =
             [this] ( MKey key, std::uint32_t mod ) {
-                if ( key == MKey::UP ) {
+                if ( key == M_KEY_UP ) {
                     if ( current == 0 )
                         current = items.size();
                     current--;
                 }
-                else if ( key == MKey::DOWN ) {
+                else if ( key == M_KEY_DOWN ) {
                     current++;
                     if ( current == items.size() )
                         current = 0;
                 }
-                else if ( key == MKey::RETURN )
+                else if ( key == M_KEY_RETURN )
                     activated ( current );
             };
     virtual void draw();
@@ -139,7 +140,7 @@ int main ( int argc, char** argv ) {
     MSlot<MKey,std::uint32_t> onKeyPress =
         [] ( MKey key, std::uint32_t mod )
         {
-            if ( key == MKey::BACKSPACE && !text.empty() )
+            if ( key == M_KEY_BACKSPACE && !text.empty() )
                 text.pop_back();
             else if ( static_cast<int> ( key ) >= 32 && static_cast<int> ( key ) < 256 )
                 text += static_cast<char> ( key );
