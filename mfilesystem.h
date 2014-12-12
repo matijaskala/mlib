@@ -21,7 +21,7 @@
 #define MFILESYSTEM_H
 
 #include <MGlobal>
-#include <set>
+#include <vector>
 #include <string>
 
 class MFile
@@ -83,11 +83,7 @@ public:
     const std::string& path() const { return m_path; }
 
 private:
-    struct before : std::binary_function<Entry,Entry,bool> {
-        bool operator() (const Entry& x, const Entry& y) { return x.name() < y.name(); }
-    };
-
-    std::set<Entry,before> m_entries;
+    std::vector<Entry> m_entries;
     std::string m_path;
 
 };

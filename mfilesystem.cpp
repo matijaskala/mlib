@@ -21,12 +21,15 @@
 
 #include <sys/stat.h>
 #include <dirent.h>
+#include <algorithm>
 
 #ifdef _WIN32
 #define lstat64 stat64
 #endif
 
-MFile::MFile ( std::string fullname )
+using namespace std;
+
+MFile::MFile ( string fullname )
 {
     while ( fullname.back() == '/' )
         fullname.pop_back();
@@ -38,7 +41,7 @@ MFile::MFile ( std::string fullname )
     refresh();
 }
 
-MFile::MFile ( std::string name, std::string path )
+MFile::MFile ( string name, string path )
 {
     while ( path.back() == '/' )
         path.pop_back();
@@ -58,7 +61,7 @@ void MFile::refresh()
     m_type = static_cast<Type> ( st.st_mode >> 13 );
 }
 
-MDirectory::MDirectory ( std::string path )
+MDirectory::MDirectory ( string path )
 {
     m_path = path;
 
@@ -70,8 +73,11 @@ MDirectory::MDirectory ( std::string path )
     while ( auto entry = readdir ( dir ) ) {
         if ( errno )
             break;
-        m_entries.insert ( {entry->d_name,path} );
+        m_entries.push_back ( {entry->d_name,path} );
     }
+
+    m_entries.shrink_to_fit();
+    sort ( m_entries.begin(), m_entries.end(), [] (Entry& a, Entry&  b) { return a.name() < b.name(); } );
 
     closedir ( dir );
 }
