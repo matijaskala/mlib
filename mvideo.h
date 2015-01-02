@@ -20,16 +20,18 @@
 #ifndef MVIDEO_H
 #define MVIDEO_H
 
+#include <mglobal.h>
+
 class MSize;
 namespace MVideo
 {
 
-bool init ();
-bool setVideoMode ( int x, int y );
-void beginPaint ();
-void endPaint ();
-void handleEvents ();
-const MSize& screenSize();
+M_EXPORT bool init ();
+M_EXPORT bool setVideoMode ( int x, int y );
+M_EXPORT void beginPaint ();
+M_EXPORT void endPaint ();
+M_EXPORT void handleEvents ();
+M_EXPORT const MSize& screenSize();
 }
 
 #endif // MVIDEO_H

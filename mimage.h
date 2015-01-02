@@ -22,10 +22,11 @@
 
 #include <MResource>
 #include <MSize>
+#include <mglobal.h>
 #include <string>
 
 class MTexture;
-class MImage : public MResource
+class M_EXPORT MImage : public MResource
 {
 public:
     MImage ( MSize size, bool alpha, std::uint8_t* data );

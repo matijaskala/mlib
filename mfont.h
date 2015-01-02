@@ -20,12 +20,13 @@
 #ifndef MFONT_H
 #define MFONT_H
 
+#include <mglobal.h>
 #include <MResource>
 #include <MSize>
 #include <string>
 
 class MTexture;
-class MFont : public MResource
+class M_EXPORT MFont : public MResource
 {
 public:
     class Glyph

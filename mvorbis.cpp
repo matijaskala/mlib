@@ -31,14 +31,14 @@ struct MVorbisStream : public MAudioStream
     {
         virtual bool valid ( std::istream* stream );
         virtual MAudioStream* create ( std::istream* stream );
-    } interface;
+    } iface;
     virtual ~MVorbisStream();
     virtual void read();
     virtual void seek ( double );
     OggVorbis_File vorbisFile;
 };
 
-MVorbisStream::Interface MVorbisStream::interface;
+MVorbisStream::Interface MVorbisStream::iface;
 
 bool MVorbisStream::Interface::valid ( std::istream* stream )
 {
@@ -138,7 +138,7 @@ bool MVorbis::valid ( std::string file )
     std::ifstream stream ( file );
     if ( !stream.is_open() )
         return false;
-    return MVorbisStream::interface.valid(&stream);
+    return MVorbisStream::iface.valid(&stream);
 }
 
 MResource* MVorbis::load ( std::string file )
@@ -146,7 +146,7 @@ MResource* MVorbis::load ( std::string file )
     std::ifstream stream{file};
     if ( !stream.is_open() )
         return nullptr;
-    auto oggStream = MVorbisStream::interface.create(&stream);
+    auto oggStream = MVorbisStream::iface.create(&stream);
     if ( !oggStream )
         return nullptr;
     auto res = new MAudioFile;

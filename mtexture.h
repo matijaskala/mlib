@@ -20,9 +20,10 @@
 #ifndef MTEXTURE_H
 #define MTEXTURE_H
 
+#include <mglobal.h>
 #include <MSize>
 
-class MTexture
+class M_EXPORT MTexture
 {
 public:
     MTexture();

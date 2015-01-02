@@ -20,14 +20,16 @@
 #ifndef MDEBUG_H
 #define MDEBUG_H
 
+#include <mglobal.h>
 #include <iostream>
 
+#undef ERROR
 enum MDebugLevel {
     LOG,
     ERROR,
 };
 
-class MDebug
+class M_EXPORT MDebug
 {
 public:
     MDebug ( MDebugLevel level = LOG );
