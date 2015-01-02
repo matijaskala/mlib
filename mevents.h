@@ -23,7 +23,7 @@
 #include <MGlobal>
 #include <MSignal>
 
-enum class MKey;
+enum MKey : std::uint32_t;
 namespace MEvents
 {
     extern MSignal<> quit M_EXPORT;
