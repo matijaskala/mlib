@@ -51,6 +51,9 @@ inline _Res lexical_cast ( const _Arg& s ) throw ( non_std::bad_lexical_cast ) {
     return r;
 }
 
+template<>
+std::wstring lexical_cast ( const std::string& s ) throw ( non_std::bad_lexical_cast );
+
 template< typename _Res, typename _Arg >
 struct auto_cast_helper {
     static _Res cast ( _Arg s ) {
