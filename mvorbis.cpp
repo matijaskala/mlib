@@ -34,7 +34,7 @@ struct MVorbisStream : public MAudioStream
     } iface;
     virtual ~MVorbisStream();
     virtual void read();
-    virtual void seek ( double );
+    virtual void seek ( std::chrono::duration < double > seconds );
     OggVorbis_File vorbisFile;
 };
 
@@ -101,9 +101,9 @@ MVorbisStream::~MVorbisStream()
     ov_clear(&vorbisFile);
 }
 
-void MVorbisStream::seek ( double pos )
+void MVorbisStream::seek ( std::chrono::duration < double > seconds )
 {
-    ov_time_seek(&vorbisFile, pos);
+    ov_time_seek(&vorbisFile, seconds.count());
 }
 
 void MVorbisStream::read()
