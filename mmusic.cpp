@@ -19,26 +19,37 @@
 
 #include "mmusic.h"
 
+#include <array>
 #include <al.h>
 
+namespace al {
+    enum format {
+        MONO8 = AL_FORMAT_MONO8,
+        MONO16 = AL_FORMAT_MONO16,
+        STEREO8 = AL_FORMAT_STEREO8,
+        STEREO16 = AL_FORMAT_STEREO16,
+    };
+}
+
 using namespace std;
+using namespace al;
 
 static volatile bool m_pause{};
 static volatile bool m_stop{};
 static thread m_thread;
-static ALuint source{};
+static unsigned int source{};
 
 void MMusic::play_sync ( MAudioStream* stream )
 {
     stream->initRead();
 
-    ALenum format = stream->stereo() ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
-    ALsizei n_buffers = 8;
-    ALint state;
-    ALuint buffers[n_buffers];
+    al::format format = stream->stereo() ? STEREO16 : MONO16;
+    constexpr size_t n_buffers = 8;
+    int state;
+    array<unsigned int,n_buffers> buffers;
 
     alGenSources(1, &source);
-    alGenBuffers(n_buffers, buffers);
+    alGenBuffers(n_buffers, buffers.data());
 
     alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcef(source, AL_ROLLOFF_FACTOR, 0 );
@@ -50,7 +61,7 @@ void MMusic::play_sync ( MAudioStream* stream )
         alBufferData(buffer, format, stream->buffer, stream->buffer_size, stream->freq());
         stream->initRead();
     }
-    alSourceQueueBuffers(source, n_buffers, buffers);
+    alSourceQueueBuffers(source, n_buffers, buffers.data());
 
     if (!m_pause)
         alSourcePlay(source);
@@ -110,7 +121,7 @@ void MMusic::play_sync ( MAudioStream* stream )
         this_thread::sleep_for(0.2s);
     }
 
-    alDeleteBuffers(n_buffers, buffers);
+    alDeleteBuffers(n_buffers, buffers.data());
     alDeleteSources(1, &source);
     source = 0;
 }
@@ -142,7 +153,7 @@ void MMusic::resume()
 
 bool MMusic::playing()
 {
-    ALint state;
+    int state;
     alGetSourcei(source, AL_SOURCE_STATE, &state);
     return state == AL_PLAYING;
 }
