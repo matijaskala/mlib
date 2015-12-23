@@ -88,7 +88,7 @@ void SDLVideoInterface::fini()
 
 bool SDLVideoInterface::setVideoMode ( int x, int y )
 {
-    SDL_Surface* screen = SDL_SetVideoMode ( x, y, 32, SDL_OPENGL | SDL_RESIZABLE );
+    SDL_Surface* screen = SDL_SetVideoMode ( x, y, 32, SDL_OPENGL );
     if ( !screen ) {
         mDebug ( ERROR ) << SDL_GetError();
         return false;

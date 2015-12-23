@@ -121,7 +121,12 @@ void XlibVideoInterface::fini()
 bool XlibVideoInterface::setVideoMode ( int x, int y )
 {
     screen_size = MSize ( x, y );
-    XResizeWindow ( xdisplay, xwindow, x, y );
+    XSizeHints* sizehints = XAllocSizeHints();
+    sizehints->min_width = sizehints->max_width = screen_size.width();
+    sizehints->min_height = sizehints->max_height = screen_size.height();
+    sizehints->flags = PMinSize | PMaxSize;
+    XSetWMNormalHints ( xdisplay, xwindow, sizehints );
+    XFree(sizehints);
     glViewport ( 0, 0, screen_size.width(), screen_size.height() );
     glMatrixMode ( GL_PROJECTION );
     glLoadIdentity();
