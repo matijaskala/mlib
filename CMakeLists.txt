@@ -17,7 +17,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14 -pedantic")
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
     set(CMAKE_INSTALL_LIBDIR lib)
-endif()
+endif(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
+    set(CMAKE_INSTALL_INCLUDEDIR include)
+endif(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
 
 add_definitions(-DMLIB_LIBRARY_DIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/mlib/")
 add_definitions(-DMLIB_DATA_DIR="${CMAKE_INSTALL_PREFIX}/share/mlib/")
@@ -58,6 +61,30 @@ add_library(mwl MODULE mwl.cpp)
 target_link_libraries(mwl wayland-egl EGL xkbcommon)
 
 install(TARGETS mpng mtype mvorbis msdl mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
+install(FILES
+    maudiofile.h
+    maudiostream.h
+    mdebug.h
+    mdl.h
+    melapsedtimer.h
+    meventhandler.h
+    mevents.h
+    mfilesystem.h
+    mfont.h
+    mglobal.h
+    mimage.h
+    mkeys.h
+    mmusic.h
+    mobject.h
+    mreflection.h
+    mresourceloader.h
+    msignal.h
+    msize.h
+    mtexture.h
+    mvariant.h
+    mvideo.h
+    mvideointerface.h
+DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mlib)
 
 target_link_libraries(mlib ${CMAKE_DL_LIBS} ${FREETYPE_LIBRARIES} ${OPENAL_LIBRARY} ${OPENGL_gl_LIBRARY})
 
