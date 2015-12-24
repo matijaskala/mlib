@@ -108,6 +108,6 @@ bool SDLVideoInterface::setVideoMode ( int x, int y )
     return true;
 }
 
-static SDLVideoInterface interface;
+static SDLVideoInterface iface;
 
 
