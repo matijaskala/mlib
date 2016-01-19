@@ -26,8 +26,7 @@
 namespace non_std
 {
 
-[[gnu::visibility("default")]]
-struct file
+struct [[gnu::visibility("default")]] file
 {
     enum {
         broken = 0x0000,
@@ -67,8 +66,7 @@ struct file
 
 };
 
-[[gnu::visibility("default")]]
-struct directory : public std::set< std::pair< std::string, std::string > >
+struct [[gnu::visibility("default")]] directory : public std::set< std::pair< std::string, std::string > >
 {
     directory ( const std::string& __s );
 
