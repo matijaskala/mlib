@@ -27,6 +27,7 @@
 
 #include FT_OUTLINE_H
 #include <GL/gl.h>
+#include <GL/glext.h>
 
 #define STIRIINSESTDESET 64
 
@@ -173,6 +174,15 @@ void MFont::render ( string text )
 
     glEnable(GL_TEXTURE_2D);
 
+    {Glyph* glyphs[wstr.length()];
+    int width{};
+    int height{};
+    for ( int i = 0; i < wstr.length(); i++ ) {
+        glyphs[i] = glyph(wstr[i], d->face->size->metrics.x_ppem);
+        width += glyphs[i]->advance().x/STIRIINSESTDESET;
+        int h = glyphs[i]->size().height();
+        height = height > h ? height : h;
+    }}
     long off{};
     for ( wchar_t c: wstr ) {
         auto g = glyph(c, d->face->size->metrics.x_ppem);
@@ -188,7 +198,7 @@ MFont::Glyph* MFont::glyph ( wchar_t code, uint16_t size )
 {
     auto& glyph = d->glyphs[std::make_tuple(code,size)];
     if ( glyph )
-        return glyph;
+        delete glyph;
     setFaceSize(size);
     FT_Load_Char ( d->face, code, FT_LOAD_RENDER );
     FT_BBox bbox;
