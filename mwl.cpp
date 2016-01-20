@@ -19,7 +19,6 @@
 
 #include <MVideoInterface>
 #include <mglobal.h>
-#include <MEvents>
 #include <MDebug>
 #include <MKeys>
 #include <wayland-egl.h>

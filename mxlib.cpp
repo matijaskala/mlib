@@ -19,7 +19,6 @@
 
 #include <mglobal.h>
 #include <MVideoInterface>
-#include <MEvents>
 #include <MKeys>
 #include <GL/glx.h>
 #include <unistd.h>

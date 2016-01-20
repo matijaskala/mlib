@@ -20,7 +20,6 @@
 #include "mglobal.h"
 #include <MVideoInterface>
 #include <MDebug>
-#include <MEvents>
 #include <MSize>
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>

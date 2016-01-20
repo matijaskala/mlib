@@ -33,7 +33,6 @@ add_library(mlib SHARED
     mdl.cpp
     melapsedtimer.cpp
     meventhandler.cpp
-    mevents.cpp
     mfilesystem.cpp
     mfont.cpp
     mglobal.cpp
@@ -45,6 +44,7 @@ add_library(mlib SHARED
     mtexture.cpp
     mvideo.cpp
     mvideointerface.cpp
+    mwindow.cpp
 )
 target_link_libraries(mlib nonstdcxx)
 add_library(mpng MODULE mpng.cpp)
@@ -73,7 +73,6 @@ install(FILES
     mdl.h
     melapsedtimer.h
     meventhandler.h
-    mevents.h
     mfilesystem.h
     mfont.h
     mglobal.h
@@ -87,8 +86,8 @@ install(FILES
     msize.h
     mtexture.h
     mvariant.h
-    mvideo.h
     mvideointerface.h
+    mwindow.h
 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mlib)
 
 target_link_libraries(mlib ${CMAKE_DL_LIBS} ${FREETYPE_LIBRARIES} ${OPENAL_LIBRARY} ${OPENGL_gl_LIBRARY})

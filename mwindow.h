@@ -17,21 +17,24 @@
  *
  */
 
-#ifndef MVIDEO_H
-#define MVIDEO_H
+#include "mkeys.h"
+#include "msignal.h"
+#include "msize.h"
 
-#include <mglobal.h>
-
-class MSize;
-namespace MVideo
+class MWindow
 {
+protected:
+    MWindow ( int width, int height );
+    virtual void flush () = 0;
+    virtual void resize () = 0;
 
-M_EXPORT bool init ();
-M_EXPORT bool setVideoMode ( int x, int y );
-M_EXPORT void beginPaint ();
-M_EXPORT void endPaint ();
-M_EXPORT void handleEvents ();
-M_EXPORT const MSize& screenSize();
-}
+public:
+    void beginPaint();
+    void endPaint();
+    void resize( int width, int height );
+    MSize size;
 
-#endif // MVIDEO_H
+    MSignal<> quit{this};
+    MSignal<MKey,std::uint32_t> keyPressed{this};
+    MSignal<MKey,std::uint32_t> keyReleased{this};
+};
