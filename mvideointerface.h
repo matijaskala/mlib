@@ -21,6 +21,7 @@
 #define MVIDEOINTERFACE_H
 
 #include <MSize>
+#include "mwindow.h"
 #include <list>
 
 class MVideoInterface
@@ -28,15 +29,14 @@ class MVideoInterface
 public:
     MVideoInterface();
     virtual ~MVideoInterface();
-    MSize screen_size;
     void test ();
-    virtual void beginPaint();
-    virtual void endPaint();
-    virtual bool init();
+    virtual bool init() = 0;
     virtual void fini() = 0;
     virtual void handleEvents() {}
-    virtual bool setVideoMode ( int x, int y ) = 0;
+    virtual MWindow* createWindow ( int width, int height ) = 0;
+    virtual void destroyWindow ( MWindow* window ) = 0;
     static std::list< MVideoInterface* >& interfaces();
+    static MVideoInterface* get();
 };
 
 #endif // MVIDEOINTERFACE_H

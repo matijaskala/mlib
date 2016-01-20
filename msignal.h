@@ -70,7 +70,7 @@ class MSignal : public MSlot<Args...>
     std::list<Slot*> m_slots;
 
 public:
-    MSignal ( void* data = nullptr );
+    MSignal ( void* data );
     ~MSignal();
     void connect ( Slot& slot ) { m_slots.push_back ( &slot ); slot.m_signals.push_front ( this ); }
     void disconnect ( Slot& slot ) { m_slots.remove ( &slot ); slot.m_signals.remove ( this ); }

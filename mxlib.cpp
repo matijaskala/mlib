@@ -24,19 +24,53 @@
 #include <GL/glx.h>
 #include <unistd.h>
 
+class XlibVideoInterface;
+class XlibWindow : public MWindow
+{
+    XlibVideoInterface* iface;
+public:
+    XlibWindow ( int width, int height, Window window, XlibVideoInterface* iface );
+    virtual void flush();
+    virtual void resize();
+    Window xwindow;
+};
+
 class XlibVideoInterface : public MVideoInterface
 {
+public:
+    std::list<XlibWindow*> window_list;
     virtual void handleEvents() override;
     virtual bool init() override;
     virtual void fini() override;
-    virtual bool setVideoMode ( int x, int y ) override;
+    virtual MWindow* createWindow ( int width, int height );
+    virtual void destroyWindow ( MWindow* window );
     MKey getKey ( unsigned int keycode );
     Display* xdisplay;
-    Window xwindow;
     GLXContext context;
     MKey keymap[0x100];
     void keymap_init();
 };
+
+XlibWindow::XlibWindow ( int width, int height, Window window, XlibVideoInterface* iface ) : MWindow ( width, height )
+{
+    xwindow = window;
+    this->iface = iface;
+}
+
+void XlibWindow::flush()
+{
+
+}
+
+void XlibWindow::resize()
+{
+    XSizeHints* sizehints = XAllocSizeHints();
+    sizehints->min_width = sizehints->max_width = size.width();
+    sizehints->min_height = sizehints->max_height = size.height();
+    sizehints->flags = PMinSize | PMaxSize;
+    XSetWMNormalHints ( iface->xdisplay, xwindow, sizehints );
+    XFree(sizehints);
+}
 
 static Atom WM_DELETE_WINDOW;
 
@@ -45,24 +79,23 @@ void XlibVideoInterface::handleEvents()
     while ( XPending ( xdisplay ) ) {
         XEvent ev;
         XNextEvent ( xdisplay, &ev );
+        MWindow* win = nullptr;
+        for ( XlibWindow* w: window_list )
+            if ( w->xwindow == ev.xany.window )
+                win = w;
         switch ( ev.type ) {
             case Expose:
                 break;
             case ClientMessage:
                 if ( ev.xclient.data.l[0] == WM_DELETE_WINDOW ) {
-                    MEvents::quit();
+                    win->quit();
                 }
                 break;
             case ConfigureNotify:
-                screen_size = MSize ( ev.xconfigure.width, ev.xconfigure.height );
-    glViewport ( 0, 0, screen_size.width(), screen_size.height() );
-    glMatrixMode ( GL_PROJECTION );
-    glLoadIdentity();
-    glOrtho ( 0, screen_size.width(), screen_size.height(), 0, -1, 1 );
-    glMatrixMode ( GL_MODELVIEW );
+                win->resize ( ev.xconfigure.width, ev.xconfigure.height );
                 break;
             case KeyPress:
-                MEvents::keyPressed ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
+                win->keyPressed ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
                 break;
             case KeyRelease:
                 if ( XEventsQueued ( xdisplay, QueuedAfterReading ) ) {
@@ -73,7 +106,7 @@ void XlibVideoInterface::handleEvents()
                         break;
                     }
                 }
-                MEvents::keyReleased ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
+                win->keyReleased ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
                 break;
         }
     }
@@ -89,50 +122,12 @@ bool XlibVideoInterface::init()
 
     WM_DELETE_WINDOW = XInternAtom ( xdisplay, "WM_DELETE_WINDOW", False );
 
-    int attributeList[] = { 
-          GLX_RGBA, 
-          GLX_RED_SIZE,   1, 
-          GLX_GREEN_SIZE, 1, 
-          GLX_BLUE_SIZE,  1, 
-          None };
-    XVisualInfo* vi = glXChooseVisual ( xdisplay, DefaultScreen(xdisplay), attributeList );
-    Window xroot = RootWindow ( xdisplay, vi->screen );
-    Colormap xcolormap = XCreateColormap ( xdisplay, xroot, vi->visual, AllocNone );
-
-    XSetWindowAttributes attr;
-    attr.colormap = xcolormap;
-    attr.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | KeyReleaseMask;
-    xwindow = XCreateWindow ( xdisplay, xroot, 0, 0, 1, 1, CopyFromParent, vi->depth, InputOutput, vi->visual, CWEventMask | CWColormap, &attr );
-    XMapWindow ( xdisplay, xwindow );
-    XSetWMProtocols ( xdisplay, xwindow, &WM_DELETE_WINDOW, 1 );
-
-    context = glXCreateContext ( xdisplay, vi, 0, GL_TRUE );
-    glXMakeCurrent ( xdisplay, xwindow, context );
-
-    return MVideoInterface::init();
+    return true;
 }
 
 void XlibVideoInterface::fini()
 {
-    XUnmapWindow ( xdisplay, xwindow );
-    XDestroyWindow ( xdisplay, xwindow );
-}
-
-bool XlibVideoInterface::setVideoMode ( int x, int y )
-{
-    screen_size = MSize ( x, y );
-    XSizeHints* sizehints = XAllocSizeHints();
-    sizehints->min_width = sizehints->max_width = screen_size.width();
-    sizehints->min_height = sizehints->max_height = screen_size.height();
-    sizehints->flags = PMinSize | PMaxSize;
-    XSetWMNormalHints ( xdisplay, xwindow, sizehints );
-    XFree(sizehints);
-    glViewport ( 0, 0, screen_size.width(), screen_size.height() );
-    glMatrixMode ( GL_PROJECTION );
-    glLoadIdentity();
-    glOrtho ( 0, screen_size.width(), screen_size.height(), 0, -1, 1 );
-    glMatrixMode ( GL_MODELVIEW );
-    return true;
+    XCloseDisplay(xdisplay);
 }
 
 MKey XlibVideoInterface::getKey ( unsigned int keycode )
@@ -233,6 +228,51 @@ void XlibVideoInterface::keymap_init()
     keymap[XK_Break&0xFF] = M_KEY_BREAK;
     keymap[XK_Menu&0xFF] = M_KEY_MENU;
     keymap[XK_Hyper_R&0xFF] = M_KEY_MENU;   /* Windows "Menu" key */
+}
+
+MWindow* XlibVideoInterface::createWindow ( int width, int height )
+{
+    int attributeList[] = { 
+          GLX_RGBA, 
+          GLX_RED_SIZE,   1, 
+          GLX_GREEN_SIZE, 1, 
+          GLX_BLUE_SIZE,  1, 
+          None };
+
+    XVisualInfo* vi = glXChooseVisual ( xdisplay, DefaultScreen(xdisplay), attributeList );
+    Window xroot = RootWindow ( xdisplay, vi->screen );
+    Colormap xcolormap = XCreateColormap ( xdisplay, xroot, vi->visual, AllocNone );
+
+    XSetWindowAttributes attr;
+    attr.colormap = xcolormap;
+    attr.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | KeyReleaseMask;
+    auto xwindow = XCreateWindow ( xdisplay, xroot, 0, 0, width, height, CopyFromParent, vi->depth, InputOutput, vi->visual, CWEventMask | CWColormap, &attr );
+    XMapWindow ( xdisplay, xwindow );
+    XSetWMProtocols ( xdisplay, xwindow, &WM_DELETE_WINDOW, 1 );
+
+    context = glXCreateContext ( xdisplay, vi, 0, GL_TRUE );
+    glXMakeCurrent ( xdisplay, xwindow, context );
+
+    XSizeHints* sizehints = XAllocSizeHints();
+    sizehints->min_width = sizehints->max_width = width;
+    sizehints->min_height = sizehints->max_height = height;
+    sizehints->flags = PMinSize | PMaxSize;
+    XSetWMNormalHints ( xdisplay, xwindow, sizehints );
+    XFree(sizehints);
+
+    auto w = new XlibWindow{width,height,xwindow,this};
+    window_list.push_back(w);
+    return w;
+}
+
+void XlibVideoInterface::destroyWindow ( MWindow* window )
+{
+    auto w = dynamic_cast<XlibWindow*> ( window );
+    if ( !w )
+        return;
+    window_list.remove(w);
+    XUnmapWindow ( xdisplay, w->xwindow );
+    XDestroyWindow ( xdisplay, w->xwindow );
 }
 
 static XlibVideoInterface interface;

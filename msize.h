@@ -39,6 +39,16 @@ public:
         return m_height;
     }
 
+    bool operator== ( const MSize& other ) const
+    {
+        return width() == other.width() && height() == other.height();
+    }
+
+    bool operator!= ( const MSize& other ) const
+    {
+        return width() != other.width() || height() != other.height();
+    }
+
 private:
     std::uint_fast16_t m_width;
     std::uint_fast16_t m_height;

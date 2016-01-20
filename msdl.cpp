@@ -25,13 +25,38 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 
+class SDLWindow : public MWindow
+{
+public:
+    SDLWindow ( int width, int height );
+    virtual void flush();
+    virtual void resize ();
+};
+
+static MWindow* win;
+SDLWindow::SDLWindow ( int width, int height ) : MWindow{width,height}
+{
+    SDL_Event ev;
+    while ( SDL_PollEvent ( &ev ) );
+}
+
+void SDLWindow::flush()
+{
+    SDL_GL_SwapBuffers();
+}
+
+void SDLWindow::resize ()
+{
+    SDL_SetVideoMode ( size.width(), size.height(), 32, SDL_OPENGL );
+}
+
 class SDLVideoInterface : public MVideoInterface
 {
-    virtual void endPaint() override;
     virtual void handleEvents() override;
     virtual bool init() override;
     virtual void fini() override;
-    virtual bool setVideoMode ( int x, int y ) override;
+    virtual MWindow* createWindow ( int width, int height );
+    virtual void destroyWindow ( MWindow* window );
 };
 
 void SDLVideoInterface::handleEvents()
@@ -40,23 +65,18 @@ void SDLVideoInterface::handleEvents()
     while ( SDL_PollEvent ( &ev ) )
         switch ( ev.type ) {
             case SDL_QUIT:
-                MEvents::quit();
+                win->quit();
                 break;
             case SDL_VIDEORESIZE:
-                setVideoMode(ev.resize.w,ev.resize.h);
+                win->resize(ev.resize.w,ev.resize.h);
                 break;
             case SDL_KEYDOWN:
-                MEvents::keyPressed ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
+                win->keyPressed ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
                 break;
             case SDL_KEYUP:
-                MEvents::keyReleased ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
+                win->keyReleased ( static_cast<MKey> ( ev.key.keysym.sym ), ev.key.keysym.mod );
                 break;
         }
-}
-
-void SDLVideoInterface::endPaint()
-{
-    SDL_GL_SwapBuffers();
 }
 
 bool SDLVideoInterface::init()
@@ -78,7 +98,7 @@ bool SDLVideoInterface::init()
         return false;
     }
 
-    return MVideoInterface::init();
+    return true;
 }
 
 void SDLVideoInterface::fini()
@@ -86,26 +106,22 @@ void SDLVideoInterface::fini()
     SDL_Quit();
 }
 
-bool SDLVideoInterface::setVideoMode ( int x, int y )
+MWindow* SDLVideoInterface::createWindow ( int width, int height )
 {
-    SDL_Surface* screen = SDL_SetVideoMode ( x, y, 32, SDL_OPENGL );
+    SDL_Surface* screen = SDL_SetVideoMode ( width, height, 32, SDL_OPENGL );
     if ( !screen ) {
         mDebug ( ERROR ) << SDL_GetError();
-        return false;
+        return nullptr;
     }
 
-    SDL_Event ev;
-    while ( SDL_PollEvent ( &ev ) );
+    auto w = new SDLWindow{width,height};
+    win = w;
+    return w;
+}
 
-    screen_size = MSize ( screen->w, screen->h );
+void SDLVideoInterface::destroyWindow ( MWindow* window )
+{
 
-    glViewport ( 0, 0, screen_size.width(), screen_size.height() );
-    glMatrixMode ( GL_PROJECTION );
-    glLoadIdentity();
-    glOrtho ( 0, screen_size.width(), screen_size.height(), 0, -1, 1 );
-    glMatrixMode ( GL_MODELVIEW );
-
-    return true;
 }
 
 static SDLVideoInterface iface;

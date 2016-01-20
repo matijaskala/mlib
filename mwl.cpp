@@ -33,44 +33,93 @@
 
 using namespace std;
 
-class WaylandVideoInterface : public MVideoInterface
+class WaylandWindow : public MWindow
 {
-    virtual void beginPaint();
-    virtual void endPaint();
-    virtual void handleEvents();
-    virtual bool init();
-    virtual void fini();
-    virtual bool setVideoMode ( int x, int y );
-    struct wl_display *wl_display;
-    struct wl_compositor *wl_compositor;
-    struct wl_seat *wl_seat;
-    struct wl_shell *wl_shell;
+public:
     struct wl_shell_surface *wl_shell_surface;
     struct wl_surface *wl_surface;
     struct wl_egl_window *wl_egl_window;
+    EGLDisplay egl_display;
+    EGLSurface egl_surface;
+
+    WaylandWindow ( int width, int height, struct wl_shell_surface* _wl_shell_surface, EGLDisplay _egl_display,
+                    struct wl_surface* _wl_surface, struct wl_egl_window* _wl_egl_window, EGLSurface _egl_surface );
+    ~WaylandWindow();
+    virtual void flush() override;
+    virtual void resize () override;
+};
+
+static WaylandWindow* focused = nullptr;
+
+WaylandWindow::WaylandWindow ( int width, int height, struct wl_shell_surface* _wl_shell_surface, EGLDisplay _egl_display,
+                               struct wl_surface* _wl_surface, struct wl_egl_window* _wl_egl_window, EGLSurface _egl_surface )
+                             : MWindow{width,height}
+{
+    wl_surface = _wl_surface;
+    wl_egl_window = _wl_egl_window;
+    wl_shell_surface = _wl_shell_surface;
+    egl_display = _egl_display;
+    egl_surface = _egl_surface;
+    static const struct wl_shell_surface_listener wl_shell_surface_listener = {
+        [] ( void* data, struct wl_shell_surface *wl_shell_surface, uint32_t serial ) {
+            wl_shell_surface_pong ( wl_shell_surface, serial );
+        },
+        [] ( void* data, struct wl_shell_surface *wl_shell_surface, uint32_t edges, int32_t width, int32_t height ) {
+        },
+        [] ( void* data, struct wl_shell_surface *wl_shell_surface ) {
+        },
+    };
+
+    wl_shell_surface_add_listener ( wl_shell_surface, &wl_shell_surface_listener, this );
+
+    wl_shell_surface_set_title ( wl_shell_surface, "program" );
+    wl_shell_surface_set_toplevel ( wl_shell_surface );
+
+}
+
+WaylandWindow::~WaylandWindow()
+{
+    eglDestroySurface ( egl_display, egl_surface );
+
+    wl_egl_window_destroy ( wl_egl_window );
+    wl_shell_surface_destroy ( wl_shell_surface );
+    wl_surface_destroy ( wl_surface );
+}
+
+void WaylandWindow::flush()
+{
+    eglSwapBuffers ( egl_display, egl_surface );
+}
+
+void WaylandWindow::resize ()
+{
+    wl_egl_window_resize ( wl_egl_window, size.width(), size.height(), 0, 0 );
+}
+
+class WaylandVideoInterface : public MVideoInterface
+{
+    std::list<WaylandWindow*> window_list;
+    virtual void handleEvents();
+    virtual bool init();
+    virtual void fini();
+    virtual MWindow* createWindow ( int width, int height );
+    virtual void destroyWindow ( MWindow* window );
+    struct wl_display *wl_display;
+    struct wl_shell *wl_shell;
+    struct wl_compositor *wl_compositor;
+    struct wl_seat *wl_seat;
     struct wl_pointer *wl_pointer;
     struct wl_keyboard *wl_keyboard;
     struct xkb_context *xkb_context;
     struct xkb_keymap *xkb_keymap;
     struct xkb_state *xkb_state;
     EGLDisplay egl_display;
-    EGLSurface egl_surface;
     EGLConfig egl_config;
     EGLContext egl_context;
     MKey keymap[0x100];
     void keymap_init();
 };
 
-void WaylandVideoInterface::beginPaint()
-{
-    MVideoInterface::beginPaint();
-}
-
-void WaylandVideoInterface::endPaint()
-{
-    MVideoInterface::endPaint();
-    eglSwapBuffers ( egl_display, egl_surface );
-}
 
 void WaylandVideoInterface::handleEvents()
 {
@@ -87,7 +136,7 @@ bool WaylandVideoInterface::init()
         [] ( void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state ) {
             auto _This = static_cast<WaylandVideoInterface*> ( data );
             if ( button == 274 && state == WL_POINTER_BUTTON_STATE_RELEASED ) {
-                MEvents::quit();
+                focused->quit();
             }
         },
         [] ( void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value ) {},
@@ -102,7 +151,12 @@ bool WaylandVideoInterface::init()
             _This->xkb_state = xkb_state_new ( _This->xkb_keymap );
             munmap ( map_str, size );
         },
-        [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys ) {},
+        [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys ) {
+            auto _This = static_cast<WaylandVideoInterface*> ( data );
+            for ( WaylandWindow* win: _This->window_list )
+                if ( win->wl_surface == surface )
+                    focused = win;
+        },
         [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface ) {},
         [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state ) {
             auto _This = static_cast<WaylandVideoInterface*> ( data );
@@ -112,9 +166,9 @@ bool WaylandVideoInterface::init()
                 sym = syms[0];
             MKey mKey = ( ( sym & 0xff00 ) == 0xff00 ) ? _This->keymap[sym & 0xff] : MKey ( sym & 0xff );
             if ( state )
-                MEvents::keyPressed ( mKey, 0 );
+                focused->keyPressed ( mKey, 0 );
             else
-                MEvents::keyReleased ( mKey, 0 );
+                focused->keyReleased ( mKey, 0 );
         },
         [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group ) {},
     };
@@ -158,15 +212,6 @@ bool WaylandVideoInterface::init()
         },
         [] ( void* data, struct wl_registry *wl_registry, uint32_t name ) {},
     };
-    static const struct wl_shell_surface_listener wl_shell_surface_listener = {
-        [] ( void* data, struct wl_shell_surface *wl_shell_surface, uint32_t serial ) {
-            wl_shell_surface_pong ( wl_shell_surface, serial );
-        },
-        [] ( void* data, struct wl_shell_surface *wl_shell_surface, uint32_t edges, int32_t width, int32_t height ) {
-        },
-        [] ( void* data, struct wl_shell_surface *wl_shell_surface ) {
-        },
-    };
 
     wl_display = wl_display_connect ( nullptr );
     if ( !wl_display )
@@ -174,10 +219,6 @@ bool WaylandVideoInterface::init()
     struct wl_registry *wl_registry = wl_display_get_registry ( wl_display );
     wl_registry_add_listener ( wl_registry, &wl_registry_listener, this );
     wl_display_dispatch ( wl_display );
-    wl_surface = wl_compositor_create_surface ( wl_compositor );
-    wl_shell_surface = wl_shell_get_shell_surface ( wl_shell, wl_surface );
-    wl_shell_surface_add_listener ( wl_shell_surface, &wl_shell_surface_listener, this );
-    wl_egl_window = nullptr;
 
     egl_display = eglGetDisplay ( wl_display );
     EGLint major, minor;
@@ -206,47 +247,15 @@ bool WaylandVideoInterface::init()
     xkb_context = xkb_context_new ( static_cast<xkb_context_flags> ( 0 ) );
     keymap_init();
 
-    return MVideoInterface::init();
+    return true;
 }
 
 void WaylandVideoInterface::fini()
 {
     xkb_context_unref ( xkb_context );
     eglMakeCurrent ( egl_display, nullptr, nullptr, egl_context );
-    eglDestroySurface ( egl_display, egl_surface );
     eglDestroyContext ( egl_display, egl_context );
-    wl_egl_window_destroy ( wl_egl_window );
-    wl_shell_surface_destroy ( wl_shell_surface );
-    wl_surface_destroy ( wl_surface );
     wl_display_disconnect ( wl_display );
-}
-
-bool WaylandVideoInterface::setVideoMode ( int x, int y )
-{
-    screen_size = MSize ( x, y );
-    wl_shell_surface_set_title ( wl_shell_surface, "program" );
-    if ( wl_egl_window ) {
-        wl_egl_window_resize ( wl_egl_window, screen_size.width(), screen_size.height(), 0, 0 );
-    }
-    else {
-        wl_egl_window = wl_egl_window_create ( wl_surface, screen_size.width(), screen_size.height() );
-        egl_surface = eglCreateWindowSurface ( egl_display, egl_config, wl_egl_window, nullptr );
-        if ( !eglMakeCurrent ( egl_display, egl_surface, egl_surface, egl_context ) )
-            return false;
-        wl_shell_surface_set_toplevel ( wl_shell_surface );
-    }
-
-    glViewport ( 0, 0, screen_size.width(), screen_size.height() );
-    glMatrixMode ( GL_PROJECTION );
-    glLoadIdentity();
-    glOrtho ( 0, screen_size.width(), screen_size.height(), 0, -1, 1 );
-    glMatrixMode ( GL_MODELVIEW );
-
-    wl_region* region = wl_compositor_create_region ( wl_compositor );
-    wl_region_add ( region, 0, 0, screen_size.width(), screen_size.height() );
-    wl_surface_set_opaque_region ( wl_surface, region );
-    wl_region_destroy ( region );
-    return true;
 }
 
 void WaylandVideoInterface::keymap_init()
@@ -338,6 +347,41 @@ void WaylandVideoInterface::keymap_init()
     keymap[XKB_KEY_Break&0xFF] = M_KEY_BREAK;
     keymap[XKB_KEY_Menu&0xFF] = M_KEY_MENU;
     keymap[XKB_KEY_Hyper_R&0xFF] = M_KEY_MENU;   /* Windows "Menu" key */
+}
+
+MWindow* WaylandVideoInterface::createWindow ( int width, int height )
+{
+    auto wl_surface = wl_compositor_create_surface ( wl_compositor );
+    if ( !wl_surface )
+        return nullptr;
+    auto wl_egl_window = wl_egl_window_create ( wl_surface, width, height );
+    if ( !wl_egl_window )
+        return nullptr;
+    EGLSurface egl_surface = eglCreateWindowSurface ( egl_display, egl_config, wl_egl_window, nullptr );
+    if ( !egl_surface )
+        return nullptr;
+    if ( !eglMakeCurrent ( egl_display, egl_surface, egl_surface, egl_context ))
+        return nullptr;
+    auto wl_region = wl_compositor_create_region ( wl_compositor );
+    wl_region_add ( wl_region, 0, 0, width, height );
+    wl_surface_set_opaque_region ( wl_surface, wl_region );
+    wl_region_destroy ( wl_region );
+
+    auto w = new WaylandWindow{width, height, wl_shell_get_shell_surface ( wl_shell, wl_surface ),
+                               egl_display, wl_surface, wl_egl_window, egl_surface};
+    window_list.push_back(w);
+    return w;
+}
+
+void WaylandVideoInterface::destroyWindow ( MWindow* window )
+{
+    auto w = dynamic_cast<WaylandWindow*> (window);
+    if ( !w )
+        return;
+    window_list.remove(w);
+    eglDestroySurface(w->egl_display, w->egl_surface);
+    wl_egl_window_destroy(w->wl_egl_window);
+    wl_surface_destroy(w->wl_surface);
 }
 
 static WaylandVideoInterface interface;

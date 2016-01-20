@@ -36,25 +36,6 @@ MVideoInterface::~MVideoInterface()
     interfaces().remove ( this );
 }
 
-void MVideoInterface::beginPaint()
-{
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-}
-
-void MVideoInterface::endPaint()
-{
-    glFlush();
-    this_thread::sleep_for ( 20us );
-}
-
-bool MVideoInterface::init()
-{
-    glEnable ( GL_BLEND );
-    glEnable ( GL_TEXTURE_2D );
-    glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    return true;
-}
-
 void MVideoInterface::test ()
 {
         glBegin(GL_QUADS);
@@ -76,4 +57,20 @@ std::list< MVideoInterface* >& MVideoInterface::interfaces()
 {
     static std::list< MVideoInterface* > interfaces;
     return interfaces;
+}
+
+MVideoInterface* MVideoInterface::get()
+{
+    static MVideoInterface* iface = nullptr;
+    if ( iface )
+        return iface;
+    for ( auto i: MVideoInterface::interfaces() )
+        if ( i->init() ) {
+            iface = i;
+            glEnable ( GL_BLEND );
+            glEnable ( GL_TEXTURE_2D );
+            glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+            return iface;
+        }
+    return nullptr;
 }

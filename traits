@@ -38,7 +38,7 @@ template<typename T, int __internal, std::size_t size> struct __remove_everythin
 template<typename T> struct remove_everything { using type = typename __remove_everything_1<T>::type; };
 template<typename T> using remove_everything_t = typename remove_everything<T>::type;
 
-#define CLASSOF(object) remove_everything_t<decltype(object)>
-#define THIS_T CLASSOF(this)
+#define __classof__(object) remove_everything_t<decltype(object)>
+#define this_t __classof__(this)
 
 #endif // __MLIB_TRAITS__
