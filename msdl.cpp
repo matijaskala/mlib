@@ -28,8 +28,9 @@ class SDLWindow : public MWindow
 {
 public:
     SDLWindow ( int width, int height );
-    virtual void flush();
+    virtual void makeCurrent() {}
     virtual void resize ();
+    virtual void swapBuffers();
 };
 
 static MWindow* win;
@@ -39,14 +40,14 @@ SDLWindow::SDLWindow ( int width, int height ) : MWindow{width,height}
     while ( SDL_PollEvent ( &ev ) );
 }
 
-void SDLWindow::flush()
-{
-    SDL_GL_SwapBuffers();
-}
-
 void SDLWindow::resize ()
 {
     SDL_SetVideoMode ( size.width(), size.height(), 32, SDL_OPENGL );
+}
+
+void SDLWindow::swapBuffers()
+{
+    SDL_GL_SwapBuffers();
 }
 
 class SDLVideoInterface : public MVideoInterface

@@ -40,18 +40,22 @@ public:
     struct wl_egl_window *wl_egl_window;
     EGLDisplay egl_display;
     EGLSurface egl_surface;
+    EGLContext egl_context;
 
-    WaylandWindow ( int width, int height, struct wl_shell_surface* _wl_shell_surface, EGLDisplay _egl_display,
-                    struct wl_surface* _wl_surface, struct wl_egl_window* _wl_egl_window, EGLSurface _egl_surface );
+    WaylandWindow ( int width, int height, struct wl_shell_surface* _wl_shell_surface,
+                    struct wl_surface* _wl_surface, struct wl_egl_window* _wl_egl_window,
+                    EGLDisplay _egl_display, EGLSurface _egl_surface, EGLContext _egl_context );
     ~WaylandWindow();
-    virtual void flush() override;
+    virtual void makeCurrent();
     virtual void resize () override;
+    virtual void swapBuffers() override;
 };
 
 static WaylandWindow* focused = nullptr;
 
-WaylandWindow::WaylandWindow ( int width, int height, struct wl_shell_surface* _wl_shell_surface, EGLDisplay _egl_display,
-                               struct wl_surface* _wl_surface, struct wl_egl_window* _wl_egl_window, EGLSurface _egl_surface )
+WaylandWindow::WaylandWindow ( int width, int height, struct wl_shell_surface* _wl_shell_surface,
+                               struct wl_surface* _wl_surface, struct wl_egl_window* _wl_egl_window,
+                               EGLDisplay _egl_display, EGLSurface _egl_surface, EGLContext _egl_context )
                              : MWindow{width,height}
 {
     wl_surface = _wl_surface;
@@ -59,6 +63,8 @@ WaylandWindow::WaylandWindow ( int width, int height, struct wl_shell_surface* _
     wl_shell_surface = _wl_shell_surface;
     egl_display = _egl_display;
     egl_surface = _egl_surface;
+    egl_context = _egl_context;
+
     static const struct wl_shell_surface_listener wl_shell_surface_listener = {
         [] ( void* data, struct wl_shell_surface *wl_shell_surface, uint32_t serial ) {
             wl_shell_surface_pong ( wl_shell_surface, serial );
@@ -73,7 +79,6 @@ WaylandWindow::WaylandWindow ( int width, int height, struct wl_shell_surface* _
 
     wl_shell_surface_set_title ( wl_shell_surface, "program" );
     wl_shell_surface_set_toplevel ( wl_shell_surface );
-
 }
 
 WaylandWindow::~WaylandWindow()
@@ -85,14 +90,19 @@ WaylandWindow::~WaylandWindow()
     wl_surface_destroy ( wl_surface );
 }
 
-void WaylandWindow::flush()
+void WaylandWindow::makeCurrent()
 {
-    eglSwapBuffers ( egl_display, egl_surface );
+    eglMakeCurrent ( egl_display, egl_surface, egl_surface, egl_context );
 }
 
 void WaylandWindow::resize ()
 {
     wl_egl_window_resize ( wl_egl_window, size.width(), size.height(), 0, 0 );
+}
+
+void WaylandWindow::swapBuffers()
+{
+    eglSwapBuffers ( egl_display, egl_surface );
 }
 
 class WaylandVideoInterface : public MVideoInterface
@@ -170,6 +180,7 @@ bool WaylandVideoInterface::init()
                 focused->keyReleased ( mKey, 0 );
         },
         [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group ) {},
+        [] ( void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay ) {},
     };
     static const struct wl_seat_listener wl_seat_listener = {
         [] ( void *data, struct wl_seat *wl_seat, uint32_t capabilities ) {
@@ -359,16 +370,15 @@ MWindow* WaylandVideoInterface::createWindow ( int width, int height )
     EGLSurface egl_surface = eglCreateWindowSurface ( egl_display, egl_config, wl_egl_window, nullptr );
     if ( !egl_surface )
         return nullptr;
-    if ( !eglMakeCurrent ( egl_display, egl_surface, egl_surface, egl_context ))
-        return nullptr;
     auto wl_region = wl_compositor_create_region ( wl_compositor );
     wl_region_add ( wl_region, 0, 0, width, height );
     wl_surface_set_opaque_region ( wl_surface, wl_region );
     wl_region_destroy ( wl_region );
 
     auto w = new WaylandWindow{width, height, wl_shell_get_shell_surface ( wl_shell, wl_surface ),
-                               egl_display, wl_surface, wl_egl_window, egl_surface};
+                               wl_surface, wl_egl_window, egl_display, egl_surface, egl_context};
     window_list.push_back(w);
+
     return w;
 }
 
