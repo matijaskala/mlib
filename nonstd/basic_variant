@@ -20,6 +20,8 @@
 #ifndef NON_STD_BASIC_VARIANT
 #define NON_STD_BASIC_VARIANT
 
+#include <stdexcept>
+#include <typeindex>
 #include "casts"
 
 namespace non_std
@@ -30,10 +32,58 @@ public:
     virtual const char* what() const noexcept;
 };
 
-template< class _Manager >
-class basic_variant {
-    using manager = _Manager;
+template< typename... _Types >
+class variant_manager;
 
+template< typename _FirstType, typename... _OtherTypes >
+class variant_manager<_FirstType,_OtherTypes...> : public variant_manager<_OtherTypes...> {
+    using next = variant_manager<_OtherTypes...>;
+
+    static std::type_index current_type() { return typeid(_FirstType); }
+
+public:
+    using next::create;
+
+    static void create ( _FirstType __value, std::type_index& type, void*& data ) {
+        data = new _FirstType ( __value );
+        type = current_type();
+    }
+
+    template< class Visitor >
+    static void apply_visitor ( Visitor& visitor, std::type_index type, void* data ) {
+        if ( type == current_type() )
+            visitor ( static_cast<_FirstType*> ( data ) );
+        else
+            next::apply_visitor ( visitor, type, data );
+    }
+};
+
+template<>
+class variant_manager<> {
+    static std::type_index current_type() { return typeid(void); }
+
+public:
+    using null_t = std::nullptr_t;
+    static std::type_index nulltype() { return current_type(); }
+    static constexpr null_t null() { return nullptr; }
+
+    static void create ( null_t, std::type_index& type, void*& data ) { /* leave null */ }
+
+    template< class Visitor >
+    static void apply_visitor ( Visitor& visitor, std::type_index type, void* data ) {
+        if ( type == current_type() ) {
+            if ( data )
+                throw std::runtime_error ( "data != null" );
+            visitor ( null() );
+        }
+        else
+            throw std::runtime_error ( std::string{} + "unhandled data type '" + type.name() + "'" );
+    }
+};
+
+template< typename... _Types >
+class basic_variant {
+    using manager = variant_manager<_Types...>;
     using null_t = typename manager::null_t;
 
     void* data{manager::null()};
