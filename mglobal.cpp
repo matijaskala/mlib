@@ -19,11 +19,13 @@
 
 #include "mglobal.h"
 
-#include <MDirectory>
+#include <nonstd/directory>
 #include <MDL>
 #include <MDebug>
 
 #include <alc.h>
+
+using namespace non_std;
 
 static bool initialized{false};
 
@@ -35,8 +37,8 @@ void M::init ( int& argc, char**& argv )
     }
     initialized = true;
 
-    MDirectory dir ( MLIB_LIBRARY_DIR );
-    for ( MDirectory::Entry f: dir )
+    directory dir ( MLIB_LIBRARY_DIR );
+    for ( directory::entry f: dir )
         if ( f.name()[0] != '.' )
             MDL::open(f.path() + f.name());
 

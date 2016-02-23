@@ -19,18 +19,16 @@
 
 #include <iostream>
 #include <vector>
+#include <nonstd/file>
 #include <nonstd/xterm>
-
-#include <MDirectory>
-#include <MFile>
 
 using namespace std;
 using namespace non_std;
 
-void list ( const MFile& f ) {
-    if ( f.type() == MFile::SYMLINK )
+void list ( const file& f ) {
+    if ( f.type() == file::symlink )
         cerr << xterm::bold << xterm::fgcolor ( cyan );
-    else if ( f.type() == MFile::DIRECTORY )
+    else if ( f.type() == file::directory )
         cerr << xterm::bold << xterm::fgcolor ( blue );
     else if ( f.mode() & 0111 )
         cerr << xterm::bold << xterm::fgcolor ( green );
@@ -44,9 +42,9 @@ int main ( int argc, char** argv ) {
             t[i-1] = argv[i];
     else
         t[0] = ".";
-    for ( MFile d: t ) {
-        if ( d.type() == MFile::DIRECTORY ) {
-            MDirectory dir = d.name();
+    for ( file d: t ) {
+        if ( d.type() == file::directory ) {
+            directory dir = d.name();
             for ( auto f: dir ) {
                 list ( f );
             }
