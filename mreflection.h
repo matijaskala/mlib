@@ -92,10 +92,14 @@ public:
         return obj->*symbol<O,T> ( field_name );
     }
 
-    template< typename _Class = void >
-    _Class* createInstance() {
-        auto create = symbol<_Class*()>("create");
+    void* createInstance() {
+        auto create = symbol<void*()>("create");
         return create();
+    }
+
+    void destroyInstance(void* p) {
+        auto destroy = symbol<void(void*)>("destroy");
+        destroy(p);
     }
 
     std::string name;
