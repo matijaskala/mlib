@@ -27,16 +27,33 @@
 #define reflected reflect ( this )
 #define reflect(...) { MReflection::invoke_pretty ( __PRETTY_FUNCTION__, __VA_ARGS__ ); }
 
-#define M_REFLECT_METHOD(CLASS,METHOD,ARGS) m_symbols[std::string{}+#METHOD+#ARGS] = \
+#define M_REFLECT_METHOD(CLASS,METHOD,ARGS) m_symbols[#METHOD #ARGS] = \
         static_cast<void(CLASS::*)ARGS>(&CLASS::METHOD)
 #define M_REFLECT_FIELD(CLASS,METHOD) m_symbols[#METHOD] = &CLASS::METHOD
 
-#define M_REFLECTION_CONSTRUCT(CLASS) MReflection { static_cast<CLASS*>(0), #CLASS }
+#define M_REFLECTION \
+public: \
+    static MReflection* getClass() { \
+        std::string pretty_function_name = __PRETTY_FUNCTION__; \
+        std::size_t a = pretty_function_name.rfind(' '); \
+        std::size_t b = pretty_function_name.rfind("::"); \
+        return MReflection::get ( pretty_function_name.substr ( a + 1, b - a - 1 ) ); \
+    } \
+    template<typename T> \
+    T& access ( const std::string& field_name ) { \
+        return getClass()->access<T>(this, field_name); \
+    } \
+    template< typename... _Args > \
+    void invoke ( const std::string& function_name, _Args... __args ) { \
+        getClass()->invoke(function_name, this, __args...); \
+    } \
+private:
 
 class MReflection
 {
-    struct Symbol {
+    class Symbol {
         void* ptr;
+    public:
         Symbol() : ptr{nullptr} {}
         template<typename T> Symbol ( T* ptr )
             : ptr { reinterpret_cast<void*&> ( ptr ) } {}
@@ -44,10 +61,6 @@ class MReflection
             : ptr { reinterpret_cast<void*&> ( ptr ) } {}
         template<typename R, typename O, typename... A> Symbol ( R (O::*ptr)(A...) )
             : ptr { reinterpret_cast<void*&> ( ptr ) } {}
-        template<typename T> T* as()
-            { return reinterpret_cast<T*&> ( ptr ); }
-        template<typename O, typename T> T O::* as()
-            { return reinterpret_cast<T O::*&> ( ptr ); }
     };
 
     using SymbolMap = std::unordered_map< std::string, Symbol >;
@@ -66,7 +79,9 @@ public:
     template< typename... _Args >
     void invoke ( const std::string& function_name, _Args... __args ) {
         try {
-            symbol<void(_Args...)>(function_name)(__args...);
+            auto sym = symbol<void(_Args...)>(function_name);
+            if ( sym )
+                sym(__args...);
         } catch(std::exception) {
             throw std::runtime_error ( name + ": an error occurred while calling " + function_name );
         }
@@ -78,35 +93,25 @@ public:
     }
 
     template< typename _Class = void >
-    _Class* newInstance() {
-        return symbol<_Class*()>("new")();
+    _Class* createInstance() {
+        auto create = symbol<_Class*()>("create");
+        return create();
     }
-
-    ~MReflection();
 
     std::string name;
-
-protected:
-    template < typename _Class >
-    MReflection ( _Class*, const char* name ) : MReflection{name} {
-        m_symbols["new"] = static_cast<_Class*(*)()> ( [] () { return new _Class; } );
-        m_symbols["delete"] = static_cast<void(*)(_Class*)> ( [] ( _Class* obj ) { delete obj; } );
-    }
-
-    template< typename T >
-    T* symbol ( std::string name ) {
-        return m_symbols[name].as<T> ();
-    }
-
-    template< typename O, typename T >
-    T O::* symbol ( std::string name ) {
-        return m_symbols[name].as<O,T> ();
-    }
 
     SymbolMap m_symbols;
 
 private:
-    MReflection ( std::string&& name );
+    template< typename T >
+    T* symbol ( std::string name ) {
+        return reinterpret_cast<T*&>(m_symbols[name]);
+    }
+
+    template< typename O, typename T >
+    T O::* symbol ( std::string name ) {
+        return reinterpret_cast<T O::*&>(m_symbols[name]);
+    }
 };
 
 #endif // MREFLECTION_H

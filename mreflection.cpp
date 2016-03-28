@@ -18,24 +18,9 @@
  */
 
 #include "mreflection.h"
-
-static std::unordered_map< std::string, MReflection* >& reflectionMap() {
-    static std::unordered_map< std::string, MReflection* > map;
-    return map;
-}
-
-MReflection::MReflection ( std::string&& name )
-    : name(name)
-{
-    reflectionMap()[name] = this;
-}
-
-MReflection::~MReflection()
-{
-    reflectionMap()[name] = nullptr;
-}
+#include <MDL>
 
 MReflection* MReflection::get ( const std::string& name )
 {
-    return reflectionMap()[name];
+    return MDL::get("").symbol<MReflection*()>(name + "_REFLECTION")();
 }
