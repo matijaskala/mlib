@@ -40,11 +40,14 @@
 
 #define M_REFLECTION \
 public: \
-    static MReflection* getClass() { \
+    static std::string className() { \
         std::string pretty_function_name = __PRETTY_FUNCTION__; \
         std::size_t a = pretty_function_name.rfind(' '); \
         std::size_t b = pretty_function_name.rfind("::"); \
-        return MReflection::get ( pretty_function_name.substr ( a + 1, b - a - 1 ) ); \
+        return pretty_function_name.substr ( a + 1, b - a - 1 ); \
+    } \
+    static MReflection* getClass() { \
+        return MReflection::get ( className() ); \
     } \
     template<typename T> \
     T& access ( const std::string& sym ) { \

@@ -22,7 +22,8 @@ extern "C" MReflection* Ukaz_REFLECTION() {
 }
 
 int main ( int argc, char** argv ) {
-    MReflection* reflection = MReflection::get ( "Ukaz" );
+    std::string className = Ukaz::className();
+    MReflection* reflection = MReflection::get ( className );
     void* instance = reflection->newInstance();
     reflection->setField ( instance, "stevilo", 4 );
     reflection->setField ( instance, "z1", 6 );
