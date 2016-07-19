@@ -27,8 +27,15 @@
 #define reflected reflect ( this )
 #define reflect(...) { MReflection::invoke_pretty ( __PRETTY_FUNCTION__, __VA_ARGS__ ); }
 
+#define M_REFLECTION_HELPER_new(CLASS) static_cast<CLASS*(*)()>( [] { return new CLASS; } )
+#define M_REFLECTION_HELPER_delete(CLASS) static_cast<void(*)(CLASS*)>( [] (CLASS* obj) { delete obj; } )
+
+#define M_REFLECT_HELPER(CLASS,HELPER) m_symbols[#HELPER] = \
+        M_REFLECTION_HELPER_##HELPER(CLASS)
 #define M_REFLECT_METHOD(CLASS,METHOD,ARGS) m_symbols[#METHOD #ARGS] = \
         static_cast<void(CLASS::*)ARGS>(&CLASS::METHOD)
+#define M_REFLECT_STATIC(CLASS,METHOD,ARGS) m_symbols[#METHOD #ARGS] = \
+        static_cast<void(*)ARGS>(&CLASS::METHOD)
 #define M_REFLECT_FIELD(CLASS,METHOD) m_symbols[#METHOD] = &CLASS::METHOD
 
 #define M_REFLECTION \
@@ -40,12 +47,20 @@ public: \
         return MReflection::get ( pretty_function_name.substr ( a + 1, b - a - 1 ) ); \
     } \
     template<typename T> \
-    T& access ( const std::string& field_name ) { \
-        return getClass()->access<T>(this, field_name); \
+    T& access ( const std::string& sym ) { \
+        return getClass()->access<T>(this, sym); \
     } \
     template< typename... _Args > \
-    void invoke ( const std::string& function_name, _Args... __args ) { \
-        getClass()->invoke(function_name, this, __args...); \
+    void invoke ( const std::string& sym, _Args... __args ) { \
+        getClass()->invoke(this, sym, __args...); \
+    } \
+    template< typename T > \
+    T getField ( const std::string& sym ) { \
+        return getClass()->getField<T>(this, sym); \
+    } \
+    template< typename... _Args > \
+    void setField ( const std::string& sym, _Args... __args ) { \
+        getClass()->setField(this, sym, __args...); \
     } \
 private:
 
@@ -76,46 +91,50 @@ public:
 
     static MReflection* get ( const std::string& name );
 
-    template< typename... _Args >
-    void invoke ( const std::string& function_name, _Args... __args ) {
+    template< typename R = void, typename... _Args >
+    R invoke ( void* obj, const std::string& function_name, _Args... __args ) const {
+        return invoke_static<R>(function_name, obj, __args...);
+    }
+
+    template< typename R = void, typename... _Args >
+    R invoke_static ( const std::string& function_name, _Args... __args ) const {
         try {
-            auto sym = symbol<void(_Args...)>(function_name);
-            if ( sym )
-                sym(__args...);
+            auto i = m_symbols.find(function_name);
+            if (i == m_symbols.end())
+                return (R)nullptr;
+            return reinterpret_cast<R (* const&) (_Args...)> ( i->second ) (__args...);
         } catch(std::exception) {
-            throw std::runtime_error ( name + ": an error occurred while calling " + function_name );
+            throw std::runtime_error ( "An error occurred while calling " + function_name );
         }
     }
 
-    template< typename T, typename O >
-    T& access ( O* obj, std::string field_name ) {
-        return obj->*symbol<O,T> ( field_name );
+    void* newInstance() const {
+        return invoke_static<void*>("new");
     }
 
-    void* createInstance() {
-        auto create = symbol<void*()>("create");
-        return create();
+    void deleteInstance(void* p) const {
+        invoke(p, "delete");
     }
 
-    void destroyInstance(void* p) {
-        auto destroy = symbol<void(void*)>("destroy");
-        destroy(p);
+    template< typename T >
+    T getField ( void* obj, std::string field_name ) const {
+        auto i = m_symbols.find(field_name);
+        if (i == m_symbols.end())
+            return T{};
+        class _Obj{};
+        return static_cast<_Obj*>(obj)->*reinterpret_cast<T _Obj::* const&> ( i->second );
     }
 
-    std::string name;
+    template< typename T >
+    void setField ( void* obj, std::string field_name, T val ) const {
+        auto i = m_symbols.find(field_name);
+        if (i == m_symbols.end())
+            return;
+        class _Obj{};
+        static_cast<_Obj*>(obj)->*reinterpret_cast<T _Obj::* const&> ( i->second ) = val;
+    }
 
     SymbolMap m_symbols;
-
-private:
-    template< typename T >
-    T* symbol ( std::string name ) {
-        return reinterpret_cast<T*&>(m_symbols[name]);
-    }
-
-    template< typename O, typename T >
-    T O::* symbol ( std::string name ) {
-        return reinterpret_cast<T O::*&>(m_symbols[name]);
-    }
 };
 
 #endif // MREFLECTION_H
