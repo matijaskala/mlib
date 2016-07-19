@@ -2,39 +2,39 @@
 #include <iostream>
 
 class Ukaz {
+    M_REFLECTION
 public:
-    struct Reflection;
     int stevilo;
-    static MReflection& getClass();
     void izpisi_stevilo ( int stevilo ) { std::cerr << stevilo << std::endl; }
     void izpisi_stevilo () { std::cerr << stevilo << std::endl; }
-        template< typename... _Args >
-        void invoke ( const std::string& function_name, _Args... __args ) {
-            getClass().invoke(function_name, this, __args...);
-        }
+    static void izpisi(const char* s) { std::cerr << s << std::endl; }
 };
 
-static struct Ukaz::Reflection : public MReflection {
-    Reflection() : M_REFLECTION_CONSTRUCT(Ukaz) {
-        M_REFLECT_METHOD(Ukaz,izpisi_stevilo,());
-        M_REFLECT_METHOD(Ukaz,izpisi_stevilo,(int));
-        M_REFLECT_FIELD(Ukaz,stevilo);
-    }
-} Class;
-
-MReflection& Ukaz::getClass() {
-	return Class;
+extern "C" MReflection* Ukaz_REFLECTION() {
+    static MReflection refl;
+    refl.M_REFLECT_HELPER(Ukaz,new);
+    refl.M_REFLECT_HELPER(Ukaz,delete);
+    refl.M_REFLECT_METHOD(Ukaz,izpisi_stevilo,());
+    refl.M_REFLECT_METHOD(Ukaz,izpisi_stevilo,(int));
+    refl.M_REFLECT_STATIC(Ukaz,izpisi,(const char*));
+    refl.M_REFLECT_FIELD(Ukaz,stevilo);
+    return &refl;
 }
 
 int main ( int argc, char** argv ) {
     MReflection* reflection = MReflection::get ( "Ukaz" );
-    Ukaz* instance = reflection->newInstance<Ukaz>();
-    reflection->access<int> ( instance, "z" ) = 6;
-    reflection->invoke ( "izpisi_stevilo(int)", instance, 2 );
-    reflection->invoke ( "izpisi_stevilo()", instance );
-    instance->invoke ( "izpisi_stevilo(int)", 2 );
-    instance->invoke ( "izpisi_stevilo()" );
-    instance->izpisi_stevilo(2);
-    instance->izpisi_stevilo();
+    void* instance = reflection->newInstance();
+    reflection->setField ( instance, "stevilo", 4 );
+    reflection->setField ( instance, "z1", 6 );
+    std::cerr << reflection->getField<int> ( instance, "stevilo" ) << std::endl;
+    std::cerr << reflection->getField<int> ( instance, "z2" ) << std::endl;
+    reflection->invoke ( instance, "izpisi_stevilo(int)", 2 );
+    reflection->invoke ( instance, "izpisi_stevilo()" );
+    reflection->invoke_static ( "izpisi(const char*)", "a" );
+    static_cast<Ukaz*>(instance)->invoke ( "izpisi_stevilo(int)", 2 );
+    static_cast<Ukaz*>(instance)->invoke ( "izpisi_stevilo()" );
+    static_cast<Ukaz*>(instance)->izpisi_stevilo(2);
+    static_cast<Ukaz*>(instance)->izpisi_stevilo();
+    reflection->deleteInstance(instance);
     return 0;
 }
