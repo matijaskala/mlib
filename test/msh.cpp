@@ -18,10 +18,11 @@
  */
 
 #include <iostream>
-#include <MFile>
+#include <nonstd/file>
 #include <nonstd/xterm>
 #include <functional>
 #include <list>
+#include <set>
 #include <vector>
 #include <mchar.h>
 
@@ -103,8 +104,8 @@ void refresh_commands() {
     commands.insert ( "cd" );
     commands.insert ( "ls" );
     commands.insert ( "pwd" );
-    for ( MFile f: MDirectory ( "/bin" ) )
-        if ( f.type() == MFile::REGULAR && f.mode() & 0100 )
+    for ( file f: directory ( "/bin" ) )
+        if ( f.type() == file::regular && f.mode() & 0100 )
             commands.insert ( f.name() );
 }
 
@@ -341,32 +342,30 @@ string get_command ( list<mstring>& history ) {
     }
 }
 
-void ls_files ( const MDirectory& dir ) {
-    if ( dir.empty() )
-        return;
+void ls_files ( const directory& dir ) {
     list< autocompletion_string > files;
-    for ( MFile f: dir ) {
+    for ( file f: dir ) {
         autocompletion_string out;
         if ( f.mode() & 0100 )
             out.bold = true;
         switch ( f.type() ) {
-            case MFile::REGULAR:
+            case file::regular:
                 if ( f.mode() & 0100 )
                     out.fgcolor = green;
                 break;
-            case MFile::SYMLINK:
+            case file::symlink:
                 out.fgcolor = cyan;
                 break;
-            case MFile::DIRECTORY:
+            case file::directory:
                 out.fgcolor = blue;
                 break;
-            case MFile::SOCKET:
+            case file::socket:
                 out.fgcolor = magenta;
                 break;
-            case MFile::CHARACTER_DEVICE:
-            case MFile::BLOCK_DEVICE:
+            case file::character_device:
+            case file::block_device:
                 out.bold = true;
-            case MFile::PIPE:
+            case file::pipe:
                 out.fgcolor = yellow;
                 break;
             case -1:
@@ -378,26 +377,27 @@ void ls_files ( const MDirectory& dir ) {
             out.fgcolor = black;
             out.bgcolor = green;
         }
-        char indicator = ' ';
-        if ( f.mode() & 0100 )
-            indicator = '*';
+        char indicator;
         switch ( f.type() ) {
-            case MFile::SYMLINK:
+            case file::regular:
+                indicator = (f.mode() & 0100) ? '*' : ' ';
+                break;
+            case file::symlink:
                 indicator = '@';
                 break;
-            case MFile::DIRECTORY:
+            case file::directory:
                 indicator = '/';
                 break;
-            case MFile::SOCKET:
+            case file::socket:
                 indicator = '=';
                 break;
-            case MFile::CHARACTER_DEVICE:
+            case file::character_device:
                 indicator = '%';
                 break;
-            case MFile::BLOCK_DEVICE:
+            case file::block_device:
                 indicator = '#';
                 break;
-            case MFile::PIPE:
+            case file::pipe:
                 indicator = '|';
                 break;
         }
