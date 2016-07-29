@@ -20,6 +20,7 @@
 #include "mdebug.h"
 
 #include <nonstd/xterm>
+#include <iostream>
 
 using namespace non_std::xterm;
 

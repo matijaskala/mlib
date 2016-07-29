@@ -21,7 +21,7 @@
 #define MDEBUG_H
 
 #include <mglobal.h>
-#include <iostream>
+#include <ostream>
 
 #undef ERROR
 enum MDebugLevel {
