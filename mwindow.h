@@ -18,7 +18,7 @@
  */
 
 #include "mkeys.h"
-#include "msignal.h"
+#include "nonstd/signal"
 #include "msize.h"
 
 class MWindow
@@ -35,7 +35,7 @@ public:
     void resize( int width, int height );
     MSize size;
 
-    MSignal<> quit{this};
-    MSignal<MKey,std::uint32_t> keyPressed{this};
-    MSignal<MKey,std::uint32_t> keyReleased{this};
+    non_std::signal<> quit{this};
+    non_std::signal<MKey,std::uint32_t> keyPressed{this};
+    non_std::signal<MKey,std::uint32_t> keyReleased{this};
 };
