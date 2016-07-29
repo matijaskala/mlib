@@ -51,7 +51,8 @@ public:
     virtual void swapBuffers() override;
 };
 
-static WaylandWindow* focused = nullptr;
+static WaylandWindow* kbFocused = nullptr;
+static WaylandWindow* ptrFocused = nullptr;
 
 WaylandWindow::WaylandWindow ( int width, int height, struct wl_shell_surface* _wl_shell_surface,
                                struct wl_surface* _wl_surface, struct wl_egl_window* _wl_egl_window,
@@ -139,13 +140,20 @@ void WaylandVideoInterface::handleEvents()
 bool WaylandVideoInterface::init()
 {
     static const struct wl_pointer_listener wl_pointer_listener = {
-        [] ( void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t surface_x, wl_fixed_t surface_y ) {},
-        [] ( void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface ) {},
+        [] ( void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t surface_x, wl_fixed_t surface_y ) {
+            auto _This = static_cast<WaylandVideoInterface*> ( data );
+            for ( WaylandWindow* win: _This->window_list )
+                if ( win->wl_surface == surface )
+                    ptrFocused = win;
+        },
+        [] ( void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface ) {
+            ptrFocused = nullptr;
+        },
         [] ( void *data, struct wl_pointer *wl_pointer, uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y ) {},
         [] ( void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state ) {
             auto _This = static_cast<WaylandVideoInterface*> ( data );
-            if ( button == 274 && state == WL_POINTER_BUTTON_STATE_RELEASED ) {
-                focused->quit();
+            if ( button == BTN_MIDDLE && state == WL_POINTER_BUTTON_STATE_RELEASED ) {
+                ptrFocused->quit();
             }
         },
         [] ( void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value ) {},
@@ -164,9 +172,11 @@ bool WaylandVideoInterface::init()
             auto _This = static_cast<WaylandVideoInterface*> ( data );
             for ( WaylandWindow* win: _This->window_list )
                 if ( win->wl_surface == surface )
-                    focused = win;
+                    kbFocused = win;
         },
-        [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface ) {},
+        [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface ) {
+            kbFocused = nullptr;
+        },
         [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state ) {
             auto _This = static_cast<WaylandVideoInterface*> ( data );
             const xkb_keysym_t* syms;
@@ -175,9 +185,9 @@ bool WaylandVideoInterface::init()
                 sym = syms[0];
             MKey mKey = ( ( sym & 0xff00 ) == 0xff00 ) ? _This->keymap[sym & 0xff] : MKey ( sym & 0xff );
             if ( state )
-                focused->keyPressed ( mKey, 0 );
+                kbFocused->keyPressed ( mKey, 0 );
             else
-                focused->keyReleased ( mKey, 0 );
+                kbFocused->keyReleased ( mKey, 0 );
         },
         [] ( void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group ) {},
         [] ( void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay ) {},
