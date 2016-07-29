@@ -64,7 +64,7 @@ MVideoInterface* MVideoInterface::get()
     static MVideoInterface* iface = nullptr;
     if ( iface )
         return iface;
-    for ( auto i: MVideoInterface::interfaces() )
+    for ( auto i: interfaces() )
         if ( i->init() ) {
             iface = i;
             glEnable ( GL_BLEND );
