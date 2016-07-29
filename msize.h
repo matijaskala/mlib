@@ -28,7 +28,7 @@ public:
     MSize()
         : MSize ( 0,0 )
     {}
-    MSize ( std::uint_fast16_t width, std::uint_fast16_t height )
+    MSize ( const std::uint_fast16_t& width, const std::uint_fast16_t& height )
         : m_width ( width )
         , m_height ( height )
     {}
