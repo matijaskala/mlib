@@ -24,8 +24,7 @@
 #include <unordered_map>
 #include <stdexcept>
 
-#define reflected reflect ( this )
-#define reflect(...) { MReflection::invoke_pretty ( __PRETTY_FUNCTION__, __VA_ARGS__ ); }
+#define reflect(...) { getClass()->invoke_pretty ( __PRETTY_FUNCTION__, __VA_ARGS__ ); }
 
 #define M_REFLECTION_HELPER_new(CLASS) static_cast<CLASS*(*)()>( [] { return new CLASS; } )
 #define M_REFLECTION_HELPER_delete(CLASS) static_cast<void(*)(CLASS*)>( [] (CLASS* obj) { delete obj; } )
@@ -84,12 +83,12 @@ class MReflection
     using SymbolMap = std::unordered_map< std::string, Symbol >;
 
 public:
-    template< typename _Instance, typename... _Args >
-    static void invoke_pretty ( std::string&& pretty_function_name, _Instance* _This, _Args... __args ) {
-        size_t f_begin = pretty_function_name.find(' ');
-        size_t b_begin = pretty_function_name.find('(', f_begin);
-        size_t r_begin = pretty_function_name.rfind("::", b_begin) + 2;
-        _This->invoke ( pretty_function_name.substr( r_begin ), __args... );
+    template< typename... _Args >
+    void invoke_pretty ( std::string&& pretty_function_name, _Args... __args ) {
+        std::size_t f_begin = pretty_function_name.find(' ');
+        std::size_t b_begin = pretty_function_name.find('(', f_begin);
+        std::size_t r_begin = pretty_function_name.rfind("::", b_begin) + 2;
+        invoke_static ( pretty_function_name.substr( r_begin ), __args... );
     }
 
     static MReflection* get ( const std::string& name );
