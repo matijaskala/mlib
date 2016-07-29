@@ -39,10 +39,11 @@ public:
     void initRead() { m_thread = std::thread { [this] { read(); } }; }
     void waitRead() { m_thread.join(); }
 
-    virtual void seek ( std::chrono::duration < double > seconds ) = 0;
+    void seek ( std::chrono::duration < double > seconds ) { setEOF(false); seek(seconds.count()); }
 
 protected:
     virtual void read () = 0;
+    virtual void seek ( double seconds ) = 0;
 
     struct Interface {
         Interface();

@@ -34,7 +34,7 @@ struct MVorbisStream : public MAudioStream
     } iface;
     virtual ~MVorbisStream();
     virtual void read();
-    virtual void seek ( std::chrono::duration < double > seconds );
+    virtual void seek ( double seconds );
     OggVorbis_File vorbisFile;
 };
 
@@ -58,6 +58,7 @@ MAudioStream* MVorbisStream::Interface::create ( std::istream* stream )
                 return 0;
             auto buf = static_cast<char*> ( ptr );
             stream->read ( buf, size * nmemb );
+            stream->clear();
             return stream->gcount() / size;
         },
         [] (void *datasource, ogg_int64_t offset, int whence) -> int {
@@ -101,9 +102,9 @@ MVorbisStream::~MVorbisStream()
     ov_clear(&vorbisFile);
 }
 
-void MVorbisStream::seek ( std::chrono::duration < double > seconds )
+void MVorbisStream::seek ( double seconds )
 {
-    ov_time_seek(&vorbisFile, seconds.count());
+    ov_time_seek(&vorbisFile, seconds);
 }
 
 void MVorbisStream::read()
@@ -143,20 +144,20 @@ bool MVorbis::valid ( std::string file )
 
 MResource* MVorbis::load ( std::string file )
 {
-    std::ifstream stream{file};
-    if ( !stream.is_open() )
+    std::ifstream fileStream{file};
+    if ( !fileStream.is_open() )
         return nullptr;
-    auto oggStream = MVorbisStream::iface.create(&stream);
+    auto oggStream = MVorbisStream::iface.create(&fileStream);
     if ( !oggStream )
         return nullptr;
-    auto res = new MAudioFile;
+    auto audioFile = new MAudioFile;
+    audioFile->stereo = oggStream->stereo();
+    audioFile->freq = oggStream->freq();
     while ( !oggStream->eof() ) {
         oggStream->initRead();
         oggStream->waitRead();
-        res->buffer.insert ( res->buffer.end(), oggStream->buffer, oggStream->buffer + oggStream->buffer_size );
+        audioFile->buffer.insert ( audioFile->buffer.end(), oggStream->buffer, oggStream->buffer + oggStream->buffer_size );
     }
-    res->stereo = oggStream->stereo();
-    res->freq = oggStream->freq();
     delete oggStream;
-    return res;
+    return audioFile;
 }
