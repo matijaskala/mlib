@@ -22,8 +22,8 @@
 
 #include <nonstd/casts>
 #include <MDebug>
-#include <MTexture>
 #include <MResourceLoader>
+#include <MTexture>
 #include <cstring>
 
 #include FT_OUTLINE_H
@@ -70,8 +70,8 @@ const MTexture* MFont::Glyph::texture()
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -151,12 +151,12 @@ uint16_t MFont::size()
     return d->face->size->metrics.x_ppem;
 }
 
-MImage* MFont::render ( string text )
+MTexture* MFont::render ( string text )
 {
     return render(lexical_cast<wstring> ( text ));
 }
 
-MImage* MFont::render ( wstring text )
+MTexture* MFont::render ( wstring text )
 {
     int width{};
     int height{};
@@ -190,7 +190,27 @@ MImage* MFont::render ( wstring text )
 
     glPopAttrib();
 
-    return new MImage{{width,height},true,data};
+    glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+
+    auto tex = new MTexture;
+    tex->setSize({width,height});
+    tex->bind();
+
+    glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data);
+
+    glPopClientAttrib();
+
+    return tex;
 }
 
 MFont::Glyph* MFont::glyph ( wchar_t code, uint16_t size )
