@@ -25,6 +25,7 @@
 #include <map>
 #include <GL/gl.h>
 #include <GL/glext.h>
+#include <cstring>
 
 static std::map< std::string, MImage* > map;
 
@@ -33,6 +34,26 @@ MImage::MImage ( MSize size, bool alpha, uint8_t* data )
     , m_alpha{alpha}
     , m_data{data}
 {
+}
+
+MImage::MImage ( const MImage& other )
+    : m_size{other.m_size}
+    , m_alpha{other.m_alpha}
+    , m_data{nullptr}
+{
+    if ( other.data() ) {
+        std::size_t n = size().width() * size().height() * ( hasAlpha() ? 32 : 24 );
+        m_data = new uint8_t[n];
+        std::memcpy ( data(), other.data(), n );
+    }
+}
+
+MImage::MImage ( MImage&& other )
+    : m_size{other.m_size}
+    , m_alpha{other.m_alpha}
+    , m_data{other.m_data}
+{
+    other.m_data = nullptr;
 }
 
 MImage::~MImage()

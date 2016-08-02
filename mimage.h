@@ -30,6 +30,8 @@ class M_EXPORT MImage : public MResource
 {
 public:
     MImage ( MSize size, bool alpha, std::uint8_t* data );
+    MImage ( const MImage& other );
+    MImage ( MImage&& other );
     virtual ~MImage();
 
     const MSize& size() const { return m_size; }
