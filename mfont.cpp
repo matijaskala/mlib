@@ -20,6 +20,7 @@
 #include "mfont.h"
 #include "mfont_p.h"
 
+#include <nonstd/casts>
 #include <MDebug>
 #include <MTexture>
 #include <MResourceLoader>
@@ -147,25 +148,7 @@ bool MFont::setFaceSize ( uint16_t size, uint16_t res )
 
 void MFont::render ( string text )
 {
-    wstring wstr;
-    {
-        locale l{""};
-        using cvt_t = std::codecvt< wchar_t, char, mbstate_t >;
-        const cvt_t& cvt = std::use_facet< cvt_t > ( l );
-        wchar_t* pwc;
-        const char* pc;
-        auto dest = new wchar_t[text.length() + 1];
-        auto state = mbstate_t{};
-        switch ( cvt.in(state, text.c_str(), text.c_str() + text.length() + 1, pc, dest, dest + text.length() + 1, pwc) )
-        {
-            case cvt_t::ok:
-                break;
-            case cvt_t::error:
-                mDebug() << "an error occurred while extracting characters from string '" << text << "'";
-        }
-        wstr = dest;
-        delete[] dest;
-    }
+    auto wstr = lexical_cast<wstring> ( text );
 
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
 
