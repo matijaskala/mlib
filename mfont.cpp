@@ -88,7 +88,7 @@ MFont::MFont ( void* face )
 {
     d->face = static_cast<FT_Face> ( face );
 
-    setFaceSize ( 20 );
+    setSize ( 20 );
 }
 
 MFont::~MFont()
@@ -139,11 +139,16 @@ MFont* MFont::get ( string file )
     return fonts[file];
 }
 
-bool MFont::setFaceSize ( uint16_t size, uint16_t res )
+bool MFont::setSize ( uint16_t size_, uint16_t res )
 {
-    if ( size == d->face->size->metrics.x_ppem )
+    if ( size_ == size() )
         return true;
-    return FT_Set_Char_Size ( d->face, 0, size * STIRIINSESTDESET, res, res ) == 0;
+    return FT_Set_Char_Size ( d->face, 0, size_ * STIRIINSESTDESET, res, res ) == 0;
+}
+
+uint16_t MFont::size()
+{
+    return d->face->size->metrics.x_ppem;
 }
 
 void MFont::render ( string text )
@@ -164,14 +169,14 @@ void MFont::render ( wstring text )
     int width{};
     int height{};
     for ( int i = 0; i < text.length(); i++ ) {
-        glyphs[i] = glyph(text[i], d->face->size->metrics.x_ppem);
+        glyphs[i] = glyph(text[i], size());
         width += glyphs[i]->advance().x/STIRIINSESTDESET;
         int h = glyphs[i]->size().height();
         height = height > h ? height : h;
     }}
     long off{};
     for ( wchar_t c: text ) {
-        auto g = glyph(c, d->face->size->metrics.x_ppem);
+        auto g = glyph(c, size());
         g->texture()->draw ( off + g->bounds().x1/STIRIINSESTDESET, g->bounds().y2/STIRIINSESTDESET,
                              off + g->bounds().x2/STIRIINSESTDESET, g->bounds().y1/STIRIINSESTDESET );
         off += g->advance().x/STIRIINSESTDESET;
@@ -185,7 +190,7 @@ MFont::Glyph* MFont::glyph ( wchar_t code, uint16_t size )
     auto& glyph = d->glyphs[std::make_tuple(code,size)];
     if ( glyph )
         delete glyph;
-    setFaceSize(size);
+    setSize(size);
     FT_Load_Char ( d->face, code, FT_LOAD_RENDER );
     FT_BBox bbox;
     FT_Outline_Get_CBox(&d->face->glyph->outline, &bbox);
