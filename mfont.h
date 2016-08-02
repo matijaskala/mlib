@@ -21,6 +21,7 @@
 #define MFONT_H
 
 #include <mglobal.h>
+#include <MImage>
 #include <MResource>
 #include <MSize>
 #include <string>
@@ -59,8 +60,8 @@ public:
 
     bool setSize ( std::uint16_t size, std::uint16_t res = 0 );
     std::uint16_t size();
-    void render ( std::wstring text );
-    void render ( std::string text );
+    MImage* render ( std::wstring text );
+    MImage* render ( std::string text );
     Glyph* glyph ( wchar_t code, std::uint16_t size );
 
 private:

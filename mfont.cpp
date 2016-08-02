@@ -24,7 +24,7 @@
 #include <MDebug>
 #include <MTexture>
 #include <MResourceLoader>
-#include <locale>
+#include <cstring>
 
 #include FT_OUTLINE_H
 #include <GL/gl.h>
@@ -63,8 +63,8 @@ const MTexture* MFont::Glyph::texture()
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 
     m_texture = new MTexture;
-    m_texture->bind();
     m_texture->setSize(size());
+    m_texture->bind();
 
     glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
@@ -151,13 +151,36 @@ uint16_t MFont::size()
     return d->face->size->metrics.x_ppem;
 }
 
-void MFont::render ( string text )
+MImage* MFont::render ( string text )
 {
-    render(lexical_cast<wstring> ( text ));
+    return render(lexical_cast<wstring> ( text ));
 }
 
-void MFont::render ( wstring text )
+MImage* MFont::render ( wstring text )
 {
+    int width{};
+    int height{};
+    for ( auto c: text ) {
+        FT_Load_Char ( d->face, c, FT_LOAD_RENDER );
+        width += d->face->glyph->advance.x/STIRIINSESTDESET;
+        int h = d->face->glyph->bitmap.rows;
+        height = height > h ? height : h;
+    }
+    auto data = calloc(width * height, 1);
+    long off{};
+    for ( auto c: text ) {
+        FT_Load_Char ( d->face, c, FT_LOAD_RENDER );
+        FT_BBox bbox;
+        FT_Outline_Get_CBox ( &d->face->glyph->outline, &bbox );
+        auto& bitmap = d->face->glyph->bitmap;
+        for ( unsigned int i = 0; i < bitmap.rows; i++ )
+            std::memcpy ( data + (height - bitmap.rows + i) * width + off + bbox.xMin/STIRIINSESTDESET,
+                          bitmap.buffer + i * bitmap.width, bitmap.width );
+//        g->texture()->draw ( off + g->bounds().x1/STIRIINSESTDESET, g->bounds().y2/STIRIINSESTDESET,
+//                             off + g->bounds().x2/STIRIINSESTDESET, g->bounds().y1/STIRIINSESTDESET );
+        off += d->face->glyph->advance.x/STIRIINSESTDESET;
+    }
+
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
 
     glEnable(GL_BLEND);
@@ -165,24 +188,9 @@ void MFont::render ( wstring text )
 
     glEnable(GL_TEXTURE_2D);
 
-    {Glyph* glyphs[text.length()];
-    int width{};
-    int height{};
-    for ( int i = 0; i < text.length(); i++ ) {
-        glyphs[i] = glyph(text[i], size());
-        width += glyphs[i]->advance().x/STIRIINSESTDESET;
-        int h = glyphs[i]->size().height();
-        height = height > h ? height : h;
-    }}
-    long off{};
-    for ( wchar_t c: text ) {
-        auto g = glyph(c, size());
-        g->texture()->draw ( off + g->bounds().x1/STIRIINSESTDESET, g->bounds().y2/STIRIINSESTDESET,
-                             off + g->bounds().x2/STIRIINSESTDESET, g->bounds().y1/STIRIINSESTDESET );
-        off += g->advance().x/STIRIINSESTDESET;
-    }
-
     glPopAttrib();
+
+    return new MImage{{width,height},true,data};
 }
 
 MFont::Glyph* MFont::glyph ( wchar_t code, uint16_t size )
