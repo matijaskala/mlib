@@ -188,8 +188,6 @@ MTexture* MFont::render ( wstring text )
 
     glEnable(GL_TEXTURE_2D);
 
-    glPopAttrib();
-
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 
     auto tex = new MTexture;
@@ -209,6 +207,8 @@ MTexture* MFont::render ( wstring text )
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data);
 
     glPopClientAttrib();
+
+    glPopAttrib();
 
     return tex;
 }
