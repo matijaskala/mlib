@@ -29,7 +29,7 @@
 
 static std::map< std::string, MImage* > map;
 
-MImage::MImage ( MSize size, bool alpha, uint8_t* data )
+MImage::MImage ( MSize size, bool alpha, void* data )
     : m_size{size}
     , m_alpha{alpha}
     , m_data{data}
@@ -43,7 +43,7 @@ MImage::MImage ( const MImage& other )
 {
     if ( other.data() ) {
         std::size_t n = size().width() * size().height() * ( hasAlpha() ? 32 : 24 );
-        m_data = new uint8_t[n];
+        m_data = malloc(n);
         std::memcpy ( data(), other.data(), n );
     }
 }
@@ -58,7 +58,7 @@ MImage::MImage ( MImage&& other )
 
 MImage::~MImage()
 {
-    delete[] m_data;
+    std::free ( m_data );
 }
 
 MTexture* MImage::createTexture() const
