@@ -17,21 +17,19 @@
  *
  */
 
+#include <nonstd/casts>
 #include <mglobal.h>
 #include <MTexture>
-#include <MEvents>
-#include <traits>
 #include <GL/gl.h>
 #include <GL/glext.h>
-#include <MDirectory>
+#include <nonstd/directory>
 #include <MDebug>
-#include <MVideo>
 #include <MKeys>
 #include <MFont>
 #include <MImage>
-#include <vector>
+#include <mvideointerface.h>
+#include <xkbcommon/xkbcommon.h>
 
-static std::string text = "Hello World!";
 static MFont* font = nullptr;
 MTexture* tex = nullptr;
 
@@ -41,12 +39,16 @@ public:
     virtual void draw() = 0;
 };
 
+#include <cstring>
+
+#define STIRIINSESTDESET 64
+
 struct Menu : public Drawable {
     uint16_t current = 0;
-    Menu (  ) {
-        MEvents::keyPressed.connect(onKeyPress);
+    Menu ( MWindow* w ) {
+        w->keyPressed.connect(onKeyPress);
     }
-    MSlot<MKey,std::uint32_t> onKeyPress =
+    non_std::slot<MKey,std::uint32_t> onKeyPress =
             [this] ( MKey key, std::uint32_t mod ) {
                 if ( key == M_KEY_UP ) {
                     if ( current == 0 )
@@ -60,30 +62,20 @@ struct Menu : public Drawable {
                 }
                 else if ( key == M_KEY_RETURN )
                     activated ( current );
+                render(font);
             };
     virtual void draw();
     std::vector< std::string > items;
-    MSignal<int> activated{this};
+    std::vector< MTexture* > textures;
+    non_std::signal<int> activated{this};
     void render(MFont* font) {
-        int x = 100;
-        int y = 100;
-        int i = 0;
-        glPushAttrib(GL_ALL_ATTRIB_BITS);
-        for ( std::string item: items ) {
-        glPushMatrix();
-            if ( current == i )
-                glColor4d(1,0,0,1);
-            else
-                glColor4d(0,1,1,1);
-            glTranslated(x,y,0);
-            glRotated(180,1,0,0);
-            font->setFaceSize ( 20 );
-            font->render ( item.c_str() );
-            i++;
-            y += 20;
-        glPopMatrix();
+        for ( auto tex: textures )
+            delete tex;
+        textures.resize(items.size());
+        for ( int i = 0; i < items.size(); i++ ) {
+            std::string text = items[i];
+            textures[i] = font->render(text);
         }
-        glPopAttrib();
     }
 };
 
@@ -91,8 +83,9 @@ class Listener {
     Menu* menu;
     void activated ( int z ) {
         menu->items.push_back ( "ACTIVATED: " + menu->items[z] );
+        menu->render(font);
     }
-    MSlot<int> slotActivated{&THIS_T::activated, this};
+    non_std::slot<int> slotActivated{&this_t::activated, this};
 public:
     Listener ( Menu* menu ) : menu{menu} {
 #undef connect
@@ -101,7 +94,13 @@ public:
 };
 
 class Text : public Drawable {
+    void onChanged();
     virtual void draw();
+    MTexture* texture = new MTexture;
+public:
+    Text();
+    non_std::slot<> changed = [this] { onChanged(); };
+    std::wstring text;
 };
 
 class Texture : public Drawable {
@@ -110,43 +109,70 @@ class Texture : public Drawable {
 
 void Menu::draw()
 {
-    render(font);
+        int x = 100;
+        int y = 100;
+        int i = 0;
+        for ( std::string item: items ) {
+            if ( current == i )
+                glColor4d(1,0,0,1);
+            else
+                glColor4d(0,1,1,1);
+            textures[i]->draw(x, y, x + textures[i]->size().width(), y + textures[i]->size().height());
+            i++;
+            y += 20;
+        }
+}
+
+Text::Text()
+{
+    text = L"Hello World!";
+    changed();
+}
+
+void Text::onChanged()
+{
+    font->setSize(72);
+    texture = font->render(text);
 }
 
 void Text::draw()
 {
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPushMatrix();
     glColor4d(0,0,1,1);
-    glTranslated(0,72,0);
-    glRotated(180,1,0,0);
-    font->setFaceSize(72);
-    font->render(text);
+    glTranslated(50,20,0);
+    texture->draw(0,0,texture->size().width(),texture->size().height());
     glPopMatrix();
-    glPopAttrib();
 }
 
+MWindow* w;
 void Texture::draw()
 {
-    MSize size = MVideo::screenSize();
+    MSize size = w->size;
     tex->draw(0,0,size.width(),size.height());
 }
 
+#include <chrono>
+using namespace std::chrono;
+Text* text;
 int main ( int argc, char** argv ) {
     M::init ( argc, argv );
-    MVideo::init();
-    MSlot<> onQuit{M::quit};
-    MEvents::quit.connect(onQuit);
-    MSlot<MKey,std::uint32_t> onKeyPress =
-        [] ( MKey key, std::uint32_t mod )
+    auto i = MVideoInterface::get();
+    w = i->createWindow(800,600);
+    class EventHandler : public MEventHandler {
+        virtual void quit() { M::quit(); }
+        virtual void keyPressed ( MKey key, uint32_t mods )
         {
-            if ( key == M_KEY_BACKSPACE && !text.empty() )
-                text.pop_back();
-            else if ( static_cast<int> ( key ) >= 32 && static_cast<int> ( key ) < 256 )
-                text += static_cast<char> ( key );
+            if ( key == M_KEY_BACKSPACE && !text->text.empty() )
+                text->text.pop_back();
+            else if ( static_cast<int> ( key ) >= 32 && static_cast<int> ( key ) < 128 )
+                text->text += static_cast<char> ( key );
+            else if ( static_cast<int> ( key ) >= M_KEY_LAST )
+                text->text += static_cast<wchar_t> ( xkb_keysym_to_utf32 ( key ) );
+            text->changed();
         };
-    MEvents::keyPressed.connect(onKeyPress);
-    for ( auto f: MDirectory ( MLIB_DATA_DIR "images" ) ) {
+    };
+    w->eventHandlers.push<EventHandler>();
+    for ( auto f: non_std::directory ( MLIB_DATA_DIR "images" ) ) {
         if ( f.name()[0] == '.' )
             continue;
         MDebug debug;
@@ -156,7 +182,7 @@ int main ( int argc, char** argv ) {
         else
             debug << "failed";
     }
-    for ( auto f: MDirectory ( MLIB_DATA_DIR "fonts" ) ) {
+    for ( auto f: non_std::directory ( MLIB_DATA_DIR "fonts" ) ) {
         if ( f.name()[0] == '.' )
             continue;
         MDebug debug;
@@ -169,21 +195,25 @@ int main ( int argc, char** argv ) {
     auto img = MImage::get ( MLIB_DATA_DIR "images/sample.png" );
     tex = img->createTexture();
     font = MFont::get ( MLIB_DATA_DIR "fonts/DejaVuSans.ttf" );
-    MVideo::setVideoMode(200,200);
-    Menu* menu = new Menu;
+    text = new Text;
+    Menu* menu = new Menu{w};
     menu->items.push_back("ITEM1");
     menu->items.push_back("ITEM2");
     menu->items.push_back("ITEM3");
+    menu->render(font);
     new Listener ( menu );
     std::list<Drawable*> drawables;
     drawables.push_back(menu);
-    drawables.push_back(new Text);
+    drawables.push_back(text);
     drawables.push_back(new Texture);
     for(;;) {
-        MVideo::handleEvents();
-        MVideo::beginPaint();
-        for ( Drawable* drawable: drawables )
+        i->handleEvents();
+        w->beginPaint();
+                auto start = system_clock::now();
+        for ( Drawable* drawable: drawables ) {
             drawable->draw();
-        MVideo::endPaint();
+        }
+                mDebug() << duration_cast<microseconds>(system_clock::now() - start).count();
+        w->endPaint();
     }
 }
