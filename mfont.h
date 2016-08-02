@@ -58,6 +58,7 @@ public:
     static MFont* get ( std::string file );
 
     bool setFaceSize ( std::uint16_t size, std::uint16_t res = 0 );
+    void render ( std::wstring text );
     void render ( std::string text );
     Glyph* glyph ( wchar_t code, std::uint16_t size );
 

@@ -148,8 +148,11 @@ bool MFont::setFaceSize ( uint16_t size, uint16_t res )
 
 void MFont::render ( string text )
 {
-    auto wstr = lexical_cast<wstring> ( text );
+    render(lexical_cast<wstring> ( text ));
+}
 
+void MFont::render ( wstring text )
+{
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
 
     glEnable(GL_BLEND);
@@ -157,17 +160,17 @@ void MFont::render ( string text )
 
     glEnable(GL_TEXTURE_2D);
 
-    {Glyph* glyphs[wstr.length()];
+    {Glyph* glyphs[text.length()];
     int width{};
     int height{};
-    for ( int i = 0; i < wstr.length(); i++ ) {
-        glyphs[i] = glyph(wstr[i], d->face->size->metrics.x_ppem);
+    for ( int i = 0; i < text.length(); i++ ) {
+        glyphs[i] = glyph(text[i], d->face->size->metrics.x_ppem);
         width += glyphs[i]->advance().x/STIRIINSESTDESET;
         int h = glyphs[i]->size().height();
         height = height > h ? height : h;
     }}
     long off{};
-    for ( wchar_t c: wstr ) {
+    for ( wchar_t c: text ) {
         auto g = glyph(c, d->face->size->metrics.x_ppem);
         g->texture()->draw ( off + g->bounds().x1/STIRIINSESTDESET, g->bounds().y2/STIRIINSESTDESET,
                              off + g->bounds().x2/STIRIINSESTDESET, g->bounds().y1/STIRIINSESTDESET );
