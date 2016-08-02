@@ -86,7 +86,7 @@ MResource* MPNG::load ( std::string file )
     bitDepth = png_get_bit_depth ( png, info );
     stride = png_get_rowbytes ( png, info );
     png_byte channels = png_get_channels ( png, info );
-    png_bytep data = new png_byte[height * stride];
+    png_bytep data = static_cast<png_bytep>( malloc ( height * stride * sizeof *data ) );
     png_bytepp rowPointers = new png_bytep[height];
     for ( png_uint_32 i = 0; i < height; i++ ) {
         rowPointers[i] = data + i * stride;
