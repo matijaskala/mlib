@@ -24,9 +24,11 @@
 
 using namespace std;
 
-MWindow::MWindow ( int width, int height )
+MWindow::MWindow ( int width, int height ) : size{width,height}
 {
-    size = {width,height};
+    quit.connect(eventHandlers.quit);
+    keyPressed.connect(eventHandlers.keyPressed);
+    keyReleased.connect(eventHandlers.keyReleased);
 
     glViewport ( 0, 0, width, height );
     glMatrixMode ( GL_PROJECTION );

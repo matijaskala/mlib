@@ -21,8 +21,6 @@
 
 #include <cstdlib>
 
-MEventHandler::Stack MEventHandler::handlers;
-
 MEventHandler::Stack::Stack()
 {
     class FallbackHandler : public MEventHandler {

@@ -20,6 +20,7 @@
 #include "mkeys.h"
 #include "nonstd/signal"
 #include "msize.h"
+#include "meventhandler.h"
 
 class MWindow
 {
@@ -34,6 +35,7 @@ public:
     void endPaint();
     void resize( int width, int height );
     MSize size;
+    MEventHandler::Stack eventHandlers;
 
     non_std::signal<> quit{this};
     non_std::signal<MKey,std::uint32_t> keyPressed{this};

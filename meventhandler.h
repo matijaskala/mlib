@@ -22,10 +22,12 @@
 
 #include <cstdint>
 #include <stack>
+#include <nonstd/signal>
 
-enum class MKey;
+enum MKey : std::uint32_t;
 class MEventHandler
 {
+public:
     class Stack {
         std::stack< MEventHandler* > pointers;
     public:
@@ -37,17 +39,18 @@ class MEventHandler
         void pop();
         MEventHandler& top();
         bool empty() const;
+
+        non_std::slot<> quit = [this] { top().quit(); };
+        non_std::slot<MKey,std::uint32_t> keyPressed = [this] ( MKey key, std::uint32_t mods ) { top().keyPressed ( key, mods ); };
+        non_std::slot<MKey,std::uint32_t> keyReleased = [this] ( MKey key, std::uint32_t mods ) { top().keyReleased ( key, mods ); };
     };
-
-public:
-    static Stack handlers;
-
-    virtual void quit() {}
-    virtual void key_pressed ( MKey keysym, std::uint32_t mods ) {}
-    virtual void key_released ( MKey keysym, std::uint32_t mods ) {}
 
 protected:
     virtual ~MEventHandler() = default;
+
+    virtual void quit() {}
+    virtual void keyPressed ( MKey key, std::uint32_t mods ) {}
+    virtual void keyReleased ( MKey key, std::uint32_t mods ) {}
 };
 
 #endif // MEVENTHANDLER_H
