@@ -69,6 +69,7 @@ struct Menu : public Drawable {
     std::vector< MTexture* > textures;
     non_std::signal<int> activated{this};
     void render(MFont* font) {
+        font->setSize(20);
         for ( auto tex: textures )
             delete tex;
         textures.resize(items.size());
