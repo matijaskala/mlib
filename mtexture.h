@@ -27,6 +27,8 @@ class M_EXPORT MTexture
 {
 public:
     MTexture();
+    MTexture ( const MTexture& other ) = delete;
+    MTexture ( MTexture&& other ) { d = other.d; other.d = nullptr; }
     ~MTexture();
     void bind() const;
     unsigned int texture() const;
