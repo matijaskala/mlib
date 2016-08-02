@@ -183,7 +183,7 @@ bool WaylandVideoInterface::init()
             xkb_keysym_t sym = XKB_KEY_NoSymbol;
             if ( xkb_state_key_get_syms ( _This->xkb_state, key + 8, &syms ) == 1 )
                 sym = syms[0];
-            MKey mKey = ( ( sym & 0xff00 ) == 0xff00 ) ? _This->keymap[sym & 0xff] : MKey ( sym & 0xff );
+            MKey mKey = ( ( sym & 0xff00 ) == 0xff00 ) ? _This->keymap[sym & 0xff] : MKey ( sym );
             if ( state )
                 kbFocused->keyPressed ( mKey, 0 );
             else

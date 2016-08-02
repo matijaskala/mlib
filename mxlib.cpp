@@ -165,7 +165,7 @@ MKey XlibVideoInterface::getKey ( unsigned int keycode )
     if ( ( xsym & 0xff00 ) == 0xff00 )
         return keymap[xsym&0xff];
     else
-        return MKey(xsym&0xff);
+        return MKey(xsym);
 }
 
 void XlibVideoInterface::keymap_init()
