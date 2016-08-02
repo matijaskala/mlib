@@ -125,39 +125,3 @@ void MVorbisStream::read()
             buffer_size += read;
     } while ( buffer_size + read < sizeof(buffer) );
 }
-
-class MVorbis : public MResourceLoader
-{
-    virtual bool valid ( std::string file );
-    virtual MResource* load ( std::string file );
-    virtual MResource::Type type() { return MResource::Audio; }
-    virtual std::string name() { return "vorbis"; }
-} vorbis;
-
-bool MVorbis::valid ( std::string file )
-{
-    std::ifstream stream ( file );
-    if ( !stream.is_open() )
-        return false;
-    return MVorbisStream::iface.valid(&stream);
-}
-
-MResource* MVorbis::load ( std::string file )
-{
-    std::ifstream fileStream{file};
-    if ( !fileStream.is_open() )
-        return nullptr;
-    auto oggStream = MVorbisStream::iface.create(&fileStream);
-    if ( !oggStream )
-        return nullptr;
-    auto audioFile = new MAudioFile;
-    audioFile->stereo = oggStream->stereo();
-    audioFile->freq = oggStream->freq();
-    while ( !oggStream->eof() ) {
-        oggStream->initRead();
-        oggStream->waitRead();
-        audioFile->buffer.insert ( audioFile->buffer.end(), oggStream->buffer, oggStream->buffer + oggStream->buffer_size );
-    }
-    delete oggStream;
-    return audioFile;
-}
