@@ -53,6 +53,16 @@ void MVideoInterface::test ()
         glFlush();
 }
 
+void MVideoInterface::handleEvents()
+{
+
+}
+
+void MVideoInterface::destroyWindow ( MWindow* window )
+{
+    delete window;
+}
+
 std::list< MVideoInterface* >& MVideoInterface::interfaces()
 {
     static std::list< MVideoInterface* > interfaces;

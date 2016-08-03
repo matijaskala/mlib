@@ -24,6 +24,7 @@
 
 class MWindow
 {
+    friend class MVideoInterface;
 protected:
     MWindow ( int width, int height );
     virtual ~MWindow() = default;

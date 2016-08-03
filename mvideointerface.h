@@ -32,9 +32,9 @@ public:
     void test ();
     virtual bool init() = 0;
     virtual void fini() = 0;
-    virtual void handleEvents() {}
+    virtual void handleEvents();
     virtual MWindow* createWindow ( int width, int height ) = 0;
-    virtual void destroyWindow ( MWindow* window ) = 0;
+    virtual void destroyWindow ( MWindow* window );
     static std::list< MVideoInterface* >& interfaces();
     static MVideoInterface* get();
 };

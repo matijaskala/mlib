@@ -285,7 +285,7 @@ void XlibVideoInterface::destroyWindow ( MWindow* window )
     window_list.remove(w);
     XUnmapWindow ( xdisplay, w->xwindow );
     XDestroyWindow ( xdisplay, w->xwindow );
-    delete window;
+    MVideoInterface::destroyWindow(window);
 }
 
 static XlibVideoInterface interface;

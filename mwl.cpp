@@ -397,7 +397,7 @@ void WaylandVideoInterface::destroyWindow ( MWindow* window )
     if ( !w )
         return;
     window_list.remove(w);
-    delete window;
+    MVideoInterface::destroyWindow(window);
 }
 
 static WaylandVideoInterface interface;
