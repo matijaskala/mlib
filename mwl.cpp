@@ -87,7 +87,6 @@ WaylandWindow::~WaylandWindow()
     eglDestroySurface ( egl_display, egl_surface );
 
     wl_egl_window_destroy ( wl_egl_window );
-    wl_shell_surface_destroy ( wl_shell_surface );
     wl_surface_destroy ( wl_surface );
 }
 
@@ -398,9 +397,7 @@ void WaylandVideoInterface::destroyWindow ( MWindow* window )
     if ( !w )
         return;
     window_list.remove(w);
-    eglDestroySurface(w->egl_display, w->egl_surface);
-    wl_egl_window_destroy(w->wl_egl_window);
-    wl_surface_destroy(w->wl_surface);
+    delete window;
 }
 
 static WaylandVideoInterface interface;
