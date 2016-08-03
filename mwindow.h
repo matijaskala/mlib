@@ -26,6 +26,7 @@ class MWindow
 {
 protected:
     MWindow ( int width, int height );
+    virtual ~MWindow() = default;
     virtual void makeCurrent () = 0;
     virtual void resize () = 0;
     virtual void swapBuffers () = 0;
