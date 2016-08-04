@@ -2,10 +2,6 @@ project(mlib)
 
 cmake_minimum_required(VERSION 2.6)
 
-if(__${CMAKE_BUILD_TYPE}__ STREQUAL __Debug__)
-    add_definitions(-D__DEBUG__)
-endif()
-
 find_package(Freetype REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(OpenGL REQUIRED)
