@@ -28,6 +28,7 @@
 #include <MFont>
 #include <MImage>
 #include <mvideointerface.h>
+#include <mwindow.h>
 
 static MFont* font = nullptr;
 MTexture* tex = nullptr;
