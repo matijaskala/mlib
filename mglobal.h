@@ -20,7 +20,7 @@
 #ifndef MGLOBAL_H
 #define MGLOBAL_H
 
-#ifdef WIN32
+#ifdef _WIN32
 #define M_NO_EXPORT
 #define M_EXPORT __declspec(dllexport)
 #define M_IMPORT __declspec(dllimport)
