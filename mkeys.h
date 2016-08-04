@@ -338,5 +338,15 @@ enum class KMod {
         META = LMETA | RMETA
 };
 
+#ifndef _WIN32
+#include <xkbcommon/xkbcommon.h>
+#endif
+inline wchar_t m_key_to_wchar(MKey key) {
+#ifdef _WIN32
+    return key;
+#else
+    return xkb_keysym_to_utf32 ( key );
+#endif
+}
 
 #endif // MKEYS_H
