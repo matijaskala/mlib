@@ -321,12 +321,6 @@ bool DIBVideoInterface::init()
     return true;
 }
 
-TCHAR* last_error() {
-	static TCHAR errBuff[256];
-	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), 1, errBuff, sizeof(errBuff), NULL);
-	return errBuff;
-}
-
 void DIBVideoInterface::fini()
 {
     if (wglGetCurrentContext() == rc)
