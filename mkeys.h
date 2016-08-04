@@ -107,6 +107,7 @@ enum MKey : std::uint32_t {
         M_KEY_x                  = 120,
         M_KEY_y                  = 121,
         M_KEY_z                  = 122,
+        M_KEY_GRAVE              = 124,
         M_KEY_DELETE             = 127,
         /* End of ASCII mapped keysyms */
         /*@}*/
@@ -208,7 +209,7 @@ enum MKey : std::uint32_t {
         M_KEY_WORLD_92           = 252,
         M_KEY_WORLD_93           = 253,
         M_KEY_WORLD_94           = 254,
-        M_KEY_WORLD_95           = 255,          /* 0xFF */
+        M_KEY_WORLD_95           = 255,
         /*@}*/
 
         /** @name Numeric keypad */
@@ -262,37 +263,52 @@ enum MKey : std::uint32_t {
         M_KEY_F13                = 294,
         M_KEY_F14                = 295,
         M_KEY_F15                = 296,
+        M_KEY_F16,
+        M_KEY_F17,
+        M_KEY_F18,
+        M_KEY_F19,
+        M_KEY_F20,
+        M_KEY_F21,
+        M_KEY_F22,
+        M_KEY_F23,
+        M_KEY_F24,
         /*@}*/
 
         /** @name Key state modifier keys */
         /*@{*/
-        M_KEY_NUMLOCK            = 300,
-        M_KEY_CAPSLOCK           = 301,
-        M_KEY_SCROLLOCK          = 302,
-        M_KEY_RSHIFT             = 303,
-        M_KEY_LSHIFT             = 304,
-        M_KEY_RCTRL              = 305,
-        M_KEY_LCTRL              = 306,
-        M_KEY_RALT               = 307,
-        M_KEY_LALT               = 308,
-        M_KEY_RMETA              = 309,
-        M_KEY_LMETA              = 310,
-        M_KEY_LSUPER             = 311,          /**< Left "Windows" key */
-        M_KEY_RSUPER             = 312,          /**< Right "Windows" key */
-        M_KEY_MODE               = 313,          /**< "Alt Gr" key */
-        M_KEY_COMPOSE            = 314,          /**< Multi-key compose key */
+        M_KEY_NUMLOCK,
+        M_KEY_CAPSLOCK,
+        M_KEY_SCROLLOCK,
+        M_KEY_SCROLLLOCK = M_KEY_SCROLLOCK,
+        M_KEY_RSHIFT,
+        M_KEY_LSHIFT,
+        M_KEY_RCTRL,
+        M_KEY_LCTRL,
+        M_KEY_RALT,
+        M_KEY_LALT,
+        M_KEY_RMETA,
+        M_KEY_LMETA,
+        M_KEY_LSUPER,
+        M_KEY_RSUPER,
+        M_KEY_LGUI,
+        M_KEY_RGUI,
+        M_KEY_MODE,
+        M_KEY_ALTGR = M_KEY_MODE,
+        M_KEY_COMPOSE,
+        M_KEY_SELECT,
+        M_KEY_EXECUTE,
         /*@}*/
 
         /** @name Miscellaneous function keys */
         /*@{*/
-        M_KEY_HELP               = 315,
-        M_KEY_PRINT              = 316,
-        M_KEY_SYSREQ             = 317,
-        M_KEY_BREAK              = 318,
-        M_KEY_MENU               = 319,
-        M_KEY_POWER              = 320,          /**< Power Macintosh power key */
-        M_KEY_EURO               = 321,          /**< Some european keyboards */
-        M_KEY_UNDO               = 322,          /**< Atari keyboard has Undo */
+        M_KEY_HELP,
+        M_KEY_PRINT,
+        M_KEY_SYSREQ,
+        M_KEY_BREAK,
+        M_KEY_MENU,
+        M_KEY_POWER,
+        M_KEY_EURO,
+        M_KEY_UNDO,
         /*@}*/
 
         /* Add any other keys here */
