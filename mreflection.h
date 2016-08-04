@@ -20,6 +20,7 @@
 #ifndef MREFLECTION_H
 #define MREFLECTION_H
 
+#include <mglobal.h>
 #include <string>
 #include <unordered_map>
 #include <stdexcept>
@@ -66,7 +67,7 @@ public: \
     } \
 private:
 
-class MReflection
+class M_EXPORT MReflection
 {
     class Symbol {
         void* ptr;

@@ -20,6 +20,7 @@
 #ifndef MAUDIOSTREAM_H
 #define MAUDIOSTREAM_H
 
+#include <mglobal.h>
 #include <thread>
 #include <list>
 
@@ -45,7 +46,7 @@ protected:
     virtual void read () = 0;
     virtual void seek ( double seconds ) = 0;
 
-    struct Interface {
+    struct M_EXPORT Interface {
         Interface();
         virtual ~Interface();
         virtual bool valid ( std::istream* stream ) = 0;
