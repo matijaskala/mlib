@@ -33,7 +33,6 @@ add_library(mlib SHARED
     mdl.cpp
     melapsedtimer.cpp
     meventhandler.cpp
-    mfilesystem.cpp
     mfont.cpp
     mglobal.cpp
     mimage.cpp
@@ -73,7 +72,6 @@ install(FILES
     mdl.h
     melapsedtimer.h
     meventhandler.h
-    mfilesystem.h
     mfont.h
     mglobal.h
     mimage.h
