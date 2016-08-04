@@ -37,7 +37,6 @@ add_library(mlib SHARED
     mreflection.cpp
     mresourceloader.cpp
     mtexture.cpp
-    mvideo.cpp
     mvideointerface.cpp
     mwindow.cpp
 )
