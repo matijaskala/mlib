@@ -25,7 +25,6 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <EGL/egl.h>
-#include <GL/gl.h>
 #include <linux/input.h>
 #include <sys/mman.h>
 #include <xkbcommon/xkbcommon.h>
