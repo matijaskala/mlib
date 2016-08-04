@@ -40,7 +40,7 @@ add_library(mlib SHARED
     mvideointerface.cpp
     mwindow.cpp
 )
-target_link_libraries(mlib nonstdcxx)
+target_link_libraries(mlib nonstdc++)
 add_library(mpng MODULE mpng.cpp)
 target_link_libraries(mpng mlib png)
 add_library(mtype MODULE mtype.cpp)
