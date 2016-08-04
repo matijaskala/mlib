@@ -73,7 +73,7 @@ struct Menu : public Drawable {
         for ( auto tex: textures )
             delete tex;
         textures.resize(items.size());
-        for ( int i = 0; i < items.size(); i++ ) {
+        for ( unsigned int i = 0; i < items.size(); i++ ) {
             std::string text = items[i];
             textures[i] = font->render(text);
         }
@@ -165,9 +165,7 @@ int main ( int argc, char** argv ) {
         {
             if ( key == M_KEY_BACKSPACE && !text->text.empty() )
                 text->text.pop_back();
-            else if ( static_cast<int> ( key ) >= 32 && static_cast<int> ( key ) < 128 )
-                text->text += static_cast<char> ( key );
-            else if ( static_cast<int> ( key ) >= M_KEY_LAST )
+            else if ( ( key >= 32 && key < 127 ) || ( key >= 160 && key < 256 ) || key >= M_KEY_LAST )
                 text->text += static_cast<wchar_t> ( xkb_keysym_to_utf32 ( key ) );
             text->changed();
         };
