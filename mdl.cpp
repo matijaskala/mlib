@@ -48,8 +48,15 @@ bool MDL::open ( string file )
         mspath += ( c == '/' ) ? '\\' : c;
     module = LoadLibraryExA ( (LPSTR) mspath.c_str(), NULL, 
                              LOAD_WITH_ALTERED_SEARCH_PATH );
-    if ( !module )
-        mDebug(ERROR) << GetLastError();
+
+    if ( !module ) {
+        static TCHAR error_buffer[0x100];
+        FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
+                      MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                      error_buffer, sizeof(error_buffer), NULL);
+
+        mDebug(ERROR) << error_buffer;
+    }
 #else
     dlerror();
     module = dlopen ( file.c_str(), RTLD_NOW | RTLD_LOCAL );
@@ -72,8 +79,14 @@ bool MDL::close ( string file )
         return true;
     }
 #ifdef _WIN32
-    if ( !FreeLibrary ( static_cast<HMODULE> ( module ) ) )
-        mDebug() << GetLastError();
+    if ( !FreeLibrary ( static_cast<HMODULE> ( module ) ) ) {
+        static TCHAR error_buffer[0x100];
+        FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
+                      MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                      error_buffer, sizeof(error_buffer), NULL);
+
+        mDebug(ERROR) << error_buffer;
+    }
 #else
     dlerror();
     if ( dlclose(module) != 0 )
