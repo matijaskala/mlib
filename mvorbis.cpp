@@ -89,8 +89,10 @@ MAudioStream* MVorbisStream::Interface::create ( std::istream* stream )
         },
     };
     stream->seekg(0);
-    if ( ov_open_callbacks ( stream, &vorbisStream->vorbisFile, nullptr, 0, callbacks ) < 0 )
+    if ( ov_open_callbacks ( stream, &vorbisStream->vorbisFile, nullptr, 0, callbacks ) < 0 ) {
+        delete vorbisStream;
         return nullptr;
+    }
     auto info = ov_info ( &vorbisStream->vorbisFile, -1 );
     vorbisStream->setFreq ( info->rate );
     vorbisStream->setStereo ( info->channels > 1 );
