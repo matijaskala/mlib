@@ -98,4 +98,3 @@ install(DIRECTORY data/ DESTINATION share/mlib)
 
 add_subdirectory(test)
 add_subdirectory(wml)
-add_subdirectory(nonstd)
