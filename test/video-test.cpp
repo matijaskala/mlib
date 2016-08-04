@@ -28,7 +28,6 @@
 #include <MFont>
 #include <MImage>
 #include <mvideointerface.h>
-#include <xkbcommon/xkbcommon.h>
 
 static MFont* font = nullptr;
 MTexture* tex = nullptr;
@@ -165,8 +164,8 @@ int main ( int argc, char** argv ) {
         {
             if ( key == M_KEY_BACKSPACE && !text->text.empty() )
                 text->text.pop_back();
-            else if ( ( key >= 32 && key < 127 ) || ( key >= 160 && key < 256 ) || key >= M_KEY_LAST )
-                text->text += static_cast<wchar_t> ( xkb_keysym_to_utf32 ( key ) );
+            else if ( m_key_is_character ( key ) )
+                text->text += m_key_to_wchar ( key );
             text->changed();
         };
     };
