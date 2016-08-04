@@ -17,12 +17,13 @@
  *
  */
 
-#include "mkeys.h"
-#include "nonstd/signal"
-#include "msize.h"
-#include "meventhandler.h"
+#include <mkeys.h>
+#include <nonstd/signal>
+#include <msize.h>
+#include <meventhandler.h>
+#include <mglobal.h>
 
-class MWindow
+class M_EXPORT MWindow
 {
     friend class MVideoInterface;
 protected:

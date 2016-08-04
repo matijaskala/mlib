@@ -17,10 +17,10 @@
  *
  */
 
-#include "mglobal.h"
 #include <MVideoInterface>
 #include <MDebug>
 #include <MSize>
+#include <mwindow.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 

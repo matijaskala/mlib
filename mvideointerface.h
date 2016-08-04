@@ -20,11 +20,12 @@
 #ifndef MVIDEOINTERFACE_H
 #define MVIDEOINTERFACE_H
 
+#include <MGlobal>
 #include <MSize>
-#include "mwindow.h"
 #include <list>
 
-class MVideoInterface
+class MWindow;
+class M_EXPORT MVideoInterface
 {
 public:
     MVideoInterface();

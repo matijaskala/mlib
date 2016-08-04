@@ -20,6 +20,7 @@
 #include <MDebug>
 #include <MKeys>
 #include <MVideoInterface>
+#include <mwindow.h>
 #include <GL/gl.h>
 
 class DIBWindow : public MWindow

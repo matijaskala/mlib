@@ -17,8 +17,8 @@
  *
  */
 
-#include <mglobal.h>
 #include <MVideoInterface>
+#include <mwindow.h>
 #include <MKeys>
 #include <GL/glx.h>
 #include <unistd.h>

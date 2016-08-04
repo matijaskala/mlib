@@ -25,7 +25,7 @@
 #include <list>
 #include <string>
 
-struct MResourceLoader
+struct M_EXPORT MResourceLoader
 {
     MResourceLoader();
     virtual ~MResourceLoader();
