@@ -172,7 +172,7 @@ int main ( int argc, char** argv ) {
     };
     w->eventHandlers.push<EventHandler>();
     for ( auto f: non_std::directory ( MLIB_DATA_DIR "images" ) ) {
-        if ( f.name()[0] == '.' )
+        if ( f.name().front() == '.' )
             continue;
         MDebug debug;
         debug << "Loading image " << f.name() << " ... ";
@@ -182,7 +182,7 @@ int main ( int argc, char** argv ) {
             debug << "failed";
     }
     for ( auto f: non_std::directory ( MLIB_DATA_DIR "fonts" ) ) {
-        if ( f.name()[0] == '.' )
+        if ( f.name().front() == '.' )
             continue;
         MDebug debug;
         debug << "Loading font " << f.name() << " ... ";
