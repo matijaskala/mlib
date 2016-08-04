@@ -35,7 +35,7 @@ M_EXPORT MPNG png;
 bool MPNG::valid ( std::string file )
 {
     png_byte header[8];
-    std::ifstream stream ( file );
+    std::ifstream stream { file, std::ios::binary };
     if ( !stream.is_open() )
         mDebug() << file << ": No such file or directory.";
     stream.read ( reinterpret_cast<char*> ( header ), 8 );
@@ -63,7 +63,7 @@ MResource* MPNG::load ( std::string file )
         png_destroy_read_struct ( &png, &info, nullptr );
         return nullptr;
     }
-    std::ifstream stream ( file );
+    std::ifstream stream { file, std::ios::binary };
     png_set_read_fn ( png, &stream, readData );
     png_read_info ( png, info );
     png_uint_32 width = png_get_image_width ( png, info );
