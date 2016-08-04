@@ -338,10 +338,15 @@ enum class KMod {
         META = LMETA | RMETA
 };
 
+inline bool m_key_is_character ( MKey key ) {
+    return ( key >= 32 && key < 127 ) || ( key >= 160 && key < 256 ) || key >= M_KEY_LAST;
+}
+
 #ifndef _WIN32
 #include <xkbcommon/xkbcommon.h>
 #endif
-inline wchar_t m_key_to_wchar(MKey key) {
+
+inline wchar_t m_key_to_wchar ( MKey key ) {
 #ifdef _WIN32
     return key;
 #else
