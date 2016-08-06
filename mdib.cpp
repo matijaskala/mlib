@@ -113,8 +113,7 @@ void DIBWindow::swapBuffers()
 }
 
 #include <xkbcommon/xkbcommon-keysyms.h>
-static const MKey windows_scancode_table[] = 
-{ 
+static const MKey windows_scancode_table[] {
 	/*	0						1							2							3							4						5							6							7 */
 	/*	8						9							A							B							C						D							E							F */
 	M_KEY_UNKNOWN,		M_KEY_ESCAPE,		M_KEY_1,				M_KEY_2,				M_KEY_3,			M_KEY_4,				M_KEY_5,				M_KEY_6,			/* 0 */
@@ -135,7 +134,7 @@ static const MKey windows_scancode_table[] =
 	M_KEY_DOWN,			M_KEY_PAGEDOWN,		M_KEY_INSERT,		M_KEY_DELETE,		M_KEY_UNKNOWN,	M_KEY_UNKNOWN,		/*M_KEY_NONUSBACKSLASH*/M_KEY_UNKNOWN,M_KEY_F11,		/* 5 */
 	M_KEY_F12,			M_KEY_PAUSE,			M_KEY_UNKNOWN,		/*M_KEY_LGUI*/M_KEY_UNKNOWN,			/*M_KEY_RGUI*/M_KEY_UNKNOWN,		/*M_KEY_APPLICATION*/M_KEY_UNKNOWN,	M_KEY_UNKNOWN,		M_KEY_UNKNOWN,	/* 5 */
 
-	(MKey)XKB_KEY_scaron,		(MKey)XKB_KEY_dstroke,		(MKey)XKB_KEY_ccaron,		(MKey)XKB_KEY_cacute,		M_KEY_F13,		M_KEY_F14,			M_KEY_F15,			M_KEY_F16,		/* 6 */
+	(MKey)XKB_KEY_scaron,		(MKey)XKB_KEY_dstroke,		(MKey)XKB_KEY_ccaron,		(MKey)XKB_KEY_cacute,		M_KEY_F13,		/*M_KEY_F14*/(MKey)XKB_KEY_zcaron,			M_KEY_F15,			M_KEY_F16,		/* 6 */
 	M_KEY_F17,			M_KEY_F18,			M_KEY_F19,			M_KEY_UNKNOWN,		M_KEY_UNKNOWN,	M_KEY_UNKNOWN,		M_KEY_UNKNOWN,		M_KEY_UNKNOWN,	/* 6 */
 	
 	M_KEY_WORLD_2,		M_KEY_UNKNOWN,		M_KEY_UNKNOWN,		M_KEY_WORLD_1,		M_KEY_UNKNOWN,	M_KEY_UNKNOWN,		M_KEY_UNKNOWN,		M_KEY_UNKNOWN,	/* 7 */
