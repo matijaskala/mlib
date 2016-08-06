@@ -117,26 +117,26 @@ static const MKey windows_scancode_table[] {
 	/*	0						1							2							3							4						5							6							7 */
 	/*	8						9							A							B							C						D							E							F */
 	M_KEY_UNKNOWN,		M_KEY_ESCAPE,		M_KEY_1,				M_KEY_2,				M_KEY_3,			M_KEY_4,				M_KEY_5,				M_KEY_6,			/* 0 */
-	M_KEY_7,				M_KEY_8,				M_KEY_9,				M_KEY_0,				M_KEY_MINUS,		M_KEY_EQUALS,		M_KEY_BACKSPACE,		M_KEY_TAB,		/* 0 */
+	M_KEY_7,				M_KEY_8,				M_KEY_9,				M_KEY_0,				M_KEY_QUOTE,		M_KEY_PLUS,		M_KEY_BACKSPACE,		M_KEY_TAB,		/* 0 */
 
-	M_KEY_q,				M_KEY_w,				M_KEY_e,				M_KEY_r,				M_KEY_t,			M_KEY_y,				M_KEY_u,				M_KEY_i,			/* 1 */
+	M_KEY_q,				M_KEY_w,				M_KEY_e,				M_KEY_r,				M_KEY_t,			M_KEY_z,				M_KEY_u,				M_KEY_i,			/* 1 */
 	M_KEY_o,				M_KEY_p,				M_KEY_LEFTBRACKET,	M_KEY_RIGHTBRACKET,	M_KEY_RETURN,	M_KEY_LCTRL,			M_KEY_a,				M_KEY_s,			/* 1 */
 
 	M_KEY_d,				M_KEY_f,				M_KEY_g,				M_KEY_h,				M_KEY_j,			M_KEY_k,				M_KEY_l,				M_KEY_SEMICOLON,	/* 2 */
-	M_KEY_QUOTE,	M_KEY_GRAVE,			M_KEY_LSHIFT,		M_KEY_BACKSLASH,		M_KEY_z,			M_KEY_x,				M_KEY_c,				M_KEY_v,			/* 2 */
+	M_KEY_QUOTE,	M_KEY_GRAVE,			M_KEY_LSHIFT,		M_KEY_BACKSLASH,		M_KEY_y,			M_KEY_x,				M_KEY_c,				M_KEY_v,			/* 2 */
 
-	M_KEY_b,				M_KEY_n,				M_KEY_m,				M_KEY_COMMA,			M_KEY_PERIOD,	M_KEY_SLASH,			M_KEY_RSHIFT,		M_KEY_PRINT,/* 3 */
+	M_KEY_b,				M_KEY_n,				M_KEY_m,				M_KEY_COMMA,			M_KEY_PERIOD,	M_KEY_MINUS,			M_KEY_RSHIFT,		M_KEY_PRINT,/* 3 */
 	M_KEY_LALT,			M_KEY_SPACE,			M_KEY_CAPSLOCK,		M_KEY_F1,			M_KEY_F2,		M_KEY_F3,			M_KEY_F4,			M_KEY_F5,		/* 3 */
 
 	M_KEY_F6,			M_KEY_F7,			M_KEY_F8,			M_KEY_F9,			M_KEY_F10,		M_KEY_NUMLOCK,	M_KEY_SCROLLLOCK,	M_KEY_HOME,		/* 4 */
 	M_KEY_UP,			M_KEY_PAGEUP,		M_KEY_KP_MINUS,		M_KEY_LEFT,			M_KEY_KP5,		M_KEY_RIGHT,			M_KEY_KP_PLUS,		M_KEY_END,		/* 4 */
 
-	M_KEY_DOWN,			M_KEY_PAGEDOWN,		M_KEY_INSERT,		M_KEY_DELETE,		M_KEY_UNKNOWN,	M_KEY_UNKNOWN,		/*M_KEY_NONUSBACKSLASH*/M_KEY_UNKNOWN,M_KEY_F11,		/* 5 */
+	M_KEY_DOWN,			M_KEY_PAGEDOWN,		M_KEY_INSERT,		M_KEY_DELETE,		M_KEY_UNKNOWN,	M_KEY_UNKNOWN,		M_KEY_LESS,M_KEY_F11,		/* 5 */
 	M_KEY_F12,			M_KEY_PAUSE,			M_KEY_UNKNOWN,		/*M_KEY_LGUI*/M_KEY_UNKNOWN,			/*M_KEY_RGUI*/M_KEY_UNKNOWN,		/*M_KEY_APPLICATION*/M_KEY_UNKNOWN,	M_KEY_UNKNOWN,		M_KEY_UNKNOWN,	/* 5 */
 
 	(MKey)XKB_KEY_scaron,		(MKey)XKB_KEY_dstroke,		(MKey)XKB_KEY_ccaron,		(MKey)XKB_KEY_cacute,		M_KEY_F13,		/*M_KEY_F14*/(MKey)XKB_KEY_zcaron,			M_KEY_F15,			M_KEY_F16,		/* 6 */
-	M_KEY_F17,			M_KEY_F18,			M_KEY_F19,			M_KEY_UNKNOWN,		M_KEY_UNKNOWN,	M_KEY_UNKNOWN,		M_KEY_UNKNOWN,		M_KEY_UNKNOWN,	/* 6 */
-	
+	M_KEY_F17,			M_KEY_F18,			M_KEY_F19,			M_KEY_UNKNOWN,		M_KEY_UNKNOWN,	(MKey)XKB_KEY_KP_Enter,		M_KEY_KP_EQUALS,		M_KEY_WORLD_17,	/* 6 */
+
 	M_KEY_WORLD_2,		M_KEY_UNKNOWN,		M_KEY_UNKNOWN,		M_KEY_WORLD_1,		M_KEY_UNKNOWN,	M_KEY_UNKNOWN,		M_KEY_UNKNOWN,		M_KEY_UNKNOWN,	/* 7 */
 	M_KEY_UNKNOWN,		M_KEY_WORLD_4,		M_KEY_UNKNOWN,		M_KEY_WORLD_5,		M_KEY_UNKNOWN,	M_KEY_WORLD_3,		M_KEY_UNKNOWN,		M_KEY_UNKNOWN	/* 7 */
 };
