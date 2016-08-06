@@ -98,7 +98,13 @@ void DIBWindow::raise()
 
 void DIBWindow::resize()
 {
-    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, size.width(), size.height(), SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOACTIVATE);
+    RECT bounds;
+    bounds.left = 0;
+    bounds.top = 0;
+    bounds.right = size.width();
+    bounds.bottom = size.height();
+    AdjustWindowRect(&bounds, GetWindowLong(hwnd, GWL_STYLE), 0);
+    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, bounds.right - bounds.left, bounds.bottom - bounds.top, SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOACTIVATE);
 }
 
 void DIBWindow::swapBuffers()
