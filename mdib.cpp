@@ -179,7 +179,7 @@ static xkb_keysym_t vk_to_xkb_keysym(UINT vk) {
         case VK_F7: return M_KEY_F7;
         case VK_F8: return M_KEY_F8;
         case VK_F9: return M_KEY_F9;
-	case VK_F10: return M_KEY_F10;
+        case VK_F10: return M_KEY_F10;
         case VK_F11: return M_KEY_F11;
         case VK_F12: return M_KEY_F12;
         case VK_F13: return M_KEY_F13;
