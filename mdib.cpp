@@ -142,7 +142,6 @@ static const MKey windows_scancode_table[] {
 };
 
 static xkb_keysym_t vk_to_xkb_keysym(UINT vk) {
-    UINT vk = MapVirtualKey(vsc_vk, MAPVK_VSC_TO_VK);
     switch (vk) {
         case VK_CLEAR: return M_KEY_CLEAR;
         case VK_RETURN: return M_KEY_RETURN;
