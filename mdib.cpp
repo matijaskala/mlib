@@ -167,6 +167,7 @@ static xkb_keysym_t vk_to_xkb_keysym(UINT vk) {
 
         case VK_LWIN: return M_KEY_LSUPER;
         case VK_RWIN: return M_KEY_RSUPER;
+        case VK_APPS: return M_KEY_MENU;
         case VK_ADD: return M_KEY_KP_PLUS;
         case VK_SUBTRACT: return M_KEY_KP_MINUS;
         case VK_F1: return M_KEY_F1;
