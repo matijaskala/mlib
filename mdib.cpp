@@ -141,103 +141,47 @@ static const MKey windows_scancode_table[] {
 	M_KEY_UNKNOWN,		M_KEY_WORLD_4,		M_KEY_UNKNOWN,		M_KEY_WORLD_5,		M_KEY_UNKNOWN,	M_KEY_WORLD_3,		M_KEY_UNKNOWN,		M_KEY_UNKNOWN	/* 7 */
 };
 
-static xkb_keysym_t vsc_vk_to_xkb_keysym(UINT vsc_vk) {
+static xkb_keysym_t vk_to_xkb_keysym(UINT vk) {
     UINT vk = MapVirtualKey(vsc_vk, MAPVK_VSC_TO_VK);
     switch (vk) {
-        case 12:
-            return M_KEY_KP5;
-        case 16:
-            return vsc_vk < 48 ? M_KEY_LSHIFT : M_KEY_RSHIFT;
-        case 17:
-            return M_KEY_LCTRL;
-        case 18:
-            return M_KEY_LALT;
-        case 20:
-            return M_KEY_CAPSLOCK;
-        case 33:
-            return M_KEY_PAGEUP;
-        case 34:
-            return M_KEY_PAGEDOWN;
-        case 35:
-            return M_KEY_END;
-        case 36:
-            return M_KEY_HOME;
-        case 37:
-            return M_KEY_LEFT;
-        case 38:
-            return M_KEY_UP;
-        case 39:
-            return M_KEY_RIGHT;
-        case 40:
-            return M_KEY_DOWN;
-        case 44:
-            return M_KEY_PRINT;
-        case 45:
-            return M_KEY_INSERT;
-        case 46:
-            return M_KEY_DELETE;
-        case 91:
-            return M_KEY_LSUPER;
-        case 105:
-            return M_KEY_ALTGR;
-        case 106:
-            return M_KEY_KP_ENTER;
-        case 107:
-            return M_KEY_KP_PLUS;
-        case 109:
-            return M_KEY_KP_MINUS;
-        case 112:
-            return M_KEY_F1;
-        case 113:
-            return M_KEY_F2;
-        case 114:
-            return M_KEY_F3;
-        case 115:
-            return M_KEY_F4;
-        case 116:
-            return M_KEY_F5;
-        case 117:
-            return M_KEY_F6;
-        case 118:
-            return M_KEY_F7;
-        case 119:
-            return M_KEY_F8;
-        case 120:
-            return M_KEY_F9;
-        case 121:
-            return M_KEY_F10;
-        case 122:
-            return M_KEY_F11;
-        case 123:
-            return M_KEY_F12;
-        case 144:
-            return M_KEY_NUMLOCK;
-        case 145:
-            return M_KEY_SCROLLLOCK;
-        case 146:
-            return M_KEY_KP_EQUALS;
-        default:
-            return MapVirtualKey(vk, MAPVK_VK_TO_CHAR);
-    }
-}
-
-static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
-{
-    xkb_keysym_t key;
-    char bIsExtended;
-    UINT nScanCode = (lParam >> 16) & 0xFF;
-
-    /* 0x45 here to work around both pause and numlock sharing the same scancode, so use the VK key to tell them apart */
-    if (nScanCode == 0 || nScanCode == 0x45) {
-        switch(wParam) {
         case VK_CLEAR: return M_KEY_CLEAR;
+        case VK_RETURN: return M_KEY_RETURN;
+        case VK_CONTROL: return M_KEY_LCTRL;
+        case VK_MENU: return M_KEY_LALT;
+        case VK_PAUSE: return M_KEY_PAUSE;
+        case VK_CAPITAL: return M_KEY_CAPSLOCK;
         case VK_MODECHANGE: return M_KEY_MODE;
+        case VK_PRIOR: return M_KEY_PAGEUP;
+        case VK_NEXT: return M_KEY_PAGEDOWN;
+        case VK_END: return M_KEY_END;
+        case VK_HOME: return M_KEY_HOME;
+        case VK_LEFT: return M_KEY_LEFT;
+        case VK_UP: return M_KEY_UP;
+        case VK_RIGHT: return M_KEY_RIGHT;
+        case VK_DOWN: return M_KEY_DOWN;
         case VK_SELECT: return M_KEY_SELECT;
         case VK_EXECUTE: return M_KEY_EXECUTE;
+        case VK_SNAPSHOT: return M_KEY_PRINT;
+        case VK_INSERT: return M_KEY_INSERT;
+        case VK_DELETE: return M_KEY_DELETE;
         case VK_HELP: return M_KEY_HELP;
-        case VK_PAUSE: return M_KEY_PAUSE;
-        case VK_NUMLOCK: return M_KEY_NUMLOCK;
 
+        case VK_LWIN: return M_KEY_LSUPER;
+        case VK_RWIN: return M_KEY_RSUPER;
+        case VK_ADD: return M_KEY_KP_PLUS;
+        case VK_SUBTRACT: return M_KEY_KP_MINUS;
+        case VK_F1: return M_KEY_F1;
+        case VK_F2: return M_KEY_F2;
+        case VK_F3: return M_KEY_F3;
+        case VK_F4: return M_KEY_F4;
+        case VK_F5: return M_KEY_F5;
+        case VK_F6: return M_KEY_F6;
+        case VK_F7: return M_KEY_F7;
+        case VK_F8: return M_KEY_F8;
+        case VK_F9: return M_KEY_F9;
+	case VK_F10: return M_KEY_F10;
+        case VK_F11: return M_KEY_F11;
+        case VK_F12: return M_KEY_F12;
         case VK_F13: return M_KEY_F13;
         case VK_F14: return M_KEY_F14;
         case VK_F15: return M_KEY_F15;
@@ -250,7 +194,8 @@ static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
         case VK_F22: return M_KEY_F22;
         case VK_F23: return M_KEY_F23;
         case VK_F24: return M_KEY_F24;
-
+        case VK_NUMLOCK: return M_KEY_NUMLOCK;
+        case VK_SCROLL: return M_KEY_SCROLLLOCK;
         case VK_OEM_NEC_EQUAL: return M_KEY_KP_EQUALS;
         case VK_BROWSER_BACK: return XKB_KEY_XF86Back;
         case VK_BROWSER_FORWARD: return XKB_KEY_XF86Forward;
@@ -262,30 +207,42 @@ static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
         case VK_VOLUME_MUTE: return XKB_KEY_XF86AudioMute;
         case VK_VOLUME_DOWN: return XKB_KEY_XF86AudioLowerVolume;
         case VK_VOLUME_UP: return XKB_KEY_XF86AudioRaiseVolume;
-
         case VK_MEDIA_NEXT_TRACK: return XKB_KEY_XF86AudioNext;
         case VK_MEDIA_PREV_TRACK: return XKB_KEY_XF86AudioPrev;
         case VK_MEDIA_STOP: return XKB_KEY_XF86AudioStop;
         case VK_MEDIA_PLAY_PAUSE: return XKB_KEY_XF86AudioPlay;
         case VK_LAUNCH_MAIL: return XKB_KEY_XF86Mail;
         case VK_LAUNCH_MEDIA_SELECT: return XKB_KEY_XF86Select;
-
+        case VK_LAUNCH_APP1: return XKB_KEY_XF86Launch1;
+        case VK_LAUNCH_APP2: return XKB_KEY_XF86Launch2;
+        case VK_OEM_RESET: return M_KEY_ALTGR;
         case VK_ATTN: return M_KEY_SYSREQ;
         case VK_CRSEL: return XKB_KEY_3270_CursorSelect;
         case VK_EXSEL: return XKB_KEY_3270_ExSelect;
         case VK_OEM_CLEAR: return M_KEY_CLEAR;
+        default: return MapVirtualKey(vk, MAPVK_VK_TO_CHAR);
+    }
+}
 
-        case VK_LAUNCH_APP1: return XKB_KEY_XF86Launch1;
-        case VK_LAUNCH_APP2: return XKB_KEY_XF86Launch2;
+static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
+{
+    if (lParam & (1 << 30))
+        return M_KEY_UNKNOWN;
 
-        default: return M_KEY_UNKNOWN;
-        }
+    xkb_keysym_t key;
+    char bIsExtended;
+    UINT nScanCode = (lParam >> 16) & 0xFF;
+
+    switch (lParam >> 16) {
+        case 42: return M_KEY_LSHIFT;
+        case 54: return M_KEY_RSHIFT;
+        case 309: return M_KEY_KP_DIVIDE;
     }
 
     if (nScanCode > 127)
         return M_KEY_UNKNOWN;
 
-    key = vsc_vk_to_xkb_keysym(nScanCode);
+    key = vk_to_xkb_keysym(wParam);
 
     bIsExtended = (lParam & (1 << 24)) != 0;
     if (!bIsExtended) {
@@ -298,6 +255,8 @@ static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
             return M_KEY_KP9;
         case M_KEY_LEFT:
             return M_KEY_KP4;
+        case M_KEY_CLEAR:
+            return M_KEY_KP5;
         case M_KEY_RIGHT:
             return M_KEY_KP6;
         case M_KEY_END:
@@ -323,10 +282,6 @@ static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
             return M_KEY_RALT;
         case M_KEY_LCTRL:
             return M_KEY_RCTRL;
-        case M_KEY_MINUS:
-            return M_KEY_KP_DIVIDE;
-        case M_KEY_CAPSLOCK:
-            return M_KEY_KP_PLUS;
         default:
             break;
         }
