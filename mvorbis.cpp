@@ -23,24 +23,17 @@
 #include <MDebug>
 
 #include <vorbis/vorbisfile.h>
-#include <fstream>
 
-struct MVorbisStream : public MAudioStream
+static struct VorbisInterface : public MAudioInterface
 {
-    static struct Interface : public MAudioStream::Interface
-    {
-        virtual bool valid ( std::istream* stream );
-        virtual MAudioStream* create ( std::istream* stream );
-    } iface;
-    virtual ~MVorbisStream();
-    virtual void read();
-    virtual void seek ( double seconds );
-    OggVorbis_File vorbisFile;
-};
+    virtual bool valid ( std::istream* stream ) const;
+    virtual void init ( MAudioStream* audioStream ) const;
+    virtual void fini ( MAudioStream* audioStream ) const;
+    virtual void read ( MAudioStream* audioStream ) const;
+    virtual void seek ( MAudioStream* audioStream, double seconds ) const;
+} iface;
 
-MVorbisStream::Interface MVorbisStream::iface;
-
-bool MVorbisStream::Interface::valid ( std::istream* stream )
+bool VorbisInterface::valid ( std::istream* stream ) const
 {
     stream->seekg(0);
     char header[5]{};
@@ -48,21 +41,23 @@ bool MVorbisStream::Interface::valid ( std::istream* stream )
     return header == std::string{"OggS"};
 }
 
-MAudioStream* MVorbisStream::Interface::create ( std::istream* stream )
+void VorbisInterface::init ( MAudioStream* audioStream ) const
 {
-    auto vorbisStream = new MVorbisStream;
+    auto vorbisFile = new OggVorbis_File;
     ov_callbacks callbacks{
         [] (void *ptr, std::size_t size, std::size_t nmemb, void *datasource) -> std::size_t {
-            auto stream = static_cast<std::istream*> ( datasource );
-            if ( stream->eof() )
+            auto audioStream = static_cast<MAudioStream*> ( datasource );
+            if ( stream ( audioStream ) ->eof() ) {
+                setEOF ( audioStream );
                 return 0;
+            }
             auto buf = static_cast<char*> ( ptr );
-            stream->read ( buf, size * nmemb );
-            stream->clear();
-            return stream->gcount() / size;
+            stream ( audioStream ) ->read ( buf, size * nmemb );
+            stream ( audioStream ) ->clear();
+            return stream ( audioStream ) ->gcount() / size;
         },
         [] (void *datasource, ogg_int64_t offset, int whence) -> int {
-            auto stream = static_cast<std::istream*> ( datasource );
+            auto audioStream = static_cast<MAudioStream*> ( datasource );
             std::ios::seekdir dir;
             switch ( whence ) {
                 case SEEK_SET:
@@ -77,53 +72,57 @@ MAudioStream* MVorbisStream::Interface::create ( std::istream* stream )
                 default:
                     return -1;
             }
-            stream->seekg ( offset, dir );
-            return stream->fail() ? -1 : 0;
+            stream ( audioStream ) ->seekg ( offset, dir );
+            return stream ( audioStream ) ->fail() ? -1 : 0;
         },
         [] (void *datasource) -> int {
             return 0;
         },
         [] (void *datasource) -> long {
-            auto stream = static_cast<std::istream*> ( datasource );
-            return stream->tellg();
+            auto audioStream = static_cast<MAudioStream*> ( datasource );
+            return stream ( audioStream ) ->tellg();
         },
     };
-    stream->seekg(0);
-    if ( ov_open_callbacks ( stream, &vorbisStream->vorbisFile, nullptr, 0, callbacks ) < 0 ) {
-        delete vorbisStream;
-        return nullptr;
+    stream ( audioStream ) ->seekg(0);
+    if ( ov_open_callbacks ( audioStream, vorbisFile, nullptr, 0, callbacks ) < 0 ) {
+        delete vorbisFile;
+        return;
     }
-    auto info = ov_info ( &vorbisStream->vorbisFile, -1 );
-    vorbisStream->setFreq ( info->rate );
-    vorbisStream->setStereo ( info->channels > 1 );
-    return vorbisStream;
+    auto info = ov_info ( vorbisFile, -1 );
+    setEOF ( audioStream, false );
+    setFreq ( audioStream, info->rate );
+    setStereo ( audioStream, info->channels > 1 );
+    setUserData ( audioStream, vorbisFile );
+    setValid ( audioStream );
 }
 
-MVorbisStream::~MVorbisStream()
+void VorbisInterface::fini ( MAudioStream* audioStream ) const
 {
-    ov_clear(&vorbisFile);
+    ov_clear ( &userdata<OggVorbis_File> ( audioStream ) );
 }
 
-void MVorbisStream::seek ( double seconds )
+void VorbisInterface::seek ( MAudioStream* audioStream, double seconds ) const
 {
-    ov_time_seek(&vorbisFile, seconds);
+    ov_time_seek ( &userdata<OggVorbis_File> ( audioStream ), seconds );
 }
 
-void MVorbisStream::read()
+void VorbisInterface::read ( MAudioStream* audioStream ) const
 {
-    buffer_size = 0;
+    audioStream->buffer_size = 0;
     long read;
     do {
-        read = ov_read ( &vorbisFile, buffer + buffer_size, sizeof(buffer) - buffer_size, 0, 2, 1, nullptr );
+        read = ov_read ( &userdata<OggVorbis_File> ( audioStream ), audioStream->buffer + audioStream->buffer_size,
+                         sizeof(audioStream->buffer) - audioStream->buffer_size, 0, 2, 1, nullptr );
         if ( read <= 0 )
             switch ( read ) {
                 case 0:
-                    return setEOF();
+                    setEOF ( audioStream );
+                    return;
                 case OV_HOLE:
                     mDebug(ERROR) << "OV_HOLE";
                     break;
             }
         else
-            buffer_size += read;
-    } while ( buffer_size + read < sizeof(buffer) );
+            audioStream->buffer_size += read;
+    } while ( audioStream->buffer_size + read < sizeof(audioStream->buffer) );
 }

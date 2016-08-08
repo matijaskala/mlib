@@ -35,18 +35,17 @@ MResource* MAudioLoader::load ( std::string file )
     std::ifstream fileStream{file};
     if ( !fileStream.is_open() )
         return nullptr;
-    auto audioStream = MAudioStream::create(&fileStream);
-    if ( !audioStream )
+    MAudioStream audioStream{std::move(fileStream)};
+    if ( !audioStream.valid() )
         return nullptr;
     auto audioFile = new MAudioFile;
-    audioFile->stereo = audioStream->stereo();
-    audioFile->freq = audioStream->freq();
-    while ( !audioStream->eof() ) {
-        audioStream->initRead();
-        audioStream->waitRead();
-        audioFile->buffer.insert ( audioFile->buffer.end(), audioStream->buffer, audioStream->buffer + audioStream->buffer_size );
+    audioFile->stereo = audioStream.stereo();
+    audioFile->freq = audioStream.freq();
+    while ( !audioStream.eof() ) {
+        audioStream.initRead();
+        audioStream.waitRead();
+        audioFile->buffer.insert ( audioFile->buffer.end(), audioStream.buffer, audioStream.buffer + audioStream.buffer_size );
     }
-    delete audioStream;
     return audioFile;
 }
 

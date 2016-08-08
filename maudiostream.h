@@ -21,50 +21,66 @@
 #define MAUDIOSTREAM_H
 
 #include <mglobal.h>
-#include <thread>
+#include <istream>
 #include <list>
+#include <thread>
 
+class MAudioInterface;
 class M_EXPORT MAudioStream
 {
+    friend class MAudioInterface;
+
 public:
-    static MAudioStream* create ( std::istream* stream );
-    virtual ~MAudioStream() = default;
+    template <typename _IStream>
+    MAudioStream ( _IStream&& stream ) : m_stream{new _IStream{std::move(stream)}} { m_init(); }
+    MAudioStream ( std::streambuf* sb ) : m_stream{new std::istream{sb}} { m_init(); }
+    ~MAudioStream();
 
     bool eof() { return m_eof; }
     int freq() { return m_freq; }
     bool stereo() { return m_stereo; }
+    bool valid() { return m_valid; }
 
     char buffer[0x4000];
     std::size_t buffer_size;
 
-    void initRead() { m_thread = std::thread { [this] { read(); } }; }
-    void waitRead() { m_thread.join(); }
+    void initRead();
+    void waitRead();
 
-    void seek ( std::chrono::duration < double > seconds ) { setEOF(false); seek(seconds.count()); }
-
-protected:
-    virtual void read () = 0;
-    virtual void seek ( double seconds ) = 0;
-
-    struct M_EXPORT Interface {
-        Interface();
-        virtual ~Interface();
-        virtual bool valid ( std::istream* stream ) = 0;
-        virtual MAudioStream* create ( std::istream* stream ) = 0;
-        using List = std::list<Interface*>;
-    };
-
-    void setEOF(bool eof = true) { m_eof = eof; }
-    void setFreq(int freq) { m_freq = freq; }
-    void setStereo(bool stereo) { m_stereo = stereo; }
+    void seek ( std::chrono::duration < double > seconds );
 
 private:
+    bool m_eof = true;
+    int m_freq;
+    bool m_stereo;
+    void* m_userdata = nullptr;
+    bool m_valid = false;
+    MAudioInterface* m_interface;
+    std::istream* m_stream;
     std::thread m_thread{};
-    bool m_eof{};
-    int m_freq{};
-    bool m_stereo{};
+    void m_init();
+};
 
-    static Interface::List& interfaces();
+struct M_EXPORT MAudioInterface {
+    MAudioInterface();
+    virtual ~MAudioInterface();
+    virtual bool valid ( std::istream* stream ) const = 0;
+    virtual void init ( MAudioStream* audioStream ) const = 0;
+    virtual void fini ( MAudioStream* audioStream ) const = 0;
+    virtual void read ( MAudioStream* audioStream ) const = 0;
+    virtual void seek ( MAudioStream* audioStream, double seconds ) const = 0;
+
+    static std::list<MAudioInterface*>& interfaces();
+
+protected:
+    static void setEOF ( MAudioStream* audioStream, bool eof = true ) { audioStream->m_eof = eof; }
+    static void setFreq ( MAudioStream* audioStream, int freq ) { audioStream->m_freq = freq; }
+    static void setStereo ( MAudioStream* audioStream, bool stereo ) { audioStream->m_stereo = stereo; }
+    static void setUserData ( MAudioStream* audioStream, void* userdata ) { audioStream->m_userdata = userdata; }
+    static void setValid ( MAudioStream* audioStream, bool valid = true ) { audioStream->m_valid = valid; }
+    template < typename _Data >
+    static _Data& userdata ( MAudioStream* audioStream ) { return *static_cast<_Data*> ( audioStream->m_userdata ); }
+    static std::istream* stream ( MAudioStream* audioStream ) { return audioStream->m_stream; }
 };
 
 #endif // MAUDIOSTREAM_H

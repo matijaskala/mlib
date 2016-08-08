@@ -19,26 +19,51 @@
 
 #include "maudiostream.h"
 
-MAudioStream* MAudioStream::create ( std::istream* stream )
+MAudioStream::~MAudioStream()
 {
-    for ( auto iface: interfaces() )
-        if ( iface->valid ( stream ) )
-            return iface->create ( stream );
-
-    return nullptr;
+    m_interface->fini ( this );
+    delete m_stream;
 }
 
-MAudioStream::Interface::List& MAudioStream::interfaces() {
-    static Interface::List interfaces;
+void MAudioStream::initRead()
+{
+    m_thread = std::thread { [this] { m_interface->read(this); } };
+}
+
+void MAudioStream::waitRead()
+{
+    m_thread.join();
+}
+
+void MAudioStream::seek ( std::chrono::duration< double > seconds )
+{
+    m_eof = false;
+    m_interface->seek(this, seconds.count());
+}
+
+void MAudioStream::m_init()
+{
+    for ( auto iface: MAudioInterface::interfaces() )
+        if ( iface->valid ( m_stream ) ) {
+            iface->init ( this );
+            if ( valid() ) {
+                m_interface = iface;
+                break;
+            }
+        }
+}
+
+std::list<MAudioInterface*>& MAudioInterface::interfaces() {
+    static std::list<MAudioInterface*> interfaces;
     return interfaces;
 }
 
-MAudioStream::Interface::Interface()
+MAudioInterface::MAudioInterface()
 {
-    interfaces().push_back(this);
+    interfaces().push_back ( this );
 }
 
-MAudioStream::Interface::~Interface()
+MAudioInterface::~MAudioInterface()
 {
-    interfaces().remove(this);
+    interfaces().remove ( this );
 }
