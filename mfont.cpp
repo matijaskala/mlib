@@ -160,25 +160,28 @@ MTexture* MFont::render ( wstring text )
 {
     int width{};
     int height{};
+    int height2{};
     for ( auto c: text ) {
         FT_Load_Char ( d->face, c, FT_LOAD_RENDER );
         width += d->face->glyph->advance.x/STIRIINSESTDESET;
-        int h = d->face->glyph->bitmap.rows;
-        height = height > h ? height : h;
+        int top = d->face->glyph->bitmap_top;
+        int h = d->face->glyph->bitmap.rows - top;
+        height = height > top ? height : top;
+        height2 = height2 > h ? height2 : h;
     }
-    auto data = calloc(width * height, 1);
+    auto data = calloc(width * (height + height2), 1);
     long off{};
     for ( auto c: text ) {
         FT_Load_Char ( d->face, c, FT_LOAD_RENDER );
+        auto* glyph = d->face->glyph;
         FT_BBox bbox;
-        FT_Outline_Get_CBox ( &d->face->glyph->outline, &bbox );
-        auto& bitmap = d->face->glyph->bitmap;
-        for ( unsigned int i = 0; i < bitmap.rows; i++ )
-            std::memcpy ( data + (height - bitmap.rows + i) * width + off + bbox.xMin/STIRIINSESTDESET,
-                          bitmap.buffer + i * bitmap.width, bitmap.width );
+        FT_Outline_Get_CBox ( &glyph->outline, &bbox );
+        for ( unsigned int i = 0; i < glyph->bitmap.rows; i++ )
+            std::memcpy ( data + (height - glyph->bitmap_top + i) * width + off + bbox.xMin/STIRIINSESTDESET,
+                          glyph->bitmap.buffer + i * glyph->bitmap.width, glyph->bitmap.width );
 //        g->texture()->draw ( off + g->bounds().x1/STIRIINSESTDESET, g->bounds().y2/STIRIINSESTDESET,
 //                             off + g->bounds().x2/STIRIINSESTDESET, g->bounds().y1/STIRIINSESTDESET );
-        off += d->face->glyph->advance.x/STIRIINSESTDESET;
+        off += glyph->advance.x/STIRIINSESTDESET;
     }
 
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
@@ -191,7 +194,7 @@ MTexture* MFont::render ( wstring text )
     glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 
     auto tex = new MTexture;
-    tex->setSize({width,height});
+    tex->setSize( { width, height + height2 } );
     tex->bind();
 
     glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
@@ -204,7 +207,7 @@ MTexture* MFont::render ( wstring text )
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height + height2, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data);
 
     glPopClientAttrib();
 
