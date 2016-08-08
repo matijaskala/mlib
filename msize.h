@@ -28,7 +28,8 @@ public:
     MSize()
         : MSize ( 0,0 )
     {}
-    MSize ( const std::uint_fast16_t& width, const std::uint_fast16_t& height )
+    template <typename _W, typename _H>
+    MSize ( _W width, _H height )
         : m_width ( width )
         , m_height ( height )
     {}
