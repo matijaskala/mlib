@@ -169,15 +169,13 @@ MTexture* MFont::render ( wstring text )
         height = height > top ? height : top;
         height2 = height2 > h ? height2 : h;
     }
-    auto data = calloc(width * (height + height2), 1);
+    uint8_t* data = (uint8_t*)calloc(width * (height + height2), 1);
     long off{};
     for ( auto c: text ) {
         FT_Load_Char ( d->face, c, FT_LOAD_RENDER );
         auto* glyph = d->face->glyph;
-        FT_BBox bbox;
-        FT_Outline_Get_CBox ( &glyph->outline, &bbox );
         for ( unsigned int i = 0; i < glyph->bitmap.rows; i++ )
-            std::memcpy ( data + (height - glyph->bitmap_top + i) * width + off + bbox.xMin/STIRIINSESTDESET,
+            std::memcpy ( data + (height - glyph->bitmap_top + i) * width + off + glyph->bitmap_left,
                           glyph->bitmap.buffer + i * glyph->bitmap.width, glyph->bitmap.width );
 //        g->texture()->draw ( off + g->bounds().x1/STIRIINSESTDESET, g->bounds().y2/STIRIINSESTDESET,
 //                             off + g->bounds().x2/STIRIINSESTDESET, g->bounds().y1/STIRIINSESTDESET );
@@ -213,6 +211,8 @@ MTexture* MFont::render ( wstring text )
 
     glPopAttrib();
 
+    std::free(data);
+
     return tex;
 }
 
@@ -230,5 +230,5 @@ MFont::Glyph* MFont::glyph ( wchar_t code, uint16_t size )
     auto advance = (advance_t)d->face->glyph->advance;
     auto bounds = (bounds_t)bbox;
     auto& bitmap = d->face->glyph->bitmap;
-    return glyph = new Glyph{MSize(bitmap.width,bitmap.rows),bitmap.buffer,&advance,&bounds};
+    return glyph = new Glyph{MSize{bitmap.width,bitmap.rows},bitmap.buffer,&advance,&bounds};
 }
