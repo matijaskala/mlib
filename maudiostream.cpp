@@ -18,6 +18,29 @@
  */
 
 #include "maudiostream.h"
+#include <fstream>
+
+class IStream : public std::istream {
+public:
+    explicit IStream ( const std::string& file ) : std::istream{new std::filebuf} {
+        if ( !static_cast<std::filebuf*> (rdbuf())->open ( file, std::ios::in | std::ios::binary ) )
+            setstate(std::ios::failbit);
+        else
+            clear();
+    }
+    explicit IStream ( std::streambuf* streambuf ) : std::istream{streambuf} {}
+    virtual ~IStream() { delete rdbuf(); }
+};
+
+MAudioStream::MAudioStream ( std::streambuf* streambuf ) : m_stream{new IStream{streambuf}}
+{
+    m_init();
+}
+
+MAudioStream::MAudioStream ( std::string file ) : m_stream{new IStream{file}}
+{
+    m_init();
+}
 
 MAudioStream::~MAudioStream()
 {

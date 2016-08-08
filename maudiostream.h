@@ -21,7 +21,6 @@
 #define MAUDIOSTREAM_H
 
 #include <mglobal.h>
-#include <istream>
 #include <list>
 #include <thread>
 
@@ -33,7 +32,8 @@ class M_EXPORT MAudioStream
 public:
     template <typename _IStream>
     MAudioStream ( _IStream&& stream ) : m_stream{new _IStream{std::move(stream)}} { m_init(); }
-    MAudioStream ( std::streambuf* sb ) : m_stream{new std::istream{sb}} { m_init(); }
+    MAudioStream ( std::streambuf* streambuf );
+    MAudioStream ( std::string file );
     ~MAudioStream();
 
     bool eof() { return m_eof; }

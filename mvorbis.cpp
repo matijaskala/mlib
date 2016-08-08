@@ -23,6 +23,7 @@
 #include <MDebug>
 
 #include <vorbis/vorbisfile.h>
+#include <istream>
 
 static struct VorbisInterface : public MAudioInterface
 {
