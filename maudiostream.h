@@ -30,10 +30,10 @@ class M_EXPORT MAudioStream
     friend class MAudioInterface;
 
 public:
-    template <typename _IStream>
-    MAudioStream ( _IStream&& stream ) : m_stream{new _IStream{std::move(stream)}} { m_init(); }
-    MAudioStream ( std::streambuf* streambuf );
-    MAudioStream ( std::string file );
+    explicit MAudioStream ( std::istream* stream );
+    explicit MAudioStream ( std::streambuf* streambuf );
+    explicit MAudioStream ( const std::string& file );
+    explicit MAudioStream ( const char* file );
     ~MAudioStream();
 
     bool eof() { return m_eof; }
@@ -58,7 +58,6 @@ private:
     MAudioInterface* m_interface;
     std::istream* m_stream;
     std::thread m_thread{};
-    void m_init();
 };
 
 struct M_EXPORT MAudioInterface {

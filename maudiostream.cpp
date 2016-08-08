@@ -28,18 +28,38 @@ public:
         else
             clear();
     }
+    explicit IStream ( const char* file ) : std::istream{new std::filebuf} {
+        if ( !static_cast<std::filebuf*> (rdbuf())->open ( file, std::ios::in | std::ios::binary ) )
+            setstate(std::ios::failbit);
+        else
+            clear();
+    }
     explicit IStream ( std::streambuf* streambuf ) : std::istream{streambuf} {}
     virtual ~IStream() { delete rdbuf(); }
 };
 
-MAudioStream::MAudioStream ( std::streambuf* streambuf ) : m_stream{new IStream{streambuf}}
+MAudioStream::MAudioStream ( std::istream* stream ) : m_stream{stream}
 {
-    m_init();
+    for ( auto iface: MAudioInterface::interfaces() )
+        if ( iface->valid ( m_stream ) ) {
+            iface->init ( this );
+            if ( valid() ) {
+                m_interface = iface;
+                break;
+            }
+        }
 }
 
-MAudioStream::MAudioStream ( std::string file ) : m_stream{new IStream{file}}
+MAudioStream::MAudioStream ( std::streambuf* streambuf ) : MAudioStream{new IStream{streambuf}}
 {
-    m_init();
+}
+
+MAudioStream::MAudioStream ( const std::string& file ) : MAudioStream{new IStream{file}}
+{
+}
+
+MAudioStream::MAudioStream ( const char* file ) : MAudioStream{new IStream{file}}
+{
 }
 
 MAudioStream::~MAudioStream()
@@ -62,18 +82,6 @@ void MAudioStream::seek ( std::chrono::duration< double > seconds )
 {
     m_eof = false;
     m_interface->seek(this, seconds.count());
-}
-
-void MAudioStream::m_init()
-{
-    for ( auto iface: MAudioInterface::interfaces() )
-        if ( iface->valid ( m_stream ) ) {
-            iface->init ( this );
-            if ( valid() ) {
-                m_interface = iface;
-                break;
-            }
-        }
 }
 
 std::list<MAudioInterface*>& MAudioInterface::interfaces() {
