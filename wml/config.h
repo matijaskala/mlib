@@ -31,7 +31,7 @@ namespace wml
 class M_EXPORT config
 {
 public:
-    class attribute {
+    class M_EXPORT attribute {
         friend class config;
         using value_type = std::tuple<long, double, std::string>;
         value_type value;

@@ -24,7 +24,7 @@
 #include <thread>
 #include <list>
 
-class MAudioStream
+class M_EXPORT MAudioStream
 {
 public:
     static MAudioStream* create ( std::istream* stream );

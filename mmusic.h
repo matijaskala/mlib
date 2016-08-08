@@ -25,12 +25,12 @@
 namespace MMusic
 {
 
-void play_sync ( MAudioStream* stream );
-void play ( MAudioStream* stream );
-void stop ();
-void pause ();
-void resume ();
-bool playing ();
+M_EXPORT void play_sync ( MAudioStream* stream );
+M_EXPORT void play ( MAudioStream* stream );
+M_EXPORT void stop ();
+M_EXPORT void pause ();
+M_EXPORT void resume ();
+M_EXPORT bool playing ();
 }
 
 #endif // MMUSIC_H

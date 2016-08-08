@@ -20,9 +20,10 @@
 #ifndef MDL_H
 #define MDL_H
 
+#include <mglobal.h>
 #include <string>
 
-class MDL
+class M_EXPORT MDL
 {
     void* const m_ptr;
 
@@ -61,6 +62,6 @@ public:
 };
 
 template<>
-void* MDL::symbol ( std::string name );
+M_EXPORT void* MDL::symbol ( std::string name );
 
 #endif // MDL_H
