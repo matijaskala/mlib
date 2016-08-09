@@ -60,7 +60,8 @@ private:
     std::thread m_thread{};
 };
 
-struct M_EXPORT MAudioInterface {
+class M_EXPORT MAudioInterface {
+public:
     MAudioInterface();
     virtual ~MAudioInterface();
     virtual bool valid ( std::istream* stream ) const = 0;
