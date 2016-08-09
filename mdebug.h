@@ -33,6 +33,7 @@ class M_EXPORT MDebug
 {
 public:
     MDebug ( MDebugLevel level = LOG );
+    MDebug ( const char* file, int line, MDebugLevel level = LOG );
     MDebug ( const MDebug& other ) = delete;
     MDebug ( MDebug&& other ) = default;
     ~MDebug();
@@ -49,11 +50,17 @@ private:
     std::string trace;
 };
 
-template< typename... _Args >
-MDebug mDebug ( _Args&&... __args )
+class MMessageLogger
 {
-    return MDebug ( __args... );
-}
+    const char* file;
+    int line;
+public:
+    constexpr MMessageLogger ( const char *file, int line ) : file{file}, line{line} {}
+    template< typename... _Args >
+    MDebug debug ( _Args&&... __args ) const { return {file,line,__args...}; }
+};
+
+#define mDebug MMessageLogger{__FILE__,__LINE__}.debug
 
 #endif // MDEBUG_H
 

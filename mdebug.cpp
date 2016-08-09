@@ -35,6 +35,19 @@ MDebug::MDebug ( MDebugLevel level )
     }
 }
 
+MDebug::MDebug ( const char* file, int line, MDebugLevel level )
+    : level{level}
+    , stream{std::cerr}
+{
+    stream << fgcolor ( non_std::magenta ) << file << fgcolor ( non_std::cyan ) << ':';
+    stream << fgcolor ( non_std::green ) << line << fgcolor ( non_std::cyan ) << ':' << reset;
+    if ( level == ERROR ) {
+        stream << bold << fgcolor ( non_std::yellow ) << bgcolor ( non_std::red );
+        stream << "ERROR: ";
+        stream << fgcolor ( non_std::default_color );
+    }
+}
+
 MDebug::~MDebug()
 {
     stream << trace;
