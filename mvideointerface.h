@@ -27,6 +27,8 @@
 class MWindow;
 class M_EXPORT MVideoInterface
 {
+    using getProcAddressFunc = void (*(const char* procname))();
+
 public:
     MVideoInterface();
     virtual ~MVideoInterface();
@@ -38,6 +40,7 @@ public:
     virtual void destroyWindow ( MWindow* window );
     static std::list< MVideoInterface* >& interfaces();
     static MVideoInterface* get();
+    getProcAddressFunc* getProcAddress;
 };
 
 #endif // MVIDEOINTERFACE_H
