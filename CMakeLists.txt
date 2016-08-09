@@ -91,7 +91,7 @@ install(FILES
     mwindow.h
 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mlib)
 
-target_link_libraries(mlib ${CMAKE_DL_LIBS} ${FREETYPE_LIBRARIES} ${OPENAL_LIBRARY} ${OPENGL_gl_LIBRARY})
+target_link_libraries(mlib ${CMAKE_DL_LIBS} ${OPENAL_LIBRARY} ${OPENGL_gl_LIBRARY})
 
 install(TARGETS mlib
         RUNTIME DESTINATION bin

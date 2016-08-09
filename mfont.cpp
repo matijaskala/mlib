@@ -18,87 +18,16 @@
  */
 
 #include "mfont.h"
-#include "mfont_p.h"
 
+#include <map>
 #include <nonstd/casts>
 #include <MDebug>
 #include <MResourceLoader>
 #include <MTexture>
-#include <cstring>
-
-#include FT_OUTLINE_H
-#include <GL/gl.h>
-#include <GL/glext.h>
-
-#define STIRIINSESTDESET 64
 
 using namespace std;
 
 static map< string, MFont* > fonts;
-
-MFont::Glyph::Glyph ( MSize size, uint8_t* data, decltype(m_advance)* advance, decltype(m_bounds)* bounds )
-    : m_size{size}
-    , m_data{data}
-    , m_texture{}
-    , m_advance{}
-    , m_bounds{}
-{
-    if ( advance )
-        m_advance = *advance;
-    if ( bounds )
-        m_bounds = *bounds;
-}
-
-MFont::Glyph::~Glyph()
-{
-    if ( m_texture )
-        delete m_texture;
-}
-
-const MTexture* MFont::Glyph::texture()
-{
-    if ( m_texture )
-        return m_texture;
-
-    glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-
-    m_texture = new MTexture;
-    m_texture->setSize(size());
-    m_texture->bind();
-
-    glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, size().width(), size().height(), 0, GL_ALPHA, GL_UNSIGNED_BYTE, data());
-
-    glPopClientAttrib();
-
-    return m_texture;
-}
-
-MFont::MFont ( void* face )
-    : d{new MFontPrivate}
-{
-    d->face = static_cast<FT_Face> ( face );
-
-    setSize ( 20 );
-}
-
-MFont::~MFont()
-{
-    FT_Done_Face ( d->face );
-    for ( auto pair: d->glyphs )
-        delete pair.second;
-
-    delete d;
-}
 
 bool MFont::load ( string file )
 {
@@ -128,9 +57,9 @@ void MFont::unload ( string file )
 
 void MFont::unload ( const MFont* font )
 {
-    for ( auto position: fonts )
-        if ( position.second == font )
-            fonts.erase ( position.first );
+    for ( auto i = fonts.begin(); i != fonts.end(); i++ )
+        if ( i->second == font )
+            fonts.erase ( i );
     delete font;
 }
 
@@ -139,96 +68,12 @@ MFont* MFont::get ( string file )
     return fonts[file];
 }
 
-bool MFont::setSize ( uint16_t size_, uint16_t res )
-{
-    if ( size_ == size() )
-        return true;
-    return FT_Set_Char_Size ( d->face, 0, size_ * STIRIINSESTDESET, res, res ) == 0;
-}
-
 uint16_t MFont::size()
 {
-    return d->face->size->metrics.x_ppem;
+    return getSize();
 }
 
 MTexture* MFont::render ( string text )
 {
     return render(lexical_cast<wstring> ( text ));
-}
-
-MTexture* MFont::render ( wstring text )
-{
-    int width{};
-    int height{};
-    int height2{};
-    for ( auto c: text ) {
-        FT_Load_Char ( d->face, c, FT_LOAD_RENDER );
-        width += d->face->glyph->advance.x/STIRIINSESTDESET;
-        int top = d->face->glyph->bitmap_top;
-        int h = d->face->glyph->bitmap.rows - top;
-        height = height > top ? height : top;
-        height2 = height2 > h ? height2 : h;
-    }
-    uint8_t* data = (uint8_t*)calloc(width * (height + height2), 1);
-    long off{};
-    for ( auto c: text ) {
-        FT_Load_Char ( d->face, c, FT_LOAD_RENDER );
-        auto* glyph = d->face->glyph;
-        for ( unsigned int i = 0; i < glyph->bitmap.rows; i++ )
-            std::memcpy ( data + (height - glyph->bitmap_top + i) * width + off + glyph->bitmap_left,
-                          glyph->bitmap.buffer + i * glyph->bitmap.width, glyph->bitmap.width );
-//        g->texture()->draw ( off + g->bounds().x1/STIRIINSESTDESET, g->bounds().y2/STIRIINSESTDESET,
-//                             off + g->bounds().x2/STIRIINSESTDESET, g->bounds().y1/STIRIINSESTDESET );
-        off += glyph->advance.x/STIRIINSESTDESET;
-    }
-
-    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_TEXTURE_2D);
-
-    glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-
-    auto tex = new MTexture;
-    tex->setSize( { width, height + height2 } );
-    tex->bind();
-
-    glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height + height2, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data);
-
-    glPopClientAttrib();
-
-    glPopAttrib();
-
-    std::free(data);
-
-    return tex;
-}
-
-MFont::Glyph* MFont::glyph ( wchar_t code, uint16_t size )
-{
-    auto& glyph = d->glyphs[std::make_tuple(code,size)];
-    if ( glyph )
-        delete glyph;
-    setSize(size);
-    FT_Load_Char ( d->face, code, FT_LOAD_RENDER );
-    FT_BBox bbox;
-    FT_Outline_Get_CBox(&d->face->glyph->outline, &bbox);
-    using advance_t = std::remove_cv<decltype(glyph->advance())>::type;
-    using bounds_t = std::remove_cv<decltype(glyph->bounds())>::type;
-    auto advance = (advance_t)d->face->glyph->advance;
-    auto bounds = (bounds_t)bbox;
-    auto& bitmap = d->face->glyph->bitmap;
-    return glyph = new Glyph{MSize{bitmap.width,bitmap.rows},bitmap.buffer,&advance,&bounds};
 }
