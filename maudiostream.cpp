@@ -20,22 +20,22 @@
 #include "maudiostream.h"
 #include <fstream>
 
-class IStream : public std::istream {
+class MIStream : public std::istream {
 public:
-    explicit IStream ( const std::string& file ) : std::istream{new std::filebuf} {
+    explicit MIStream ( const std::string& file ) : std::istream{new std::filebuf} {
         if ( !static_cast<std::filebuf*> (rdbuf())->open ( file, std::ios::in | std::ios::binary ) )
             setstate(std::ios::failbit);
         else
             clear();
     }
-    explicit IStream ( const char* file ) : std::istream{new std::filebuf} {
+    explicit MIStream ( const char* file ) : std::istream{new std::filebuf} {
         if ( !static_cast<std::filebuf*> (rdbuf())->open ( file, std::ios::in | std::ios::binary ) )
             setstate(std::ios::failbit);
         else
             clear();
     }
-    explicit IStream ( std::streambuf* streambuf ) : std::istream{streambuf} {}
-    virtual ~IStream() { delete rdbuf(); }
+    explicit MIStream ( std::streambuf* streambuf ) : std::istream{streambuf} {}
+    virtual ~MIStream() { delete rdbuf(); }
 };
 
 MAudioStream::MAudioStream ( std::istream* stream ) : m_stream{stream}
@@ -50,15 +50,15 @@ MAudioStream::MAudioStream ( std::istream* stream ) : m_stream{stream}
         }
 }
 
-MAudioStream::MAudioStream ( std::streambuf* streambuf ) : MAudioStream{new IStream{streambuf}}
+MAudioStream::MAudioStream ( std::streambuf* streambuf ) : MAudioStream{new MIStream{streambuf}}
 {
 }
 
-MAudioStream::MAudioStream ( const std::string& file ) : MAudioStream{new IStream{file}}
+MAudioStream::MAudioStream ( const std::string& file ) : MAudioStream{new MIStream{file}}
 {
 }
 
-MAudioStream::MAudioStream ( const char* file ) : MAudioStream{new IStream{file}}
+MAudioStream::MAudioStream ( const char* file ) : MAudioStream{new MIStream{file}}
 {
 }
 
