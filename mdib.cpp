@@ -329,6 +329,8 @@ bool DIBVideoInterface::init()
         return false;
     }
 
+    getProcAddress = (getProcAddressFunc*)wglGetProcAddress;
+
     hidden = CreateWindow("STATIC", "", WS_POPUP | WS_DISABLED, 0, 0, 1, 1, nullptr, nullptr, nullptr, nullptr);
     ShowWindow(hidden, SW_HIDE);
     dc = GetDC(hidden);

@@ -245,6 +245,8 @@ bool WaylandVideoInterface::init()
     if ( !eglBindAPI ( EGL_OPENGL_API ) )
         return false;
 
+    getProcAddress = eglGetProcAddress;
+
     EGLint n;
     EGLint attr[] = {
         EGL_SURFACE_TYPE, EGL_WINDOW_BIT,

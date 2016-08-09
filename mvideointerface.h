@@ -27,6 +27,7 @@
 class MWindow;
 class M_EXPORT MVideoInterface
 {
+protected:
     using getProcAddressFunc = void (*(const char* procname))();
 
 public:

@@ -134,6 +134,8 @@ bool XlibVideoInterface::init()
     if ( !xdisplay )
         return false;
 
+    getProcAddress = (getProcAddressFunc*)glXGetProcAddress;
+
     keymap_init();
 
     WM_DELETE_WINDOW = XInternAtom ( xdisplay, "WM_DELETE_WINDOW", False );
