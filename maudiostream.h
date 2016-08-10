@@ -24,10 +24,10 @@
 #include <list>
 #include <thread>
 
-class MAudioInterface;
+class MAudioStreamInterface;
 class M_EXPORT MAudioStream
 {
-    friend class MAudioInterface;
+    friend MAudioStreamInterface;
 
 public:
     explicit MAudioStream ( std::istream* stream );
@@ -55,22 +55,22 @@ private:
     bool m_stereo;
     void* m_userdata = nullptr;
     bool m_valid = false;
-    MAudioInterface* m_interface;
+    MAudioStreamInterface* m_interface;
     std::istream* m_stream;
     std::thread m_thread{};
 };
 
-class M_EXPORT MAudioInterface {
+class M_EXPORT MAudioStreamInterface {
 public:
-    MAudioInterface();
-    virtual ~MAudioInterface();
+    MAudioStreamInterface();
+    virtual ~MAudioStreamInterface();
     virtual bool valid ( std::istream* stream ) const = 0;
     virtual void init ( MAudioStream* audioStream ) const = 0;
     virtual void fini ( MAudioStream* audioStream ) const = 0;
     virtual void read ( MAudioStream* audioStream ) const = 0;
     virtual void seek ( MAudioStream* audioStream, double seconds ) const = 0;
 
-    static std::list<MAudioInterface*>& interfaces();
+    static std::list<MAudioStreamInterface*>& interfaces();
 
 protected:
     static void setEOF ( MAudioStream* audioStream, bool eof = true ) { audioStream->m_eof = eof; }

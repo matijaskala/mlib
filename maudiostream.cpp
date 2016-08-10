@@ -40,7 +40,7 @@ public:
 
 MAudioStream::MAudioStream ( std::istream* stream ) : m_stream{stream}
 {
-    for ( auto iface: MAudioInterface::interfaces() )
+    for ( auto iface: MAudioStreamInterface::interfaces() )
         if ( iface->valid ( m_stream ) ) {
             iface->init ( this );
             if ( valid() ) {
@@ -84,17 +84,17 @@ void MAudioStream::seek ( std::chrono::duration< double > seconds )
     m_interface->seek(this, seconds.count());
 }
 
-std::list<MAudioInterface*>& MAudioInterface::interfaces() {
-    static std::list<MAudioInterface*> interfaces;
+std::list<MAudioStreamInterface*>& MAudioStreamInterface::interfaces() {
+    static std::list<MAudioStreamInterface*> interfaces;
     return interfaces;
 }
 
-MAudioInterface::MAudioInterface()
+MAudioStreamInterface::MAudioStreamInterface()
 {
     interfaces().push_back ( this );
 }
 
-MAudioInterface::~MAudioInterface()
+MAudioStreamInterface::~MAudioStreamInterface()
 {
     interfaces().remove ( this );
 }
