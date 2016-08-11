@@ -40,13 +40,9 @@ MWindow::MWindow ( int width, int height ) : size{width,height}
     keyPressed.connect(eventHandlers.keyPressed);
     keyReleased.connect(eventHandlers.keyReleased);
 
-    glViewport ( 0, 0, width, height );
-    glMatrixMode ( GL_PROJECTION );
-    glLoadIdentity();
-    glOrtho ( 0, width, height, 0, -1, 1 );
-    glMatrixMode ( GL_MODELVIEW );
-
     sizeChanged.connect(slotSizeChanged);
+
+    sizeChanged();
 }
 
 void MWindow::beginPaint()

@@ -27,13 +27,14 @@
 class XlibWindow : public MWindow
 {
 public:
-    XlibWindow ( int width, int height, Display* xdisplay, Window xwindow, GLXContext context );
+    XlibWindow ( int width, int height, bool resizable, Display* xdisplay, Window xwindow, GLXContext context );
     virtual void makeCurrent();
     virtual void resize();
     virtual void swapBuffers();
     Display* xdisplay;
     Window xwindow;
     GLXContext context;
+    bool resizable;
 };
 
 class XlibVideoInterface : public MVideoInterface
@@ -60,8 +61,8 @@ static Atom _NET_WM_STATE_FULLSCREEN;
 static Rotation saved_rotation;
 static int saved_size_index;
 
-XlibWindow::XlibWindow ( int width, int height, Display* xdisplay, Window xwindow, GLXContext context )
-                       : MWindow ( width, height )
+XlibWindow::XlibWindow ( int width, int height, bool resizable, Display* xdisplay, Window xwindow, GLXContext context )
+                       : MWindow ( width, height ), resizable{resizable}
 {
     this->xdisplay = xdisplay;
     this->xwindow = xwindow;
@@ -81,7 +82,8 @@ void XlibWindow::resize()
     XSizeHints* sizehints = XAllocSizeHints();
     sizehints->min_width = sizehints->max_width = size.width();
     sizehints->min_height = sizehints->max_height = size.height();
-    sizehints->flags = PMinSize | PMaxSize;
+    if (!resizable)
+        sizehints->flags = PMinSize | PMaxSize;
     XSetWMNormalHints ( xdisplay, xwindow, sizehints );
     XFree ( sizehints );
 }
@@ -109,11 +111,8 @@ void XlibVideoInterface::handleEvents()
                 }
                 break;
             case ConfigureNotify:
-    glViewport ( 0, 0, ev.xconfigure.width, ev.xconfigure.height );
-    glMatrixMode ( GL_PROJECTION );
-    glLoadIdentity();
-    glOrtho ( 0, ev.xconfigure.width, ev.xconfigure.height, 0, -1, 1 );
-    glMatrixMode ( GL_MODELVIEW );
+                win->size = {ev.xconfigure.width,ev.xconfigure.height};
+                win->sizeChanged();
                 break;
             case KeyPress:
                 win->keyPressed ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
@@ -311,7 +310,7 @@ MWindow* XlibVideoInterface::createWindow ( int width, int height, MVideoFlags f
         XFlush ( xdisplay );
     }
 
-    auto w = new XlibWindow{width,height,xdisplay,xwindow,context};
+    auto w = new XlibWindow{width,height,flags&M_VIDEO_FLAGS_RESIZABLE,xdisplay,xwindow,context};
     window_list.push_back(w);
     return w;
 }

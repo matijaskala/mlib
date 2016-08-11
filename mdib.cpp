@@ -293,10 +293,15 @@ static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     MWindow* window = (MWindow*)GetProp(hwnd, "MWindow");
+    if (!window)
+        return DefWindowProc(hwnd, msg, wParam, lParam);
     switch(msg) {
         case WM_CLOSE:
             window->quit();
             break;
+        case WM_SIZE:
+            window->size = {lParam & 0xffff, lParam >> 16};
+            window->sizeChanged();
             break;
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
@@ -388,8 +393,10 @@ void DIBVideoInterface::handleEvents()
 
 MWindow* DIBVideoInterface::createWindow ( int width, int height, MVideoFlags flags )
 {
-    HWND hwnd = CreateWindow("M_app", "M_app", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-                             CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, nullptr, nullptr, nullptr, nullptr);
+    DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+    if ( flags & M_VIDEO_FLAGS_RESIZABLE )
+        style |= WS_THICKFRAME | WS_MAXIMIZEBOX;
+    HWND hwnd = CreateWindow("M_app", "M_app", style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, nullptr, nullptr, nullptr, nullptr);
     if (!hwnd)
         return nullptr;
     auto dc = GetDC(hwnd);

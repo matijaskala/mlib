@@ -41,22 +41,23 @@ public:
     EGLSurface egl_surface;
     EGLContext egl_context;
 
-    WaylandWindow ( int width, int height, struct wl_shell_surface* _wl_shell_surface,
+    WaylandWindow ( int width, int height, bool resizable, struct wl_shell_surface* _wl_shell_surface,
                     struct wl_surface* _wl_surface, struct wl_egl_window* _wl_egl_window,
                     EGLDisplay _egl_display, EGLSurface _egl_surface, EGLContext _egl_context );
     ~WaylandWindow();
     virtual void makeCurrent();
     virtual void resize () override;
     virtual void swapBuffers() override;
+    bool resizable;
 };
 
 static WaylandWindow* kbFocused = nullptr;
 static WaylandWindow* ptrFocused = nullptr;
 
-WaylandWindow::WaylandWindow ( int width, int height, struct wl_shell_surface* _wl_shell_surface,
+WaylandWindow::WaylandWindow ( int width, int height, bool resizable, struct wl_shell_surface* _wl_shell_surface,
                                struct wl_surface* _wl_surface, struct wl_egl_window* _wl_egl_window,
                                EGLDisplay _egl_display, EGLSurface _egl_surface, EGLContext _egl_context )
-                             : MWindow{width,height}
+                             : MWindow{width,height}, resizable{resizable}
 {
     wl_surface = _wl_surface;
     wl_egl_window = _wl_egl_window;
@@ -70,6 +71,12 @@ WaylandWindow::WaylandWindow ( int width, int height, struct wl_shell_surface* _
             wl_shell_surface_pong ( wl_shell_surface, serial );
         },
         [] ( void* data, struct wl_shell_surface *wl_shell_surface, uint32_t edges, int32_t width, int32_t height ) {
+            auto _This = static_cast<WaylandWindow*> ( data );
+            if ( !_This->resizable )
+                return;
+            wl_egl_window_resize ( _This->wl_egl_window, width, height, 0, 0 );
+            _This->size = {width,height};
+            _This->sizeChanged();
         },
         [] ( void* data, struct wl_shell_surface *wl_shell_surface ) {
         },
@@ -385,7 +392,8 @@ MWindow* WaylandVideoInterface::createWindow ( int width, int height, MVideoFlag
     wl_surface_set_opaque_region ( wl_surface, wl_region );
     wl_region_destroy ( wl_region );
 
-    auto w = new WaylandWindow{width, height, wl_shell_get_shell_surface ( wl_shell, wl_surface ),
+    auto wl_shell_surface = wl_shell_get_shell_surface ( wl_shell, wl_surface );
+    auto w = new WaylandWindow{width, height, flags & M_VIDEO_FLAGS_RESIZABLE, wl_shell_surface,
                                wl_surface, wl_egl_window, egl_display, egl_surface, egl_context};
     window_list.push_back(w);
 
