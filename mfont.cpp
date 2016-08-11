@@ -23,7 +23,6 @@
 #include <nonstd/casts>
 #include <MDebug>
 #include <MResourceLoader>
-#include <MTexture>
 
 using namespace std;
 

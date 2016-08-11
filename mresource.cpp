@@ -20,7 +20,6 @@
 #include "mresource.h"
 
 #include <MResourceLoader>
-#include <MTexture>
 
 #include <map>
 

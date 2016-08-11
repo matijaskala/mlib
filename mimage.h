@@ -22,8 +22,6 @@
 
 #include <MResource>
 #include <MSize>
-#include <mglobal.h>
-#include <string>
 
 class MTexture;
 class M_EXPORT MImage : public MResource
