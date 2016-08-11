@@ -55,7 +55,7 @@ class SDLVideoInterface : public MVideoInterface
     virtual void handleEvents() override;
     virtual bool init() override;
     virtual void fini() override;
-    virtual MWindow* createWindow ( int width, int height );
+    virtual MWindow* createWindow ( int width, int height, MVideoFlags flags );
     virtual void destroyWindow ( MWindow* window );
 };
 
@@ -106,7 +106,7 @@ void SDLVideoInterface::fini()
     SDL_Quit();
 }
 
-MWindow* SDLVideoInterface::createWindow ( int width, int height )
+MWindow* SDLVideoInterface::createWindow ( int width, int height, MVideoFlags flags )
 {
     SDL_Surface* screen = SDL_SetVideoMode ( width, height, 32, SDL_OPENGL );
     if ( !screen ) {

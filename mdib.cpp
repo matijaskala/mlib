@@ -42,11 +42,12 @@ public:
     virtual void handleEvents() override;
     virtual bool init() override;
     virtual void fini() override;
-    virtual MWindow* createWindow ( int width, int height ) override;
+    virtual MWindow* createWindow ( int width, int height, MVideoFlags flags ) override;
     virtual void destroyWindow ( MWindow* window ) override;
     HWND hidden;
     HDC dc;
     HGLRC rc;
+    bool fullscreen;
 };
 
 DIBWindow::DIBWindow ( int width, int height, HWND hwnd, HDC dc ) : MWindow{width,height}, hwnd{hwnd}, dc{dc}
@@ -358,11 +359,15 @@ bool DIBVideoInterface::init()
     rc = wglCreateContext(dc);
     wglMakeCurrent(dc, rc);
 
+    fullscreen = false;
+
     return true;
 }
 
 void DIBVideoInterface::fini()
 {
+    if (fullscreen)
+        ChangeDisplaySettings(NULL, 0);
     if (wglGetCurrentContext() == rc)
         wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(rc);
@@ -381,7 +386,7 @@ void DIBVideoInterface::handleEvents()
     }
 }
 
-MWindow* DIBVideoInterface::createWindow ( int width, int height )
+MWindow* DIBVideoInterface::createWindow ( int width, int height, MVideoFlags flags )
 {
     HWND hwnd = CreateWindow("M_app", "M_app", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
                              CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, nullptr, nullptr, nullptr, nullptr);
@@ -390,6 +395,27 @@ MWindow* DIBVideoInterface::createWindow ( int width, int height )
     auto dc = GetDC(hwnd);
     if (!dc)
         return nullptr;
+
+    if ( flags & M_VIDEO_FLAGS_FULLSCREEN ) {
+        DEVMODE devModes[20];
+        EnumDisplaySettings("", 20, devModes);
+        DEVMODE devMode;
+        devMode.dmSize       = sizeof(devMode);
+        devMode.dmPelsWidth  = width;
+        devMode.dmPelsHeight = height;
+        devMode.dmBitsPerPel = 32;
+        devMode.dmFields     = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
+
+        // Apply fullscreen mode
+        if (int ch = ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+            mDebug(ERROR) << "ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) = " << ch;
+
+        SetWindowLong(hwnd, GWL_STYLE, WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_SYSMENU);
+        SetWindowPos(hwnd, HWND_TOP, 0, 0, width, height, SWP_FRAMECHANGED);
+
+        fullscreen = true;
+    }
+
     auto window = new DIBWindow{width,height,hwnd,dc};
     if (!SetProp(hwnd, "MWindow", window)) {
         destroyWindow ( window );

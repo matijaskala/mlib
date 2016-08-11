@@ -22,8 +22,8 @@
 #include <MKeys>
 #include <GL/glx.h>
 #include <unistd.h>
+#include <X11/extensions/Xrandr.h>
 
-class XlibVideoInterface;
 class XlibWindow : public MWindow
 {
 public:
@@ -43,7 +43,7 @@ public:
     virtual void handleEvents() override;
     virtual bool init() override;
     virtual void fini() override;
-    virtual MWindow* createWindow ( int width, int height );
+    virtual MWindow* createWindow ( int width, int height, MVideoFlags flags );
     virtual void destroyWindow ( MWindow* window );
     MKey getKey ( unsigned int keycode );
     Display* xdisplay;
@@ -54,6 +54,11 @@ public:
 };
 
 static Atom WM_DELETE_WINDOW;
+static Atom _NET_WM_STATE;
+static Atom _NET_WM_STATE_FULLSCREEN;
+
+static Rotation saved_rotation;
+static int saved_size_index;
 
 XlibWindow::XlibWindow ( int width, int height, Display* xdisplay, Window xwindow, GLXContext context )
                        : MWindow ( width, height )
@@ -78,7 +83,7 @@ void XlibWindow::resize()
     sizehints->min_height = sizehints->max_height = size.height();
     sizehints->flags = PMinSize | PMaxSize;
     XSetWMNormalHints ( xdisplay, xwindow, sizehints );
-    XFree(sizehints);
+    XFree ( sizehints );
 }
 
 void XlibWindow::swapBuffers()
@@ -116,9 +121,9 @@ void XlibVideoInterface::handleEvents()
             case KeyRelease:
                 if ( XEventsQueued ( xdisplay, QueuedAfterReading ) ) {
                     XEvent nev;
-                    XPeekEvent(xdisplay, &nev);
+                    XPeekEvent ( xdisplay, &nev );
                     if ( nev.type == KeyPress && nev.xkey.time == ev.xkey.time && nev.xkey.keycode == ev.xkey.keycode ) {
-                        XNextEvent(xdisplay, &ev);
+                        XNextEvent ( xdisplay, &ev );
                         break;
                     }
                 }
@@ -139,6 +144,8 @@ bool XlibVideoInterface::init()
     keymap_init();
 
     WM_DELETE_WINDOW = XInternAtom ( xdisplay, "WM_DELETE_WINDOW", False );
+    _NET_WM_STATE = XInternAtom ( xdisplay, "_NET_WM_STATE", False );
+    _NET_WM_STATE_FULLSCREEN = XInternAtom ( xdisplay, "_NET_WM_STATE_FULLSCREEN", False );
 
     int attributeList[] = { 
           GLX_RGBA, 
@@ -152,13 +159,21 @@ bool XlibVideoInterface::init()
     context = glXCreateContext ( xdisplay, visualInfo, 0, GL_TRUE );
     glXMakeCurrent ( xdisplay, None, context );
 
+    Window xroot = RootWindow ( xdisplay, visualInfo->screen );
+    auto screenInfo = XRRGetScreenInfo ( xdisplay, xroot );
+    saved_size_index = XRRConfigCurrentConfiguration ( screenInfo, &saved_rotation );
+
     return true;
 }
 
 void XlibVideoInterface::fini()
 {
+    Window xroot = RootWindow ( xdisplay, visualInfo->screen );
+    auto info = XRRGetScreenInfo ( xdisplay, xroot );
+    XRRSetScreenConfig ( xdisplay, info, xroot, saved_size_index, saved_rotation, CurrentTime );
+
     glXDestroyContext ( xdisplay, context );
-    XCloseDisplay(xdisplay);
+    XCloseDisplay ( xdisplay );
 }
 
 MKey XlibVideoInterface::getKey ( unsigned int keycode )
@@ -261,7 +276,7 @@ void XlibVideoInterface::keymap_init()
     keymap[XK_Hyper_R&0xFF] = M_KEY_MENU;   /* Windows "Menu" key */
 }
 
-MWindow* XlibVideoInterface::createWindow ( int width, int height )
+MWindow* XlibVideoInterface::createWindow ( int width, int height, MVideoFlags flags )
 {
     Window xroot = RootWindow ( xdisplay, visualInfo->screen );
     Colormap xcolormap = XCreateColormap ( xdisplay, xroot, visualInfo->visual, AllocNone );
@@ -273,6 +288,28 @@ MWindow* XlibVideoInterface::createWindow ( int width, int height )
                                    InputOutput, visualInfo->visual, CWEventMask | CWColormap, &attr );
     XMapWindow ( xdisplay, xwindow );
     XSetWMProtocols ( xdisplay, xwindow, &WM_DELETE_WINDOW, 1 );
+
+    if ( flags & M_VIDEO_FLAGS_FULLSCREEN ) {
+        auto info = XRRGetScreenInfo ( xdisplay, xroot );
+        int nsizes;
+        auto sizes = XRRConfigSizes ( info, &nsizes );
+        for (int i = 0; i < nsizes; i++)
+            if (sizes[i].width == width && sizes[i].height == height) {
+                XRRSetScreenConfig ( xdisplay, info, xroot, i, RR_Rotate_0, CurrentTime );
+            }
+
+        XEvent event;
+        event.xclient.type = ClientMessage;
+        event.xclient.window = xwindow;
+        event.xclient.format = 32;
+        event.xclient.send_event = 1;
+        event.xclient.message_type = _NET_WM_STATE;
+        event.xclient.data.l[0] = 1;
+        event.xclient.data.l[1] = _NET_WM_STATE_FULLSCREEN;
+        event.xclient.data.l[3] = 0;
+        XSendEvent ( xdisplay, xroot, 0, SubstructureNotifyMask | SubstructureRedirectMask, &event );
+        XFlush ( xdisplay );
+    }
 
     auto w = new XlibWindow{width,height,xdisplay,xwindow,context};
     window_list.push_back(w);

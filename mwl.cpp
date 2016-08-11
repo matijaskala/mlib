@@ -110,7 +110,7 @@ class WaylandVideoInterface : public MVideoInterface
     virtual void handleEvents();
     virtual bool init();
     virtual void fini();
-    virtual MWindow* createWindow ( int width, int height );
+    virtual MWindow* createWindow ( int width, int height, MVideoFlags flags );
     virtual void destroyWindow ( MWindow* window );
     struct wl_display *wl_display;
     struct wl_shell *wl_shell;
@@ -369,7 +369,7 @@ void WaylandVideoInterface::keymap_init()
     keymap[XKB_KEY_Hyper_R&0xFF] = M_KEY_MENU;   /* Windows "Menu" key */
 }
 
-MWindow* WaylandVideoInterface::createWindow ( int width, int height )
+MWindow* WaylandVideoInterface::createWindow ( int width, int height, MVideoFlags flags )
 {
     auto wl_surface = wl_compositor_create_surface ( wl_compositor );
     if ( !wl_surface )
