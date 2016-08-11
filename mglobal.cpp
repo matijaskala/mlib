@@ -48,7 +48,7 @@ void M::init ( int& argc, char**& argv )
     alcMakeContextCurrent ( context );
 }
 
-void M::quit()
+void M::quit ( int status )
 {
     auto video = MVideoInterface::get();
     if (video)
@@ -61,6 +61,6 @@ void M::quit()
     alcDestroyContext ( context );
     alcCloseDevice ( device );
 
-    exit(0);
+    exit ( status );
 }
 

@@ -41,7 +41,7 @@
 namespace M
 {
     M_EXPORT void init ( int& argc, char**& argv );
-    M_EXPORT void quit ();
+    M_EXPORT void quit ( int status = 0 );
 }
 
 #endif // MGLOBAL_H
