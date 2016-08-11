@@ -35,6 +35,7 @@ add_library(mlib SHARED
     mmusic.cpp
     mobject.cpp
     mreflection.cpp
+    mresource.cpp
     mresourceloader.cpp
     mtexture.cpp
     mvideointerface.cpp

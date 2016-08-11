@@ -20,7 +20,10 @@
 #ifndef MDATAFILE_H
 #define MDATAFILE_H
 
-struct MResource
+#include <mglobal.h>
+#include <string>
+
+struct M_EXPORT MResource
 {
     enum Type {
         Audio,
@@ -31,8 +34,19 @@ struct MResource
     MResource() = default;
     MResource(const MResource&) = delete;
     virtual ~MResource() = 0;
+
+    static bool load ( std::string file );
+    static void unload ( std::string file );
+    static void unload ( const MResource* res );
+    template< typename Resource = MResource >
+    static Resource* get ( std::string file ) {
+        return dynamic_cast<Resource*> ( get ( file ) );
+    }
 };
 
 inline MResource::~MResource() = default;
+
+template<>
+M_EXPORT MResource* MResource::get ( std::string file );
 
 #endif // MDATAFILE_H
