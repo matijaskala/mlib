@@ -32,6 +32,7 @@ protected:
     virtual void makeCurrent () = 0;
     virtual void resize () = 0;
     virtual void swapBuffers () = 0;
+    static non_std::slot<> slotSizeChanged;
 
 public:
     void beginPaint();
@@ -41,6 +42,7 @@ public:
     MEventHandler::Stack eventHandlers;
 
     non_std::signal<> quit{this};
+    non_std::signal<> sizeChanged{this};
     non_std::signal<MKey,std::uint32_t> keyPressed{this};
     non_std::signal<MKey,std::uint32_t> keyReleased{this};
 };

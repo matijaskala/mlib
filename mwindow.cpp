@@ -23,6 +23,16 @@
 #include <thread>
 
 using namespace std;
+using namespace non_std;
+
+slot<> MWindow::slotSizeChanged = [] {
+    auto& size = slotSizeChanged.data<MWindow>()->size;
+    glViewport ( 0, 0, size.width(), size.height() );
+    glMatrixMode ( GL_PROJECTION );
+    glLoadIdentity();
+    glOrtho ( 0, size.width(), size.height(), 0, -1, 1 );
+    glMatrixMode ( GL_MODELVIEW );
+};
 
 MWindow::MWindow ( int width, int height ) : size{width,height}
 {
@@ -35,6 +45,8 @@ MWindow::MWindow ( int width, int height ) : size{width,height}
     glLoadIdentity();
     glOrtho ( 0, width, height, 0, -1, 1 );
     glMatrixMode ( GL_MODELVIEW );
+
+    sizeChanged.connect(slotSizeChanged);
 }
 
 void MWindow::beginPaint()
@@ -58,10 +70,5 @@ void MWindow::resize ( int width, int height )
         return;
     size = {width,height};
     resize();
-
-    glViewport ( 0, 0, width, height );
-    glMatrixMode ( GL_PROJECTION );
-    glLoadIdentity();
-    glOrtho ( 0, width, height, 0, -1, 1 );
-    glMatrixMode ( GL_MODELVIEW );
+    sizeChanged();
 }
