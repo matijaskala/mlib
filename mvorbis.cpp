@@ -25,7 +25,7 @@
 #include <vorbis/vorbisfile.h>
 #include <istream>
 
-static struct VorbisInterface : public MAudioInterface
+static struct VorbisInterface : public MAudioStreamInterface
 {
     virtual bool valid ( std::istream* stream ) const;
     virtual void init ( MAudioStream* audioStream ) const;
