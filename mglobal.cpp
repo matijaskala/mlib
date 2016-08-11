@@ -22,6 +22,7 @@
 #include <nonstd/directory>
 #include <MDL>
 #include <MDebug>
+#include "mvideointerface.h"
 
 #include <alc.h>
 
@@ -49,6 +50,10 @@ void M::init ( int& argc, char**& argv )
 
 void M::quit()
 {
+    auto video = MVideoInterface::get();
+    if (video)
+        video->fini();
+
     auto context = alcGetCurrentContext ();
     auto device = alcGetContextsDevice ( context );
 

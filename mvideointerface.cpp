@@ -76,7 +76,6 @@ MVideoInterface* MVideoInterface::get()
         return iface;
     for ( auto i: interfaces() )
         if ( i->init() ) {
-            atexit([] { get()->fini(); });
             iface = i;
             glEnable ( GL_BLEND );
             glEnable ( GL_TEXTURE_2D );
