@@ -70,7 +70,7 @@ MAudioStream::~MAudioStream()
 
 void MAudioStream::initRead()
 {
-    m_thread = std::thread { [this] { m_interface->read(this); } };
+    m_thread = std::thread { [this] { if (valid()) m_interface->read(this); } };
 }
 
 void MAudioStream::waitRead()
@@ -80,6 +80,8 @@ void MAudioStream::waitRead()
 
 void MAudioStream::seek ( std::chrono::duration< double > seconds )
 {
+    if (!valid())
+        return;
     m_eof = false;
     m_interface->seek(this, seconds.count());
 }
