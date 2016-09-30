@@ -30,3 +30,5 @@ public:
 private:
     static bool m_pressed[];
 };
+
+#endif // MMOUSE_H
