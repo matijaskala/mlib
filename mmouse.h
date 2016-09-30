@@ -25,6 +25,7 @@ class M_EXPORT MMouse
 public:
     static struct { int x; int y; } position;
     static bool get_pressed ( int button ) { return m_pressed[button-1]; }
+    static void set_pressed ( int button, bool pressed ) { m_pressed[button-1] = pressed; }
 
 private:
     static bool m_pressed[];

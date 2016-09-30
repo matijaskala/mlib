@@ -20,6 +20,7 @@
 #include <MVideoInterface>
 #include <mwindow.h>
 #include <MKeys>
+#include <mmouse.h>
 #include <GL/glx.h>
 #include <unistd.h>
 #include <X11/extensions/Xrandr.h>
@@ -127,6 +128,17 @@ void XlibVideoInterface::handleEvents()
                     }
                 }
                 win->keyReleased ( getKey ( ev.xkey.keycode ), /*TODO*/0 );
+                break;
+            case EnterNotify:
+            case LeaveNotify:
+                MMouse::position = { ev.xcrossing.x, ev.xcrossing.y };
+                break;
+            case MotionNotify:
+                MMouse::position = { ev.xcrossing.x, ev.xcrossing.y };
+                break;
+            case ButtonPress:
+            case ButtonRelease:
+                MMouse::set_pressed ( ev.xbutton.button, ev.xbutton.state );
                 break;
         }
     }
