@@ -24,6 +24,7 @@ add_definitions(-DMLIB_DATA_DIR="${CMAKE_INSTALL_PREFIX}/share/mlib/")
 include_directories(include .)
 add_library(mlib SHARED
     maudioloader.cpp
+    maudiofile.cpp
     maudiostream.cpp
     mdebug.cpp
     mdl.cpp

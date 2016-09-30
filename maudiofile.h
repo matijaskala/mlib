@@ -29,6 +29,8 @@ public:
     bool stereo;
     int freq;
     std::vector<unsigned char> buffer;
+    void play_sync();
+    void play();
 };
 
 #endif // MAUDIOFILE_H
