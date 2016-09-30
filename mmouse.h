@@ -20,6 +20,8 @@
 #ifndef MMOUSE_H
 #define MMOUSE_H
 
+#include <mglobal.h>
+
 class M_EXPORT MMouse
 {
 public:

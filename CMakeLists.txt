@@ -80,6 +80,7 @@ install(FILES
     mglobal.h
     mimage.h
     mkeys.h
+    mmouse.h
     mmusic.h
     mobject.h
     mreflection.h
