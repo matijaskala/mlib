@@ -64,6 +64,8 @@ MAudioStream::MAudioStream ( const char* file ) : MAudioStream{new MIStream{file
 
 MAudioStream::~MAudioStream()
 {
+    if ( m_thread.joinable() )
+        m_thread.join();
     m_interface->fini ( this );
     delete m_stream;
 }
