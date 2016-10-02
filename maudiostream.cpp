@@ -64,25 +64,28 @@ MAudioStream::MAudioStream ( const char* file ) : MAudioStream{new MIStream{file
 
 MAudioStream::~MAudioStream()
 {
-    if ( m_thread.joinable() )
-        m_thread.join();
+    waitRead();
     m_interface->fini ( this );
     delete m_stream;
 }
 
 void MAudioStream::initRead()
 {
-    m_thread = std::thread { [this] { if (valid()) m_interface->read(this); } };
+    m_thread = std::thread { [this] {
+        if ( valid() )
+            m_interface->read(this);
+    } };
 }
 
 void MAudioStream::waitRead()
 {
-    m_thread.join();
+    if ( m_thread.joinable() )
+        m_thread.join();
 }
 
 void MAudioStream::seek ( std::chrono::duration< double > seconds )
 {
-    if (!valid())
+    if ( !valid() )
         return;
     m_eof = false;
     m_interface->seek(this, seconds.count());
