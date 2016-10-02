@@ -91,6 +91,13 @@ void MAudioStream::seek ( std::chrono::duration< double > seconds )
     m_interface->seek(this, seconds.count());
 }
 
+std::chrono::duration< double > MAudioStream::tell ()
+{
+    if ( !valid() )
+        return std::chrono::duration< double > {};
+    return std::chrono::duration< double > { m_interface->tell(this) };
+}
+
 std::list<MAudioStreamInterface*>& MAudioStreamInterface::interfaces() {
     static std::list<MAudioStreamInterface*> interfaces;
     return interfaces;

@@ -48,6 +48,7 @@ public:
     void waitRead();
 
     void seek ( std::chrono::duration < double > seconds );
+    std::chrono::duration < double > tell ();
 
 private:
     bool m_eof = true;
@@ -69,6 +70,7 @@ public:
     virtual void fini ( MAudioStream* audioStream ) const = 0;
     virtual void read ( MAudioStream* audioStream ) const = 0;
     virtual void seek ( MAudioStream* audioStream, double seconds ) const = 0;
+    virtual double tell ( MAudioStream* audioStream ) const = 0;
 
     static std::list<MAudioStreamInterface*>& interfaces();
 

@@ -32,6 +32,7 @@ static struct VorbisInterface : public MAudioStreamInterface
     virtual void fini ( MAudioStream* audioStream ) const;
     virtual void read ( MAudioStream* audioStream ) const;
     virtual void seek ( MAudioStream* audioStream, double seconds ) const;
+    virtual double tell ( MAudioStream* audioStream ) const;
 } iface;
 
 bool VorbisInterface::valid ( std::istream* stream ) const
@@ -105,6 +106,11 @@ void VorbisInterface::fini ( MAudioStream* audioStream ) const
 void VorbisInterface::seek ( MAudioStream* audioStream, double seconds ) const
 {
     ov_time_seek ( &userdata<OggVorbis_File> ( audioStream ), seconds );
+}
+
+double VorbisInterface::tell ( MAudioStream* audioStream ) const
+{
+    return ov_time_tell ( &userdata<OggVorbis_File> ( audioStream ) );
 }
 
 void VorbisInterface::read ( MAudioStream* audioStream ) const
