@@ -23,8 +23,9 @@ add_definitions(-DMLIB_DATA_DIR="${CMAKE_INSTALL_PREFIX}/share/mlib/")
 
 include_directories(include .)
 add_library(mlib SHARED
-    maudioloader.cpp
+    maudio.cpp
     maudiofile.cpp
+    maudioloader.cpp
     maudiostream.cpp
     mdebug.cpp
     mdl.cpp
@@ -71,6 +72,7 @@ if(NOT WIN32)
 install(TARGETS mxlib mwl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
 endif(NOT WIN32)
 install(FILES
+    maudio.h
     maudiofile.h
     maudiostream.h
     mdebug.h
