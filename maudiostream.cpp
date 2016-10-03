@@ -94,11 +94,19 @@ void MAudioStream::seek ( std::chrono::duration< double > seconds )
 std::chrono::duration< double > MAudioStream::tell ()
 {
     if ( !valid() )
-        return std::chrono::duration< double > {};
+        return {};
     return std::chrono::duration< double > { m_interface->tell(this) };
 }
 
-std::list<MAudioStreamInterface*>& MAudioStreamInterface::interfaces() {
+std::list<std::string> MAudioStream::getTag ( MAudioTag tag )
+{
+    if ( !valid() )
+        return {};
+    return m_interface->getTag(tag);
+}
+
+std::list<MAudioStreamInterface*>& MAudioStreamInterface::interfaces()
+{
     static std::list<MAudioStreamInterface*> interfaces;
     return interfaces;
 }

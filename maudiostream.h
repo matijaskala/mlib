@@ -24,6 +24,20 @@
 #include <list>
 #include <thread>
 
+enum MAudioTag {
+    M_AUDIO_TAG_TITLE,
+    M_AUDIO_TAG_ARTIST,
+    M_AUDIO_TAG_COMPOSER,
+    M_AUDIO_TAG_ALBUM,
+    M_AUDIO_TAG_DATE,
+    M_AUDIO_TAG_COMMENT,
+    M_AUDIO_TAG_GENRE,
+    M_AUDIO_TAG_TRACK_NUMBER,
+    M_AUDIO_TAG_DISC_NUMBER,
+    M_AUDIO_TAG_TOTAL_TRACKS,
+    M_AUDIO_TAG_TOTAL_DISCS,
+};
+
 class MAudioStreamInterface;
 class M_EXPORT MAudioStream
 {
@@ -51,6 +65,19 @@ public:
     void seek ( std::chrono::duration < double > seconds );
     std::chrono::duration < double > tell ();
 
+    std::list<std::string> getTag ( MAudioTag tag );
+    std::list<std::string> getTitle () { return getTag(M_AUDIO_TAG_TITLE); }
+    std::list<std::string> getArtist () { return getTag(M_AUDIO_TAG_ARTIST); }
+    std::list<std::string> getComposer () { return getTag(M_AUDIO_TAG_COMPOSER); }
+    std::list<std::string> getAlbum () { return getTag(M_AUDIO_TAG_ALBUM); }
+    std::list<std::string> getDate () { return getTag(M_AUDIO_TAG_DATE); }
+    std::list<std::string> getComment () { return getTag(M_AUDIO_TAG_COMMENT); }
+    std::list<std::string> getGenre () { return getTag(M_AUDIO_TAG_GENRE); }
+    std::list<std::string> getTrackNumber () { return getTag(M_AUDIO_TAG_TRACK_NUMBER); }
+    std::list<std::string> getDiscNumber () { return getTag(M_AUDIO_TAG_DISC_NUMBER); }
+    std::list<std::string> getTotalTracks () { return getTag(M_AUDIO_TAG_TOTAL_TRACKS); }
+    std::list<std::string> getTotalDiscs () { return getTag(M_AUDIO_TAG_TOTAL_DISCS); }
+
 private:
     bool m_eof = true;
     int m_freq;
@@ -72,6 +99,7 @@ public:
     virtual void read ( MAudioStream* audioStream ) const = 0;
     virtual void seek ( MAudioStream* audioStream, double seconds ) const = 0;
     virtual double tell ( MAudioStream* audioStream ) const = 0;
+    virtual std::list<std::string> getTag ( MAudioTag tag ) const { return {}; }
 
     static std::list<MAudioStreamInterface*>& interfaces();
 
