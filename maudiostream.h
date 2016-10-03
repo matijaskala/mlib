@@ -34,12 +34,13 @@ public:
     explicit MAudioStream ( std::streambuf* streambuf );
     explicit MAudioStream ( const std::string& file );
     explicit MAudioStream ( const char* file );
-    ~MAudioStream();
+    MAudioStream ( const MAudioStream& ) = delete;
+    ~MAudioStream ();
 
-    bool eof() { return m_eof; }
-    int freq() { return m_freq; }
-    bool stereo() { return m_stereo; }
-    bool valid() { return m_valid; }
+    bool eof () { return m_eof; }
+    int freq () { return m_freq; }
+    bool stereo () { return m_stereo; }
+    bool valid () { return m_valid; }
 
     char buffer[0x4000];
     std::size_t buffer_size;
