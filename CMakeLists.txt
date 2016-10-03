@@ -94,6 +94,7 @@ install(FILES
     msize.h
     mtexture.h
     mvariant.h
+    mvector.h
     mvideointerface.h
     mwindow.h
 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mlib)
