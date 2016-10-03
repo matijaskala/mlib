@@ -32,6 +32,7 @@ public:
     virtual void makeCurrent();
     virtual void resize();
     virtual void swapBuffers();
+    virtual void setTitle(std::string title) override;
     Display* xdisplay;
     Window xwindow;
     GLXContext context;
@@ -58,6 +59,7 @@ public:
 static Atom WM_DELETE_WINDOW;
 static Atom _NET_WM_STATE;
 static Atom _NET_WM_STATE_FULLSCREEN;
+static Atom _NET_WM_NAME;
 
 static Rotation saved_rotation;
 static int saved_size_index;
@@ -92,6 +94,17 @@ void XlibWindow::resize()
 void XlibWindow::swapBuffers()
 {
     glXSwapBuffers ( xdisplay, xwindow );
+}
+
+void XlibWindow::setTitle(std::string title)
+{
+    XTextProperty prop;
+    char* text = new char[title.length()+1];
+    title.copy ( text, title.length() );
+    text[title.length()] = 0;
+    Xutf8TextListToTextProperty(xdisplay, &text, 1, XUTF8StringStyle, &prop);
+    XSetTextProperty ( xdisplay, xwindow, &prop, _NET_WM_NAME );
+    delete text;
 }
 
 void XlibVideoInterface::handleEvents()
@@ -157,6 +170,7 @@ bool XlibVideoInterface::init()
     WM_DELETE_WINDOW = XInternAtom ( xdisplay, "WM_DELETE_WINDOW", False );
     _NET_WM_STATE = XInternAtom ( xdisplay, "_NET_WM_STATE", False );
     _NET_WM_STATE_FULLSCREEN = XInternAtom ( xdisplay, "_NET_WM_STATE_FULLSCREEN", False );
+    _NET_WM_NAME = XInternAtom ( xdisplay, "_NET_WM_NAME", False );
 
     int attributeList[] = { 
           GLX_RGBA, 
