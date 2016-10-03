@@ -28,13 +28,13 @@ namespace MAudio
      *  Sets audio volume.
      *  @param  volume New volume in the range of [0.0 - 1.0].
      */
-    M_EXPORT void set_volume ( float volume );
+    M_EXPORT void setVolume ( float volume );
 
     /**
      *  Returns current audio volume.
      *  @return  Current volume in the range of [0.0 - 1.0].
      */
-    M_EXPORT float get_volume ();
+    M_EXPORT float getVolume ();
 }
 
 #endif // MAUDIO_H

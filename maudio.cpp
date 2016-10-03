@@ -21,12 +21,12 @@
 
 #include <al.h>
 
-void MAudio::set_volume ( float volume )
+void MAudio::setVolume ( float volume )
 {
     alListenerf(AL_GAIN, volume);
 }
 
-float MAudio::get_volume ()
+float MAudio::getVolume ()
 {
     float volume;
     alGetListenerf(AL_GAIN, &volume);

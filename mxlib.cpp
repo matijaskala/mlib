@@ -138,7 +138,7 @@ void XlibVideoInterface::handleEvents()
                 break;
             case ButtonPress:
             case ButtonRelease:
-                MMouse::set_pressed ( ev.xbutton.button, ev.xbutton.state );
+                MMouse::setPressed ( ev.xbutton.button, ev.xbutton.state );
                 break;
         }
     }
