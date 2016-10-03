@@ -26,15 +26,17 @@
 class M_EXPORT MTexture
 {
 public:
-    MTexture();
+    MTexture ();
     MTexture ( const MTexture& other ) = delete;
     MTexture ( MTexture&& other ) { d = other.d; other.d = nullptr; }
-    ~MTexture();
-    void bind() const;
-    unsigned int texture() const;
-    const MSize& size() const;
+    ~MTexture ();
+    void bind () const;
+    void image2D ( MSize size, int format, void* data );
+    unsigned int texture () const;
+    const MSize& size () const;
     void setSize ( MSize size );
     void draw ( int x1, int y1, int x2, int y2 ) const;
+
 private:
     class MTexturePrivate* d;
 };

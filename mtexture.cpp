@@ -20,29 +20,55 @@
 #include "mtexture.h"
 #include "mtexture_p.h"
 
-MTexture::MTexture()
+MTexture::MTexture ()
     : d{new MTexturePrivate}
 {
     glGenTextures(1, &d->tex);
 }
 
-MTexture::~MTexture()
+MTexture::~MTexture ()
 {
     glDeleteTextures(1, &d->tex);
     delete d;
 }
 
-void MTexture::bind() const
+void MTexture::bind () const
 {
     glBindTexture(GL_TEXTURE_2D, d->tex);
 }
 
-unsigned int MTexture::texture() const
+void MTexture::image2D ( MSize size, int format, void* data )
+{
+    setSize(size);
+    bind();
+
+    glTexParameterf ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameterf ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+
+    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+    GLenum glFormat;
+    switch ( format ) {
+        case 1:
+            glFormat = GL_RGB;
+            break;
+        case 2:
+            glFormat = GL_ALPHA;
+            break;
+        case 3:
+            glFormat = GL_RGBA;
+            break;
+    }
+    glTexImage2D ( GL_TEXTURE_2D, 0, glFormat, size.width(), size.height(), 0, glFormat, GL_UNSIGNED_BYTE, data );
+}
+
+unsigned int MTexture::texture () const
 {
     return d->tex;
 }
 
-const MSize& MTexture::size() const
+const MSize& MTexture::size () const
 {
     return d->size;
 }
