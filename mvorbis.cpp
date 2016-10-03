@@ -33,6 +33,7 @@ static struct VorbisInterface : public MAudioStreamInterface
     virtual void read ( MAudioStream* audioStream ) const;
     virtual void seek ( MAudioStream* audioStream, double seconds ) const;
     virtual double tell ( MAudioStream* audioStream ) const;
+    virtual std::list<std::string> getTag ( MAudioStream* audioStream, MAudioTag tag ) const override;
 } iface;
 
 bool VorbisInterface::valid ( std::istream* stream ) const
@@ -132,4 +133,53 @@ void VorbisInterface::read ( MAudioStream* audioStream ) const
         else
             audioStream->buffer_size += read;
     } while ( audioStream->buffer_size + read < sizeof(audioStream->buffer) );
+}
+
+std::list<std::string> VorbisInterface::getTag ( MAudioStream* audioStream, MAudioTag tag ) const
+{
+    auto comment = ov_comment ( &userdata<OggVorbis_File> ( audioStream ), -1 );
+    const char* tagName = nullptr;
+    switch ( tag ) {
+        case M_AUDIO_TAG_TITLE:
+            tagName = "TITLE";
+            break;
+        case M_AUDIO_TAG_ARTIST:
+            tagName = "ARTIST";
+            break;
+        case M_AUDIO_TAG_COMPOSER:
+            tagName = "COMPOSER";
+            break;
+        case M_AUDIO_TAG_ALBUM:
+            tagName = "ALBUM";
+            break;
+        case M_AUDIO_TAG_DATE:
+            tagName = "DATE";
+            break;
+        case M_AUDIO_TAG_COMMENT:
+            tagName = "COMMENT";
+            break;
+        case M_AUDIO_TAG_GENRE:
+            tagName = "GENRE";
+            break;
+        case M_AUDIO_TAG_TRACK_NUMBER:
+            tagName = "TRACKNUMBER";
+            break;
+        case M_AUDIO_TAG_DISC_NUMBER:
+            tagName = "DISCNUMBER";
+            break;
+        case M_AUDIO_TAG_TOTAL_TRACKS:
+            tagName = "TRACKTOTAL";
+            break;
+        case M_AUDIO_TAG_TOTAL_DISCS:
+            tagName = "DISCTOTAL";
+            break;
+    }
+    if ( !tagName )
+        return {};
+
+    int count = vorbis_comment_query_count(comment, tagName);
+    std::list<std::string> ret;
+    for ( int i = 0; i < count; i++ )
+        ret.push_back(vorbis_comment_query(comment, tagName, i));
+    return ret;
 }

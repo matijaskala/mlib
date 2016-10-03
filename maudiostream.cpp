@@ -102,7 +102,7 @@ std::list<std::string> MAudioStream::getTag ( MAudioTag tag )
 {
     if ( !valid() )
         return {};
-    return m_interface->getTag(tag);
+    return m_interface->getTag(this, tag);
 }
 
 std::list<MAudioStreamInterface*>& MAudioStreamInterface::interfaces()
