@@ -41,7 +41,7 @@ public:
      *  Puts @a stream to the end of the playlist.
      */
     template < typename _Stream >
-    void insert ( _Stream* stream ) { insert(size(), stream); }
+    void insert ( _Stream stream ) { insert(size(), stream); }
 
     /**
      *  Inserts @a stream before @index.
@@ -125,7 +125,7 @@ public:
     void playRandom () { play(rand() % m_playlist.size()); }
 
     /**
-     *  Stops and rewinds the current song.
+     *  Stops playing and rewinds the current song.
      */
     void stop () { m_stop = true; }
 
@@ -157,8 +157,17 @@ public:
     non_std::signal<bool> finished{this};
 
     void seek ( std::chrono::duration < double > seconds );
+
     std::chrono::duration < double > tell ();
+
+    /**
+     *  Stops playing after @a count songs.
+     */
     void stopAfter ( std::size_t count ) { m_stopAfter = count; }
+
+    /**
+     *  @return  Number of songs to be played before the playlist will stop.
+     */
     std::size_t stoppingAfter () { return m_stopAfter; }
 
 private:

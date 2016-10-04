@@ -254,7 +254,7 @@ void MPlaylist::playNext ()
             return;
         }
     }
-    else if ( m_stopAfter && m_stopAfter + 1 )
+    if ( m_stopAfter && m_stopAfter + 1 )
         m_stopAfter--;
     playCurrent();
 }
