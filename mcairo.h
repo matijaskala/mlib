@@ -64,7 +64,7 @@ inline void cairo_image_surface_format_bind_to_m_texture(CairoImageSurface surfa
 #define cairo_image_surface_bind_to_m_texture(surface, texture) \
     cairo_image_surface_format_bind_to_m_texture ( surface, cairo_image_surface_pick_mgl_format ( surface ), texture )
 
-M_EXPORT void mcairo_from_rgba ( MSize size, std::uint8_t* data, int stride );
-M_EXPORT void mcairo_to_rgba ( MSize size, std::uint8_t* data, int stride );
+M_EXPORT void mcairo_from_rgba ( MSize size, std::uint8_t* data, int stride, bool hasAlpha );
+M_EXPORT void mcairo_to_rgba ( MSize size, std::uint8_t* data, int stride, bool hasAlpha );
 
 #endif // MCAIRO_H
