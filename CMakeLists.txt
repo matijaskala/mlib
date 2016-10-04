@@ -27,6 +27,7 @@ add_library(mlib SHARED
     maudiofile.cpp
     maudioloader.cpp
     maudiostream.cpp
+    mcairo.cpp
     mdebug.cpp
     mdl.cpp
     melapsedtimer.cpp
@@ -76,6 +77,7 @@ install(FILES
     maudio.h
     maudiofile.h
     maudiostream.h
+    mcairo.h
     mdebug.h
     mdl.h
     melapsedtimer.h
