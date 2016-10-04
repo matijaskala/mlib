@@ -67,6 +67,7 @@ public:
     MVector& operator= ( MVector&& other ) {
         std::swap(dim, other.dim);
         std::swap(data, other.data);
+        return *this;
     }
 
     template<typename O>
@@ -105,16 +106,24 @@ public:
     }
     template<typename O>
     const MVector& operator+= ( const MVector<O>& other ) {
+        if ( !other.dimensions() )
+            return *this;
+        if ( !dim )
+            return *this = +other;
         if ( dim != other.dimensions() )
-            throw std::invalid_argument{std::string{"MVector<"} + typeid2(N).name() + "> + MVector<" + typeid2(O).name() + ">"};
+            throw std::invalid_argument{std::to_string(dim) + "-dimensional MVector<" + typeid2(N).name() + "> + " + std::to_string(other.dimensions()) + "-dimensional MVector<" + typeid2(O).name() + ">"};
         foreach_d
             d += other.d;
         return *this;
     }
     template<typename O>
     const MVector& operator-= ( const MVector<O>& other ) {
+        if ( !other.dimensions() )
+            return *this;
+        if ( !dim )
+            return *this = -other;
         if ( dim != other.dimensions() )
-            throw std::invalid_argument{std::string{"MVector<"} + typeid2(N).name() + "> - MVector<" + typeid2(O).name() + ">"};
+            throw std::invalid_argument{std::to_string(dim) + "-dimensional MVector<" + typeid2(N).name() + "> - " + std::to_string(other.dimensions()) + "-dimensional MVector<" + typeid2(O).name() + ">"};
         foreach_d
             d -= other.d;
         return *this;
