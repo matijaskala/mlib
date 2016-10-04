@@ -25,12 +25,27 @@
 
 class MAudioFile : public MResource
 {
+    class Buffer {
+    public:
+        Buffer () : m_buffer{new std::vector<std::uint8_t>}, m_refcount{new int} {}
+        Buffer ( const Buffer& other ) : m_buffer{other.m_buffer}, m_refcount{other.m_refcount} { ++*m_refcount; }
+        ~Buffer () { if ( !--*m_refcount ) { delete m_buffer; delete m_refcount; } }
+        std::vector<std::uint8_t>* operator->() { return m_buffer; }
+
+    private:
+        std::vector<std::uint8_t>* m_buffer;
+        volatile int* m_refcount{};
+    };
+
 public:
     bool stereo;
     int freq;
-    std::vector<uint8_t> buffer;
-    void play_sync();
-    void play();
+    Buffer buffer;
+    void playSync ();
+    void play ();
+
+private:
+    static void m_playSync ( bool stereo, int freq, Buffer buffer );
 };
 
 #endif // MAUDIOFILE_H

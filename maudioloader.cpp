@@ -44,7 +44,7 @@ MResource* MAudioLoader::load ( std::string file )
     while ( !audioStream.eof() ) {
         audioStream.initRead();
         audioStream.waitRead();
-        audioFile->buffer.insert ( audioFile->buffer.end(), audioStream.buffer, audioStream.buffer + audioStream.buffer_size );
+        audioFile->buffer->insert ( audioFile->buffer->end(), audioStream.buffer, audioStream.buffer + audioStream.buffer_size );
     }
     return audioFile;
 }

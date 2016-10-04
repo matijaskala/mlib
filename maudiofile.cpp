@@ -35,7 +35,7 @@ using namespace std;
 using namespace this_thread;
 using namespace al;
 
-static void _play_sync(bool stereo, int freq, std::vector<std::uint8_t> buffer)
+void MAudioFile::m_playSync (bool stereo, int freq, Buffer buffer)
 {
     al::format format = stereo ? STEREO16 : MONO16;
     unsigned int source;
@@ -50,7 +50,7 @@ static void _play_sync(bool stereo, int freq, std::vector<std::uint8_t> buffer)
 
     alSourcei(source, AL_BUFFER, 0);
 
-    alBufferData(buf, format, buffer.data(), buffer.size(), freq);
+    alBufferData(buf, format, buffer->data(), buffer->size(), freq);
     alSourceQueueBuffers(source, 1, &buf);
 
     alSourcePlay(source);
@@ -64,12 +64,12 @@ static void _play_sync(bool stereo, int freq, std::vector<std::uint8_t> buffer)
     alDeleteSources(1, &source);
 }
 
-void MAudioFile::play_sync()
+void MAudioFile::playSync ()
 {
-    _play_sync(stereo, freq, buffer);
+    m_playSync(stereo, freq, buffer);
 }
 
-void MAudioFile::play()
+void MAudioFile::play ()
 {
-    thread{_play_sync, stereo, freq, buffer}.detach();
+    thread{m_playSync, stereo, freq, buffer}.detach();
 }
