@@ -35,7 +35,7 @@ using namespace std;
 using namespace this_thread;
 using namespace al;
 
-void MAudioFile::play_sync()
+static void _play_sync(bool stereo, int freq, std::vector<std::uint8_t> buffer)
 {
     al::format format = stereo ? STEREO16 : MONO16;
     unsigned int source;
@@ -64,7 +64,12 @@ void MAudioFile::play_sync()
     alDeleteSources(1, &source);
 }
 
+void MAudioFile::play_sync()
+{
+    _play_sync(stereo, freq, buffer);
+}
+
 void MAudioFile::play()
 {
-    thread{&MAudioFile::play_sync, this}.detach();
+    thread{_play_sync, stereo, freq, buffer}.detach();
 }

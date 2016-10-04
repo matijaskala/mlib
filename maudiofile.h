@@ -28,7 +28,7 @@ class MAudioFile : public MResource
 public:
     bool stereo;
     int freq;
-    std::vector<unsigned char> buffer;
+    std::vector<uint8_t> buffer;
     void play_sync();
     void play();
 };
