@@ -150,8 +150,10 @@ void XlibVideoInterface::handleEvents()
                 MMouse::position = { ev.xcrossing.x, ev.xcrossing.y };
                 break;
             case ButtonPress:
+                MMouse::setPressed ( ev.xbutton.button, true );
+                break;
             case ButtonRelease:
-                MMouse::setPressed ( ev.xbutton.button, ev.xbutton.state );
+                MMouse::setPressed ( ev.xbutton.button, false );
                 break;
         }
     }
@@ -308,7 +310,7 @@ MWindow* XlibVideoInterface::createWindow ( int width, int height, MVideoFlags f
 
     XSetWindowAttributes attr;
     attr.colormap = xcolormap;
-    attr.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | KeyReleaseMask;
+    attr.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask;
     auto xwindow = XCreateWindow ( xdisplay, xroot, 0, 0, width, height, CopyFromParent, visualInfo->depth,
                                    InputOutput, visualInfo->visual, CWEventMask | CWColormap, &attr );
     XMapWindow ( xdisplay, xwindow );
