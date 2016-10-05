@@ -46,6 +46,8 @@ add_library(mlib SHARED
     mwindow.cpp
 )
 target_link_libraries(mlib nonstdc++)
+add_library(mjpg MODULE mjpg.cpp)
+target_link_libraries(mjpg mlib jpeg)
 add_library(mpng MODULE mpng.cpp)
 target_link_libraries(mpng mlib png)
 add_library(mtype MODULE mtype.cpp)
@@ -66,7 +68,7 @@ add_library(mwl MODULE mwl.cpp)
 target_link_libraries(mwl mlib wayland-egl EGL xkbcommon)
 endif(NOT WIN32)
 
-install(TARGETS mpng mtype mvorbis msdl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
+install(TARGETS mjpg mpng mtype mvorbis msdl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
 if(WIN32)
 install(TARGETS mdib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/mlib)
 endif(WIN32)
