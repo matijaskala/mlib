@@ -20,9 +20,10 @@
 #ifndef MELAPSEDTIMER_H
 #define MELAPSEDTIMER_H
 
+#include <mglobal.h>
 #include <cstdint>
 
-class MElapsedTimer
+class M_EXPORT MElapsedTimer
 {
 public:
     MElapsedTimer();

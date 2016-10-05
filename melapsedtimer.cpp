@@ -24,7 +24,7 @@
 using namespace std::chrono;
 
 struct MElapsedTimerPrivate {
-    std::chrono::system_clock::time_point start;
+    system_clock::time_point start;
 };
 
 MElapsedTimer::MElapsedTimer()
