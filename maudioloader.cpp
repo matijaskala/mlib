@@ -32,9 +32,11 @@ static class MAudioLoader : public MResourceLoader
 
 MResource* MAudioLoader::load ( std::string file )
 {
-    auto fileStream = new std::ifstream{file};
-    if ( !fileStream->is_open() )
+    auto fileStream = new std::ifstream{file, std::ios_base::binary};
+    if ( !fileStream->is_open() ) {
+        delete fileStream;
         return nullptr;
+    }
     MAudioStream audioStream{fileStream};
     if ( !audioStream.valid() )
         return nullptr;
