@@ -44,6 +44,10 @@ public:
         for(N t: initializers)
             data[i++] = t;
     }
+    ~MVector () {
+        if ( data )
+            delete data;
+    }
     MVector ( const MVector& other )
     : dim{other.dimensions()}
     , data{new N[dim]} {
