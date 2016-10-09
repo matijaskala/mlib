@@ -42,7 +42,7 @@ MImage::MImage ( const MImage& other )
     , m_data{nullptr}
 {
     if ( other.data() ) {
-        std::size_t n = size().width() * size().height() * ( hasAlpha() ? 32 : 24 );
+        std::size_t n = size().width() * size().height() * ( hasAlpha() ? 4 : 3 );
         m_data = malloc(n);
         std::memcpy ( data(), other.data(), n );
     }
