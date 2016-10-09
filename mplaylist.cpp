@@ -44,16 +44,12 @@ static slot<bool> slotFinished = [] ( bool stop ) {
 
 MPlaylist::MPlaylist ()
 {
-    alGenSources(1, &m_source);
-    alGenBuffers(m_buffers.size(), m_buffers.data());
     finished.connect(slotFinished);
 }
 
 MPlaylist::~MPlaylist ()
 {
     clear();
-    alDeleteBuffers(m_buffers.size(), m_buffers.data());
-    alDeleteSources(1, &m_source);
 }
 
 void MPlaylist::playSync ()
@@ -64,6 +60,9 @@ void MPlaylist::playSync ()
     al::format format = m_stream->stereo() ? STEREO16 : MONO16;
 
     m_stream->initRead();
+
+    alGenSources(1, &m_source);
+    alGenBuffers(m_buffers.size(), m_buffers.data());
 
     alSourcei(m_source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcef(m_source, AL_ROLLOFF_FACTOR, 0 );
@@ -80,16 +79,17 @@ void MPlaylist::playSync ()
         m_stream->waitRead();
         m_stream->seek(0s);
         m_stream = nullptr;
+        alDeleteBuffers(m_buffers.size(), m_buffers.data());
+        alDeleteSources(1, &m_source);
+        m_thread.detach();
         return;
     }
 
     alSourceQueueBuffers(m_source, m_buffers.size(), m_buffers.data());
 
-    if ( m_pause )
-        return;
-
     m_thread.detach();
-    resume();
+    if ( !m_pause )
+        resume();
 }
 
 void MPlaylist::resumeSync ()
@@ -129,6 +129,7 @@ void MPlaylist::resumeSync ()
 
         if ( m_pause ) {
             alSourcePause(m_source);
+            m_thread.detach();
             return;
         }
 
@@ -147,6 +148,7 @@ void MPlaylist::resumeSync ()
 
         if ( m_pause ) {
             alSourcePause(m_source);
+            m_thread.detach();
             return;
         }
 
@@ -158,7 +160,9 @@ void MPlaylist::resumeSync ()
         sleep_for(0.2s);
     }
 
-    alSourceRewind(m_source);
+    alDeleteBuffers(m_buffers.size(), m_buffers.data());
+    alDeleteSources(1, &m_source);
+
     m_stream->waitRead();
     m_stream->seek(0s);
     m_stream = nullptr;
