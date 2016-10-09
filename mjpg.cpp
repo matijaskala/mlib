@@ -23,6 +23,7 @@
 #include <fstream>
 #include <cstring>
 #include <setjmp.h>
+#define boolean boolean__
 #include <jpeglib.h>
 
 class MJPG : public MResourceLoader {
@@ -128,7 +129,7 @@ MResource* MJPG::load ( std::string file )
     jpeg_calc_output_dimensions ( &cinfo );
     auto width = cinfo.output_width;
     auto height = cinfo.output_height;
-    auto stride = width * cinfo.num_components;
+    auto stride = (width * cinfo.num_components + 3) &~3;
     auto data = static_cast<std::uint8_t*> ( std::calloc ( height, stride ) );
     jpeg_start_decompress ( &cinfo );
     while ( cinfo.output_scanline < height ) {
@@ -147,13 +148,6 @@ MResource* MJPG::load ( std::string file )
             pixel[1] = g;
             pixel[2] = b;
         }
-    }
-    else {
-        auto newData = static_cast<std::uint8_t*> ( std::calloc ( width * height, 4 ) );
-        for ( JDIMENSION i = 0; i < width * height; i++ )
-            std::memcpy ( newData + i * 4, data + i * 3, 24);
-        std::free ( data );
-        data = newData;
     }
     return new MImage{{width, height}, raw, data};
 }
