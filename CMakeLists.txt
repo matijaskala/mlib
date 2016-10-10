@@ -35,6 +35,7 @@ add_library(mlib SHARED
     mfont.cpp
     mglobal.cpp
     mimage.cpp
+    mmouse.cpp
     mmusic.cpp
     mobject.cpp
     mplaylist.cpp
@@ -53,7 +54,7 @@ target_link_libraries(mpng mlib png)
 add_library(mtype MODULE mtype.cpp)
 target_link_libraries(mtype mlib ${FREETYPE_LIBRARIES})
 add_library(mvorbis MODULE mvorbis.cpp)
-target_link_libraries(mvorbis mlib vorbisfile)
+target_link_libraries(mvorbis mlib vorbis vorbisfile)
 add_library(msdl MODULE msdl.cpp)
 if(WIN32)
 target_link_libraries(msdl mlib SDL dxguid winmm)
