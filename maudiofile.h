@@ -23,7 +23,7 @@
 #include <MResource>
 #include <vector>
 
-class MAudioFile : public MResource
+class M_EXPORT MAudioFile : public MResource
 {
     class Buffer {
     public:
