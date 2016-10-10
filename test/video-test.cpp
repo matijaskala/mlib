@@ -17,7 +17,7 @@
  *
  */
 
-#include <nonstd/casts>
+#include <nonstd/lexical_cast>
 #include <mglobal.h>
 #include <MTexture>
 #include <GL/gl.h>

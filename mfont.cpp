@@ -20,7 +20,7 @@
 #include "mfont.h"
 
 #include <map>
-#include <nonstd/casts>
+#include <nonstd/lexical_cast>
 #include <MDebug>
 #include <MResourceLoader>
 
