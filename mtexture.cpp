@@ -20,6 +20,8 @@
 #include "mtexture.h"
 #include "mtexture_p.h"
 
+#include <GL/glext.h>
+
 MTexture::MTexture ()
     : d{new MTexturePrivate}
 {

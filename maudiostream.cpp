@@ -18,6 +18,7 @@
  */
 
 #include "maudiostream.h"
+
 #include <fstream>
 
 class MIStream : public std::istream {
