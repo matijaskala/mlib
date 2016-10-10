@@ -19,6 +19,7 @@
 
 #include <MDebug>
 #include <MKeys>
+#include <mmouse.h>
 #include <MVideoInterface>
 #include <mwindow.h>
 #include <GL/gl.h>
@@ -31,6 +32,7 @@ public:
     virtual void raise();
     virtual void resize();
     virtual void swapBuffers();
+    virtual void setTitle(std::string title) override;
     HWND hwnd;
     HDC dc;
     HGLRC rc;
@@ -111,6 +113,11 @@ void DIBWindow::resize()
 void DIBWindow::swapBuffers()
 {
     SwapBuffers(dc);
+}
+
+void DIBWindow::setTitle(std::string title)
+{
+    SetWindowText(hwnd, title.c_str());
 }
 
 #include <xkbcommon/xkbcommon.h>
@@ -292,9 +299,10 @@ static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    MWindow* window = (MWindow*)GetProp(hwnd, "MWindow");
+    auto window = static_cast<DIBWindow*> ( GetProp(hwnd, "MWindow") );
     if (!window)
         return DefWindowProc(hwnd, msg, wParam, lParam);
+    POINT pt;
     switch(msg) {
         case WM_CLOSE:
             window->quit();
@@ -310,6 +318,30 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_SYSKEYUP:
         case WM_KEYUP:
             window->keyReleased((MKey)WindowsScanCodeToXkbKeySym(lParam, wParam), 0);
+            break;
+        case WM_MOUSEMOVE:
+            if ( GetCursorPos(&pt) ) {
+                ScreenToClient(window->hwnd, &pt);
+                MMouse::position = { pt.x, pt.y };
+            }
+            break;
+        case WM_LBUTTONDOWN:
+            MMouse::setPressed(1, true);
+            break;
+        case WM_LBUTTONUP:
+            MMouse::setPressed(1, false);
+            break;
+        case WM_MBUTTONDOWN:
+            MMouse::setPressed(2, true);
+            break;
+        case WM_MBUTTONUP:
+            MMouse::setPressed(2, false);
+            break;
+        case WM_RBUTTONDOWN:
+            MMouse::setPressed(3, true);
+            break;
+        case WM_RBUTTONUP:
+            MMouse::setPressed(3, false);
             break;
         default:
             return DefWindowProc(hwnd, msg, wParam, lParam);
