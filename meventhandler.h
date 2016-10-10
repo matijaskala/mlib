@@ -20,6 +20,7 @@
 #ifndef MEVENTHANDLER_H
 #define MEVENTHANDLER_H
 
+#include <mglobal.h>
 #include <cstdint>
 #include <stack>
 #include <nonstd/signal>
@@ -28,7 +29,7 @@ enum MKey : std::uint32_t;
 class MEventHandler
 {
 public:
-    class Stack {
+    class M_EXPORT Stack {
         std::stack< MEventHandler* > pointers;
     public:
         Stack();
