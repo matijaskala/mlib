@@ -21,7 +21,6 @@
 #define MVECTOR_H
 
 #include <complex>
-#include <nonstd/tupleid>
 
 template<typename N>
 class MVector
@@ -34,29 +33,31 @@ private:
     std::size_t dim;
     N* data;
 
-#define foreach_d for(std::size_t i = 0; i < dim; i++)
+    explicit MVector ( std::size_t dim, N* data ) : dim{dim}, data{data} {}
+
+#define foreach_d for ( std::size_t i = 0; i < dim; i++ )
 #define d begin()[i]
 public:
     MVector ( std::initializer_list<N> initializers )
-    : dim{initializers.size()}
-    , data{new N[dim]} {
+    : MVector{initializers.size(), new N[dim]} {
         std::size_t i = 0;
-        for(N t: initializers)
+        for ( const N& t: initializers )
             data[i++] = t;
+    }
+    static MVector fromData ( std::size_t dim, N* data ) {
+        return MVector ( dim, data );
     }
     ~MVector () {
         if ( data )
             delete data;
     }
     MVector ( const MVector& other )
-    : dim{other.dimensions()}
-    , data{new N[dim]} {
+    : MVector{other.dimensions(), new N[dim]} {
         foreach_d
             d = other.d;
     }
     MVector ( MVector&& other )
-    : dim{other.dimensions()}
-    , data{other.data} {
+    : MVector{other.dimensions(), other.data} {
         other.dim = 0;
         other.data = nullptr;
     }
@@ -115,7 +116,7 @@ public:
         if ( !dim )
             return *this = +other;
         if ( dim != other.dimensions() )
-            throw std::invalid_argument{std::to_string(dim) + "-dimensional MVector<" + typeid2(N).name() + "> + " + std::to_string(other.dimensions()) + "-dimensional MVector<" + typeid2(O).name() + ">"};
+            throw std::invalid_argument{"operator+(" + std::to_string(dim) + "-dimensional MVector, " + std::to_string(other.dimensions()) + "-dimensional MVector)"};
         foreach_d
             d += other.d;
         return *this;
@@ -127,7 +128,7 @@ public:
         if ( !dim )
             return *this = -other;
         if ( dim != other.dimensions() )
-            throw std::invalid_argument{std::to_string(dim) + "-dimensional MVector<" + typeid2(N).name() + "> - " + std::to_string(other.dimensions()) + "-dimensional MVector<" + typeid2(O).name() + ">"};
+            throw std::invalid_argument{"operator-(" + std::to_string(dim) + "-dimensional MVector, " + std::to_string(other.dimensions()) + "-dimensional MVector)"};
         foreach_d
             d -= other.d;
         return *this;
@@ -206,7 +207,7 @@ template<typename N, typename O>
 auto scalar_multiplication(const MVector<N>& a, const MVector<O>& b)
 {
     if(a.dimensions() != b.dimensions())
-        throw std::invalid_argument{std::string{"scalar_multiplication(MVector<"} + typeid2(N).name() + ">, MVector<" + typeid2(O).name() + ">)"};
+        throw std::invalid_argument{"scalar_multiplication(" + std::to_string(a.dimensions()) + "-dimensional MVector, " + std::to_string(b.dimensions()) + "-dimensional MVector)"};
     auto ret = N{} * O{};
     for(std::size_t i = 0; i < a.dimensions(); i++)
         ret += a.begin()[i] * std::conj(b.begin()[i]);
@@ -217,7 +218,7 @@ template<typename N, typename O>
 auto vector_multiplication(const MVector<N>& a, const MVector<O>& b)
 {
     if (a.dimensions() != 3 || b.dimensions() != 3)
-        throw std::invalid_argument{std::string{"vector_multiplication(MVector<"} + typeid2(N).name() + ">, MVector<" + typeid2(O).name() + ">)"};
+        throw std::invalid_argument{"vector_multiplication(" + std::to_string(a.dimensions()) + "-dimensional MVector, " + std::to_string(b.dimensions()) + "-dimensional MVector)"};
     auto A = a.begin();
     auto B = b.begin();
     return MVector<decltype(N{} * O{} + N{} * O{})>{
@@ -225,6 +226,52 @@ auto vector_multiplication(const MVector<N>& a, const MVector<O>& b)
         A[2] * B[0] - A[0] * B[2],
         A[0] * B[1] - A[1] * B[0],
     };
+}
+
+template<typename N, typename C, typename T>
+std::basic_istream<C, T>& operator>> ( std::basic_istream<C, T>& is, MVector<N>& vector ) {
+    N x;
+    C ch;
+    is >> ch;
+    if (ch != '(') {
+        is.putback(ch);
+        is >> x;
+        vector = { x };
+        return is;
+    }
+    std::size_t dim = 0;
+    N* data = nullptr;
+    is >> ch;
+    while ( ch != ')' ) {
+        is.putback(ch);
+        is >> x >> ch;
+        auto newData = new N[++dim];
+        for ( auto i = dim - 2; i >= 0; i-- )
+            newData[i] = std::move(data[i]);
+        if ( data )
+            delete data;
+        data = newData;
+        data[dim - 1] = x;
+    }
+    vector = MVector<N>::fromData ( dim, data );
+    return is;
+}
+
+template<typename N, typename C, typename T>
+std::basic_ostream<C, T>& operator<< ( std::basic_ostream<C, T>& os, const MVector<N>& vector ) {
+    if (!vector.dimensions())
+        return os << "()";
+    std::basic_ostringstream<C, T> s;
+    s.flags(os.flags());
+    s.imbue(os.getloc());
+    s.precision(os.precision());
+    s << '(';
+    auto i = vector.begin();
+    s << *i;
+    for ( i++; i != vector.end(); i++ )
+        s << ',' << *i;
+    s << ')';
+    return os << s.str();
 }
 
 namespace M {
