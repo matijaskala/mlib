@@ -80,6 +80,7 @@ struct autocompletion_string {
         color fgcolor = default_color;
         color bgcolor = default_color;
         bool bold = false;
+        bool blink = false;
         char suffix = ' ';
         string::size_type length() const { return name.length(); }
 };
@@ -88,6 +89,8 @@ struct autocompletion_string {
     operator<<(std::basic_ostream<_CharT, _Traits>& __os, const autocompletion_string& s) {
         if (s.bold)
             __os << xterm::bold;
+        if (s.blink)
+            __os << xterm::escape("5m");
         __os << xterm::fgcolor(s.fgcolor);
         __os << xterm::bgcolor(s.bgcolor);
         __os << s.name;
@@ -355,6 +358,14 @@ void ls_files ( const directory& dir ) {
                 break;
             case file::symlink:
                 out.fgcolor = cyan;
+                {
+                    struct stat64 st;
+                    if ( stat64 ( f.fullname().c_str(), &st ) ) {
+                        out.fgcolor = white;
+                        out.bgcolor = red;
+                        out.blink = true;
+                    }
+                }
                 break;
             case file::directory:
                 out.fgcolor = blue;
@@ -369,8 +380,6 @@ void ls_files ( const directory& dir ) {
                 out.fgcolor = yellow;
                 break;
             case -1:
-                out.fgcolor = white;
-                out.bgcolor = red;
                 break;
         }
         if ( f.mode() & 01000 ) {
