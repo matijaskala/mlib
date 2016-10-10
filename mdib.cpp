@@ -173,11 +173,24 @@ static xkb_keysym_t vk_to_xkb_keysym(UINT vk) {
         case VK_DELETE: return M_KEY_DELETE;
         case VK_HELP: return M_KEY_HELP;
 
+        case VK_NUMPAD0: return M_KEY_KP0;
+        case VK_NUMPAD1: return M_KEY_KP1;
+        case VK_NUMPAD2: return M_KEY_KP2;
+        case VK_NUMPAD3: return M_KEY_KP3;
+        case VK_NUMPAD4: return M_KEY_KP4;
+        case VK_NUMPAD5: return M_KEY_KP5;
+        case VK_NUMPAD6: return M_KEY_KP6;
+        case VK_NUMPAD7: return M_KEY_KP7;
+        case VK_NUMPAD8: return M_KEY_KP8;
+        case VK_NUMPAD9: return M_KEY_KP9;
+
         case VK_LWIN: return M_KEY_LSUPER;
         case VK_RWIN: return M_KEY_RSUPER;
         case VK_APPS: return M_KEY_MENU;
         case VK_ADD: return M_KEY_KP_PLUS;
         case VK_SUBTRACT: return M_KEY_KP_MINUS;
+        case VK_MULTIPLY: return M_KEY_KP_MULTIPLY;
+        case VK_DIVIDE: return M_KEY_KP_DIVIDE;
         case VK_F1: return M_KEY_F1;
         case VK_F2: return M_KEY_F2;
         case VK_F3: return M_KEY_F3;
@@ -238,13 +251,15 @@ static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
         return M_KEY_UNKNOWN;
 
     xkb_keysym_t key;
-    char bIsExtended;
     UINT nScanCode = (lParam >> 16) & 0xFF;
 
-    switch (lParam >> 16) {
-        case 42: return M_KEY_LSHIFT;
-        case 54: return M_KEY_RSHIFT;
-        case 309: return M_KEY_KP_DIVIDE;
+    if (wParam == VK_SHIFT) {
+        auto lShift = MapVirtualKey(VK_LSHIFT, MAPVK_VK_TO_VSC);
+        auto rShift = MapVirtualKey(VK_RSHIFT, MAPVK_VK_TO_VSC);
+        if (nScanCode == lShift)
+            return M_KEY_LSHIFT;
+        if (nScanCode == rShift)
+            return M_KEY_RSHIFT;
     }
 
     if (nScanCode > 127)
@@ -252,8 +267,7 @@ static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
 
     key = vk_to_xkb_keysym(wParam);
 
-    bIsExtended = (lParam & (1 << 24)) != 0;
-    if (!bIsExtended) {
+    if (!(HIWORD(lParam) & KF_EXTENDED)) {
         switch (key) {
         case M_KEY_HOME:
             return M_KEY_KP7;
@@ -277,8 +291,6 @@ static xkb_keysym_t WindowsScanCodeToXkbKeySym(LPARAM lParam, WPARAM wParam)
             return M_KEY_KP0;
         case M_KEY_DELETE:
             return M_KEY_KP_PERIOD;
-        case M_KEY_PRINT:
-            return M_KEY_KP_MULTIPLY;
         default:
             break;
         }
