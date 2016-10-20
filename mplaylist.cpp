@@ -102,6 +102,7 @@ void MPlaylist::resumeSync ()
 
     while ( !m_stream->eof() ) {
         al::format format = m_stream->stereo() ? STEREO16 : MONO16;
+        alSourcef(m_source, AL_GAIN, volume);
         ALint processed;
         alGetSourcei(m_source, AL_BUFFERS_PROCESSED, &processed);
         decltype(m_buffers) buffers;

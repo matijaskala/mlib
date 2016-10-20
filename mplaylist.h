@@ -150,6 +150,8 @@ public:
 
     bool loop = false;
 
+    float volume = 1;
+
     /**
      *  A song finished playing.
      *  @param  1 True if it was stopped using @c stop().
