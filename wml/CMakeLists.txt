@@ -3,3 +3,4 @@ add_library(wml SHARED
     parser.cpp
     tokenizer.cpp
 )
+set_property(TARGET wml PROPERTY COMPILE_FLAGS -std=c++14)
