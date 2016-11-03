@@ -99,7 +99,7 @@ public:
     virtual void read ( MAudioStream* audioStream ) const = 0;
     virtual void seek ( MAudioStream* audioStream, double seconds ) const = 0;
     virtual double tell ( MAudioStream* audioStream ) const = 0;
-    virtual std::list<std::string> getTag ( MAudioStream* audioStream, MAudioTag tag ) const { return {}; }
+    virtual std::list<std::string> getTag ( MAudioStream* audioStream, MAudioTag tag ) const;
 
     static std::list<MAudioStreamInterface*>& interfaces();
 

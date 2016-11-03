@@ -27,8 +27,8 @@ void mcairo_from_rgba ( MSize size, std::uint8_t* data, int stride, bool hasAlph
 {
     if ( stride / size.width() != 4 )
         return;
-    for ( int x = 0; x < size.width(); x++ )
-        for ( int y = 0; y < size.height(); y++ ) {
+    for ( unsigned int x = 0; x < size.width(); x++ )
+        for ( unsigned int y = 0; y < size.height(); y++ ) {
             auto b = data + y * stride + x * 4;
             auto alpha = hasAlpha ? b[3] : 0xff;
             if ( !alpha )
@@ -52,8 +52,8 @@ void mcairo_to_rgba ( MSize size, std::uint8_t* data, int stride, bool hasAlpha 
 {
     if ( stride / size.width() != 4 )
         return;
-    for ( int x = 0; x < size.width(); x++ )
-        for ( int y = 0; y < size.height(); y++ ) {
+    for ( unsigned int x = 0; x < size.width(); x++ )
+        for ( unsigned int y = 0; y < size.height(); y++ ) {
             auto b = data + y * stride + x * 4;
             auto pixel = *reinterpret_cast<std::uint32_t*> ( b );
             std::uint8_t alpha = hasAlpha ? pixel >> 24 : 0xff;

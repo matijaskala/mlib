@@ -121,3 +121,11 @@ MAudioStreamInterface::~MAudioStreamInterface()
 {
     interfaces().remove ( this );
 }
+
+std::list<std::string> MAudioStreamInterface::getTag ( MAudioStream* audioStream, MAudioTag tag ) const
+{
+    (void)audioStream;
+    (void)tag;
+
+    return {};
+}
