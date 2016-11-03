@@ -38,7 +38,7 @@ public:
     void beginPaint();
     void endPaint();
     void resize( int width, int height );
-    virtual void setTitle(std::string title) {}
+    virtual void setTitle(std::string title) { (void)title; }
     MSize size;
     MEventHandler::Stack eventHandlers;
 

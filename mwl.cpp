@@ -68,6 +68,7 @@ WaylandWindow::WaylandWindow ( int width, int height, bool resizable, struct wl_
 
     static const struct wl_shell_surface_listener wl_shell_surface_listener = {
         [] ( void* data, struct wl_shell_surface *wl_shell_surface, uint32_t serial ) {
+            (void)data;
             wl_shell_surface_pong ( wl_shell_surface, serial );
         },
         [] ( void* data, struct wl_shell_surface *wl_shell_surface, uint32_t edges, int32_t width, int32_t height ) {

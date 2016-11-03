@@ -50,8 +50,8 @@ protected:
     virtual ~MEventHandler() = default;
 
     virtual void quit() {}
-    virtual void keyPressed ( MKey key, std::uint32_t mods ) {}
-    virtual void keyReleased ( MKey key, std::uint32_t mods ) {}
+    virtual void keyPressed ( MKey key, std::uint32_t mods ) { (void)key; (void)mods; }
+    virtual void keyReleased ( MKey key, std::uint32_t mods ) { (void)key; (void)mods; }
 };
 
 #endif // MEVENTHANDLER_H
