@@ -36,16 +36,13 @@ MImage::MImage ( MSize size, bool alpha, void* data )
 {
 }
 
-MImage::MImage ( const MImage& other )
-    : m_size{other.m_size}
-    , m_alpha{other.m_alpha}
-    , m_data{nullptr}
+MImage* mCopy ( const MImage* image )
 {
-    if ( other.data() ) {
-        std::size_t n = size().width() * size().height() * ( hasAlpha() ? 4 : 3 );
-        m_data = malloc(n);
-        std::memcpy ( data(), other.data(), n );
-    }
+    if ( !image->data() )
+        return new MImage{image->size(), image->hasAlpha(), nullptr};
+    auto data = std::malloc( image->stride() * image->size().height());
+    std::memcpy(data, image->data(), image->stride() * image->size().height());
+    return new MImage{image->size(), image->hasAlpha(), data};
 }
 
 MImage::MImage ( MImage&& other )

@@ -28,13 +28,13 @@ class M_EXPORT MImage : public MResource
 {
 public:
     MImage ( MSize size, bool alpha, void* data );
-    MImage ( const MImage& other );
     MImage ( MImage&& other );
     virtual ~MImage();
 
     const MSize& size() const { return m_size; }
     bool hasAlpha() const { return m_alpha; }
-    std::uint8_t* data() const { return static_cast<std::uint8_t*>(m_data); }
+    auto data() const { return static_cast<std::uint8_t*>(m_data); }
+    auto stride() const { return size().width() * ( hasAlpha() ? 4 : 3 ); }
 
     MTexture* createTexture() const;
 
@@ -48,5 +48,7 @@ private:
     bool m_alpha;
     void* m_data;
 };
+
+M_EXPORT MImage* mCopy ( const MImage* image );
 
 #endif // MIMAGE_H
