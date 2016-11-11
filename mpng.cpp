@@ -102,6 +102,6 @@ MResource* MPNG::load ( std::string file )
     png_read_end ( png, info );
     delete[] rowPointers;
     png_destroy_read_struct ( &png, &info, nullptr );
-    return new MImage{MSize ( width, height ), bitDepth * channels == 32, data};
+    return new MImage{{width,height}, bitDepth * channels == 32, data};
 }
 

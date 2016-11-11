@@ -65,7 +65,7 @@ static Rotation saved_rotation;
 static int saved_size_index;
 
 XlibWindow::XlibWindow ( int width, int height, bool resizable, Display* xdisplay, Window xwindow, GLXContext context )
-                       : MWindow ( width, height ), resizable{resizable}
+                       : MWindow{width,height}, resizable{resizable}
 {
     this->xdisplay = xdisplay;
     this->xwindow = xwindow;
