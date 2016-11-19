@@ -22,10 +22,6 @@
 using namespace std;
 using namespace wml;
 
-static bool is_alnum ( int c ) {
-    return c == '_' || isalnum ( c );
-}
-
 const token& tokenizer::next_token()
 {
     prev_token = curr_token;
@@ -36,44 +32,45 @@ const token& tokenizer::next_token()
     switch ( current ) {
         case traits::eof():
             curr_token.type = token::END;
-            break;
+            return curr_token;
         case '<':
-            if ( stream.peek() != '<' ) {
+            if ( next != '<' ) {
                 curr_token.type = token::MISC;
                 curr_token.value += current;
                 break;
             }
+            next_char();
             curr_token.type = token::LITERAL;
             for (;;) {
-                if ( current == '\n' )
-                    lineno++;
                 next_char();
                 if ( current == traits::eof() ) {
                     curr_token.type = token::UNTERMINATED_LITERAL;
                     break;
                 }
-                if ( current == '>' && stream.peek() == '>' ) {
+                if ( current == '>' && next == '>' ) {
                     next_char();
                     break;
                 }
+                if ( current == '\n' )
+                    lineno++;
                 curr_token.value += current;
             }
             break;
         case '"':
             curr_token.type = token::LITERAL;
             for (;;) {
-                if ( current == '\n' )
-                    lineno++;
                 next_char();
                 if ( current == traits::eof() ) {
                     curr_token.type = token::UNTERMINATED_LITERAL;
                     break;
                 }
                 if ( current == '"' ) {
-                    if ( stream.peek() != '"' )
+                    if ( next != '"' )
                         break;
                     next_char();
                 }
+                if ( current == '\n' )
+                    lineno++;
                 curr_token.value += current;
             }
             break;
@@ -86,54 +83,54 @@ const token& tokenizer::next_token()
                 curr_token.value += current;
             }
             break;
-        case '[':
-            curr_token.type = token::OPEN_BRACKET;
-            curr_token.value = "[";
-            break;
-        case ']':
-            curr_token.type = token::CLOSE_BRACKET;
-            curr_token.value = "]";
-            break;
-        case '/':
-            curr_token.type = token::SLASH;
-            curr_token.value = "/";
-            break;
         case '\n':
-            curr_token.type = token::LINE_FEED;
-            curr_token.value = "\n";
             lineno++;
-            break;
+        case '[':
+        case ']':
+        case '/':
         case '=':
-            curr_token.type = token::EQUALS;
-            curr_token.value = "=";
-            break;
+        case ',':
         case '+':
-            curr_token.type = token::PLUS;
-            curr_token.value = "+";
+            curr_token.type = current;
+            curr_token.value = current;
             break;
         case '_':
-            if ( !is_alnum ( stream.peek() ) ) {
-                curr_token.type = token::UNDERSCORE;
-                curr_token.value = '_';
+            if ( !isalnum ( next ) && next != '_' ) {
+                curr_token.type = current;
+                curr_token.value = current;
                 break;
             }
         default:
-            if ( is_alnum ( current ) ) {
+            if ( isalnum ( current ) || current == '_' ) {
                 curr_token.type = token::WORD;
                 do {
                     curr_token.value += current;
                     next_char();
-                } while ( is_alnum ( current ) );
+                } while ( isalnum ( current ) || current == '_' );
+                return curr_token;
             }
             else {
                 curr_token.type = token::MISC;
                 curr_token.value += current;
-                next_char();
             }
-            return curr_token;
     }
-    if ( current != traits::eof() )
-        next_char();
+    next_char();
     return curr_token;
 }
 
+void tokenizer::next_char()
+{
+    current = next;
+    if ( buffer_offset < buffer_length )
+        next = traits::to_int_type(buffer[buffer_offset++]);
+    else {
+        buffer_offset = 0;
+        if ( stream.peek() != traits::eof() && stream.readsome ( buffer, sizeof(buffer) ) == 0 )
+            stream.get(*buffer);
+        buffer_length = stream.gcount();
+        if ( buffer_length )
+            next = *buffer;
+        else
+            next = traits::eof();
+    }
+}

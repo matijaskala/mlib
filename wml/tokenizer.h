@@ -21,7 +21,7 @@
 #define WML_TOKENIZER_H
 
 #include <MGlobal>
-#include <nonstd/buffered_ifstream>
+#include <fstream>
 
 namespace wml
 {
@@ -46,8 +46,8 @@ struct token
         END
     };
 
-    int type;
-    std::string value;
+    int type = END;
+    std::string value = "";
 };
 
 class M_EXPORT tokenizer
@@ -56,7 +56,7 @@ class M_EXPORT tokenizer
 
 public:
     tokenizer ( std::string file )
-        : stream ( file ) {
+        : stream{file}, next{stream.get()} {
         next_char();
     }
     const token& next_token();
@@ -71,16 +71,18 @@ public:
     }
 
 private:
-    token curr_token;
-    token prev_token;
+    token curr_token{};
+    token prev_token{};
     int lineno = 1;
-    int startlineno;
+    int startlineno = 0;
 
-    void next_char() {
-        current = stream.get();
-    }
-    non_std::buffered_ifstream stream;
-    int current;
+    void next_char();
+    char buffer[0x400];
+    std::uint16_t buffer_offset = 0;
+    std::uint16_t buffer_length = 0;
+    std::ifstream stream;
+    int current = EOF;
+    int next;
 };
 }
 
