@@ -22,8 +22,9 @@
 
 #include <MGlobal>
 #include <string>
-#include <map>
+#include <limits>
 #include <list>
+#include <map>
 
 namespace wml
 {
@@ -34,23 +35,24 @@ public:
     class M_EXPORT attribute {
         friend class config;
         using value_type = std::tuple<long, double, std::string>;
-        value_type value;
-        std::string name;
+        value_type value = std::make_tuple(-1, std::numeric_limits<double>::quiet_NaN(), std::string{});
+        std::string name = "";
+        attribute ( const attribute& ) = delete;
     public:
-        void clear();
-        attribute& operator= ( const std::string& val );
+        attribute() = default;
+        void clear() { *this = ""; }
+        attribute& operator= ( std::string val );
         attribute& operator= ( double val );
         attribute& operator= ( long val );
-        void set_if_empty ( const std::string& val );
-        void set_if_empty ( double val );
-        void set_if_empty ( long val );
-        bool empty() const;
-        std::string str() const;
-        double to_double() const;
-        long to_long() const;
         template <typename T>
-        T as() const { return std::get<T>(value); }
-        operator std::string() const { return as<std::string>(); }
+        void set_if_empty ( T&& val ) { if ( empty() ) *this = std::forward<T>(val); }
+        bool empty() const { return str().empty(); }
+        const std::string& str() const { return as<std::string>(); }
+        double to_double() const { return as<double>(); }
+        long to_long() const { return as<long>(); }
+        template <typename T>
+        const T& as() const { return std::get<T>(value); }
+        operator const std::string&() const { return as<std::string>(); }
     };
     config ( std::string name = "" );
     ~config() { clear(); }

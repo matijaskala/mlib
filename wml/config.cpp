@@ -19,82 +19,31 @@
 
 #include "config.h"
 
-#include <limits>
-#include <cstdlib>
-
 using namespace std;
 using namespace wml;
 
-void config::attribute::clear()
+config::attribute& config::attribute::operator= ( string val )
 {
-    value = make_tuple(-1,numeric_limits< double >::quiet_NaN(),"");
-}
-
-config::attribute& config::attribute::operator= ( const string& val )
-{
-    if ( val.empty() ) {
-        clear();
-        return *this;
-    }
     char* endptr;
     double d = strtod ( val.c_str(), &endptr );
-    if ( *endptr )
-        value = make_tuple(-1,numeric_limits< double >::quiet_NaN(),val);
+    if ( *endptr || val.empty() )
+        value = make_tuple(-1, numeric_limits<double>::quiet_NaN(), move(val));
     else
-        value = make_tuple(d,d,val);
+        value = make_tuple(d, d, move(val));
     return *this;
 }
 
 config::attribute& config::attribute::operator= ( double d )
 {
-    value = make_tuple(d,d,to_string(d));
+    value = make_tuple(d, d, to_string(d));
     return *this;
 }
 
 config::attribute& config::attribute::operator= ( long int l )
 {
-    value = make_tuple(l,l,to_string(l));
+    value = make_tuple(l, l, to_string(l));
     return *this;
 }
-
-void config::attribute::set_if_empty ( const string& val )
-{
-    if ( empty() )
-        *this = val;
-}
-
-void config::attribute::set_if_empty ( double val )
-{
-    if ( empty() )
-        *this = val;
-}
-
-void config::attribute::set_if_empty ( long val )
-{
-    if ( empty() )
-        *this = val;
-}
-
-bool config::attribute::empty() const
-{
-    return str().empty();
-}
-
-string config::attribute::str() const
-{
-    return get<string>(value);
-}
-
-double config::attribute::to_double() const
-{
-    return get<double>(value);
-}
-
-long config::attribute::to_long() const
-{
-    return get<long>(value);
-}
-
 
 config::config ( string name )
     : name ( name )
