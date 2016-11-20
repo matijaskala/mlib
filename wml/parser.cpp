@@ -1,6 +1,6 @@
 /*
- * <one line to give the program's name and a brief idea of what it does.>
- * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
+ * Wesnoth Markup Language parser
+ * Copyright (C) 2014-2016  Matija Skala <mskala@gmx.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,15 @@
 
 using namespace wml;
 
+struct parser::element {
+    element ( config& cfg, int start_line = 0 )
+        : cfg{cfg}, start_line{start_line} {}
+    config& cfg;
+    int start_line;
+};
+
 exception::exception ( std::string message )
-    : message(message) {}
+    : message{message} {}
 
 const char* exception::what() const noexcept
 {
@@ -30,7 +37,7 @@ const char* exception::what() const noexcept
 }
 
 parser::parser ( std::string file )
-    : tok ( file )
+    : tok{file}, elements{}
 {
 
 }
@@ -43,11 +50,12 @@ parser::~parser()
 void parser::operator() ( config& cfg )
 {
     cfg.clear();
-    elements.push ( element ( cfg, "" ) );
+    elements.push(cfg);
 
     do {
         switch ( tok.next_token().type ) {
             case token::LINE_FEED:
+            case token::COMMENT:
                 continue;
             case token::OPEN_BRACKET:
                 parse_element();
@@ -62,7 +70,9 @@ void parser::operator() ( config& cfg )
     } while ( tok.current_token().type != token::END );
 
     if ( elements.size() != 1 )
-        throw exception ( "Missing closing tag for tag [$tag]" );
+        throw exception{"Missing closing tag for tag [" + elements.top().cfg.name +
+                        "] opened at " + std::to_string(elements.top().start_line)};
+    elements.pop();
 }
 
 void parser::parse_element()
@@ -73,51 +83,47 @@ void parser::parse_element()
         case token::WORD:
             elname = tok.current_token().value;
             if ( tok.next_token().type != token::CLOSE_BRACKET )
-                throw exception ( "Unterminated [element] tag" );
-            cfg.children.push_back ( config ( elname ) );
-            elements.push ( element ( cfg.children.back(), elname, tok.start_line() ) );
+                throw exception{"Unterminated [element] tag"};
+            cfg.children.push_back(elname);
+            elements.push({cfg.children.back(), tok.start_line()});
             break;
         case token::PLUS:
             if ( tok.next_token().type != token::WORD )
-                throw exception ( "Invalid tag name" );
+                throw exception{"Invalid tag name"};
             elname = tok.current_token().value;
             if ( tok.next_token().type != token::CLOSE_BRACKET )
-                throw exception ( "Unterminated [+element] tag" );
+                throw exception{"Unterminated [+element] tag"};
             for ( auto i = cfg.children.rbegin(); i != cfg.children.rend(); i++ )
                 if ( i->name == elname ) {
-                    elements.push ( element ( *i, elname, tok.start_line() ) );
+                    elements.push({*i, tok.start_line()});
                     return;
                 }
-            cfg.children.push_back ( config ( elname ) );
-            elements.push ( element ( cfg.children.back(), elname, tok.start_line() ) );
+            cfg.children.push_back(elname);
+            elements.push({cfg.children.back(), tok.start_line()});
             break;
         case token::SLASH:
             if ( tok.next_token().type != token::WORD )
-                throw exception ( "Invalid closing tag name" );
+                throw exception{"Invalid closing tag name"};
             elname = tok.current_token().value;
             if ( tok.next_token().type != token::CLOSE_BRACKET )
-                throw exception ( "Unterminated closing tag" );
+                throw exception{"Unterminated closing tag"};
             if ( elements.size() == 1 )
-                throw exception ( "Unexpected closing tag" );
-            if ( elname != cfg.name ) {
-                std::map<std::string, std::string> i18n_symbols;
-                i18n_symbols["tag1"] = elements.top().name;
-                i18n_symbols["tag2"] = elname;
-                i18n_symbols["pos1"] = elements.top().start_line;
-                i18n_symbols["pos2"] = tok.start_line();
-                throw exception ( "Found invalid closing tag [/$tag2] for tag [$tag1] opened at $pos1 closed at $pos2" );
-            }
+                throw exception{"Unexpected closing tag"};
+            if ( elname != cfg.name )
+                throw exception{"Found invalid closing tag [/" + elname + "] for tag [" +
+                                cfg.name + "] opened at " + std::to_string(elements.top().start_line) +
+                                " closed at " + std::to_string(tok.start_line())};
             elements.pop();
             break;
         default:
-            throw exception ( "Invalid tag name" );
+            throw exception{"Invalid tag name"};
     }
 }
 
 void parser::parse_variable()
 {
     config& cfg = elements.top().cfg;
-    std::deque<std::string> vars(1);
+    std::deque<std::string> vars{{}};
     for ( int token_type = tok.current_token().type; token_type != token::EQUALS; token_type = tok.next_token().type )
         switch ( token_type ) {
             case token::WORD:
@@ -127,16 +133,16 @@ void parser::parse_variable()
                 break;
             case token::COMMA:
                 if(vars.back().empty())
-                    throw exception ( "Empty variable name" );
+                    throw exception{"Empty variable name"};
                 else
-                    vars.push_back("");
+                    vars.push_back({});
                 break;
             default:
-                throw exception ( "Unexpected characters after variable name (expected , or =)" );
+                throw exception{"Unexpected characters after variable name (expected , or =)"};
                 break;
         }
     if ( vars.back().empty() )
-        throw exception ( "Empty variable name" );
+        throw exception{"Empty variable name"};
 
     for ( std::string var: vars )
         cfg[var] = "";
@@ -164,14 +170,15 @@ void parser::parse_variable()
                         break;
                     case token::LINE_FEED:
                     case token::END:
-                        buffer += '_';
+                        cfg[*curvar] = buffer + '_';
+                        return;
                 }
                 break;
             case token::PLUS:
                 ignore_next_newlines = true;
                 continue;
             case token::UNTERMINATED_LITERAL:
-                throw exception ( "Unterminated literal" );
+                throw exception{"Unterminated literal"};
             case token::LINE_FEED:
                 if ( ignore_next_newlines )
                     continue;

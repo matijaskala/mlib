@@ -1,6 +1,6 @@
 /*
- * <one line to give the program's name and a brief idea of what it does.>
- * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
+ * Wesnoth Markup Language parser
+ * Copyright (C) 2014-2016  Matija Skala <mskala@gmx.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,13 +44,7 @@ public:
 private:
     void parse_element();
     void parse_variable();
-    struct element {
-        element ( config& cfg, std::string name, int start_line = 0 )
-            : cfg ( cfg ), name ( name ), start_line ( start_line ) {}
-        config& cfg;
-        std::string name;
-        int start_line;
-    };
+    struct element;
     std::stack<element> elements;
 };
 }
