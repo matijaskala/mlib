@@ -21,7 +21,7 @@
 #define WML_TOKENIZER_H
 
 #include <MGlobal>
-#include <fstream>
+#include <string>
 
 namespace wml
 {
@@ -55,10 +55,9 @@ class M_EXPORT tokenizer
     using traits = std::char_traits< char >;
 
 public:
-    tokenizer ( std::string file )
-        : stream{file}, next{stream.get()} {
-        next_char();
-    }
+    tokenizer ( std::istream* stream );
+    tokenizer ( const tokenizer& ) = default;
+    tokenizer& operator= ( const tokenizer& ) = default;
     const token& next_token();
     const token& current_token() const {
         return curr_token;
@@ -80,7 +79,7 @@ private:
     char buffer[0x400];
     std::uint16_t buffer_offset = 0;
     std::uint16_t buffer_length = 0;
-    std::ifstream stream;
+    std::istream* stream;
     int current = EOF;
     int next;
 };

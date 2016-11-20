@@ -19,8 +19,16 @@
 
 #include "tokenizer.h"
 
+#include <istream>
+
 using namespace std;
 using namespace wml;
+
+tokenizer::tokenizer ( istream* stream )
+    : stream{stream}, next{stream->get()}
+{
+    next_char();
+}
 
 const token& tokenizer::next_token()
 {
@@ -125,9 +133,9 @@ void tokenizer::next_char()
         next = traits::to_int_type(buffer[buffer_offset++]);
     else {
         buffer_offset = 0;
-        if ( stream.peek() != traits::eof() && stream.readsome ( buffer, sizeof(buffer) ) == 0 )
-            stream.get(*buffer);
-        buffer_length = stream.gcount();
+        if ( stream->peek() != traits::eof() && stream->readsome ( buffer, sizeof(buffer) ) == 0 )
+            stream->get(*buffer);
+        buffer_length = stream->gcount();
         if ( buffer_length )
             next = *buffer;
         else

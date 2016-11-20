@@ -19,6 +19,8 @@
 
 #include "parser.h"
 
+#include <fstream>
+
 using namespace wml;
 
 struct parser::element {
@@ -37,12 +39,19 @@ const char* exception::what() const noexcept
 }
 
 parser::parser ( std::string file )
-    : tok{file}, elements{}
+    : elements{}, stream{new std::ifstream{file}}, tok{stream.get()}
 {
 
 }
 
-parser::~parser()
+parser::parser ( std::streambuf* streambuf )
+    : elements{}, stream{new std::istream{streambuf}}, tok{stream.get()}
+{
+
+}
+
+parser::parser ( std::istream* stream )
+    : elements{}, stream{}, tok{stream}
 {
 
 }

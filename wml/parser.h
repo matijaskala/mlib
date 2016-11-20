@@ -20,6 +20,7 @@
 #ifndef WML_PARSER_H
 #define WML_PARSER_H
 
+#include <memory>
 #include <stack>
 #include "tokenizer.h"
 #include "config.h"
@@ -38,14 +39,16 @@ class M_EXPORT parser
 {
 public:
     parser ( std::string file );
-    ~parser();
-    tokenizer tok;
+    parser ( std::streambuf* streambuf );
+    parser ( std::istream* stream );
     void operator() ( config& cfg );
 private:
     void parse_element();
     void parse_variable();
     struct element;
     std::stack<element> elements;
+    std::unique_ptr<std::istream> stream;
+    tokenizer tok;
 };
 }
 
