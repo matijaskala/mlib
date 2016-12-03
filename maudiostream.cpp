@@ -39,7 +39,7 @@ public:
     virtual ~MIStream() { delete rdbuf(); }
 };
 
-MAudioStream::MAudioStream ( std::istream* stream ) : m_stream{stream}
+MAudioStream::MAudioStream ( std::istream* stream ) : m_interface{nullptr}, m_stream{stream}
 {
     for ( auto iface: MAudioStreamInterface::interfaces() )
         if ( iface->valid ( m_stream ) ) {
@@ -66,7 +66,8 @@ MAudioStream::MAudioStream ( const char* file ) : MAudioStream{new MIStream{file
 MAudioStream::~MAudioStream()
 {
     waitRead();
-    m_interface->fini ( this );
+    if ( m_interface )
+        m_interface->fini ( this );
     delete m_stream;
 }
 
