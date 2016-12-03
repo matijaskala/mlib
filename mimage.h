@@ -34,7 +34,7 @@ public:
     const MSize& size() const { return m_size; }
     bool hasAlpha() const { return m_alpha; }
     auto data() const { return static_cast<std::uint8_t*>(m_data); }
-    auto stride() const { return size().width() * ( hasAlpha() ? 4 : 3 ); }
+    auto stride() const { return (size().width() * ( hasAlpha() ? 4 : 3 ) + 3) &~3; }
 
     MTexture* createTexture() const;
 
