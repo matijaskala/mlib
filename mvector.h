@@ -39,7 +39,7 @@ private:
 #define d begin()[i]
 public:
     MVector ( std::initializer_list<N> initializers )
-    : MVector{initializers.size(), new N[dim]} {
+    : MVector(initializers.size(), new N[initializers.size()]) {
         std::size_t i = 0;
         for ( const N& t: initializers )
             data[i++] = t;
@@ -52,12 +52,12 @@ public:
             delete data;
     }
     MVector ( const MVector& other )
-    : MVector{other.dimensions(), new N[dim]} {
+    : MVector(other.dimensions(), new N[other.dimensions()]) {
         foreach_d
             d = other.d;
     }
     MVector ( MVector&& other )
-    : MVector{other.dimensions(), other.data} {
+    : MVector(other.dimensions(), other.data) {
         other.dim = 0;
         other.data = nullptr;
     }
@@ -77,8 +77,7 @@ public:
 
     template<typename O>
     MVector ( const MVector<O>& other )
-    : dim{other.dimensions()}
-    , data{new N[dim]} {
+    : MVector(other.dimensions(), new N[other.dimensions()]) {
         foreach_d
             d = other.d;
     }
@@ -116,7 +115,8 @@ public:
         if ( !dim )
             return *this = +other;
         if ( dim != other.dimensions() )
-            throw std::invalid_argument{"operator+(" + std::to_string(dim) + "-dimensional MVector, " + std::to_string(other.dimensions()) + "-dimensional MVector)"};
+            throw std::invalid_argument{"operator+(" + std::to_string(dim) + "-dimensional MVector, "
+                                      + std::to_string(other.dimensions()) + "-dimensional MVector)"};
         foreach_d
             d += other.d;
         return *this;
@@ -128,7 +128,8 @@ public:
         if ( !dim )
             return *this = -other;
         if ( dim != other.dimensions() )
-            throw std::invalid_argument{"operator-(" + std::to_string(dim) + "-dimensional MVector, " + std::to_string(other.dimensions()) + "-dimensional MVector)"};
+            throw std::invalid_argument{"operator-(" + std::to_string(dim) + "-dimensional MVector, "
+                                      + std::to_string(other.dimensions()) + "-dimensional MVector)"};
         foreach_d
             d -= other.d;
         return *this;
@@ -153,32 +154,40 @@ public:
     }
     template<typename O>
     auto operator+ ( const MVector<O>& other ) const {
-        MVector<decltype(N{} + O{})> r = *this;
-        return r += other;
+        MVector<decltype(N{} + O{})> r(dim, new decltype(N{} + O{})[dim]);
+        foreach_d
+            r.d = d + other.d;
+        return r;
     }
     template<typename O>
     auto operator- ( const MVector<O>& other ) const {
-        MVector<decltype(N{} - O{})> r = *this;
-        return r -= other;
+        MVector<decltype(N{} - O{})> r(dim, new decltype(N{} - O{})[dim]);
+        foreach_d
+            r.d = d - other.d;
+        return r;
     }
     template<typename O>
     auto operator* ( O scalar ) const {
-        MVector<decltype(N{} * O{})> r = *this;
-        return r *= scalar;
+        MVector<decltype(N{} * O{})> r(dim, new decltype(N{} * O{})[dim]);
+        foreach_d
+            r.d = d * scalar;
+        return r;
     }
     template<typename O>
     auto operator/ ( O scalar ) const {
-        MVector<decltype(N{} / O{})> r = *this;
-        return r /= scalar;
+        MVector<decltype(N{} / O{})> r(dim, new decltype(N{} / O{})[dim]);
+        foreach_d
+            r.d = d / scalar;
+        return r;
     }
     MVector operator+ () const {
-        MVector r = *this;
+        MVector r(dim, new N[dim]);
         foreach_d
             r.d = +d;
         return r;
     }
     MVector operator- () const {
-        MVector r = *this;
+        MVector r(dim, new N[dim]);
         foreach_d
             r.d = -d;
         return r;
@@ -207,7 +216,8 @@ template<typename N, typename O>
 auto scalar_multiplication(const MVector<N>& a, const MVector<O>& b)
 {
     if(a.dimensions() != b.dimensions())
-        throw std::invalid_argument{"scalar_multiplication(" + std::to_string(a.dimensions()) + "-dimensional MVector, " + std::to_string(b.dimensions()) + "-dimensional MVector)"};
+        throw std::invalid_argument{"scalar_multiplication(" + std::to_string(a.dimensions()) + "-dimensional MVector, "
+                                                             + std::to_string(b.dimensions()) + "-dimensional MVector)"};
     auto ret = N{} * O{};
     for(std::size_t i = 0; i < a.dimensions(); i++)
         ret += a.begin()[i] * std::conj(b.begin()[i]);
@@ -218,10 +228,11 @@ template<typename N, typename O>
 auto vector_multiplication(const MVector<N>& a, const MVector<O>& b)
 {
     if (a.dimensions() != 3 || b.dimensions() != 3)
-        throw std::invalid_argument{"vector_multiplication(" + std::to_string(a.dimensions()) + "-dimensional MVector, " + std::to_string(b.dimensions()) + "-dimensional MVector)"};
+        throw std::invalid_argument{"vector_multiplication(" + std::to_string(a.dimensions()) + "-dimensional MVector, "
+                                                             + std::to_string(b.dimensions()) + "-dimensional MVector)"};
     auto A = a.begin();
     auto B = b.begin();
-    return MVector<decltype(N{} * O{} + N{} * O{})>{
+    return MVector<decltype(N{} * O{} - N{} * O{})>{
         A[1] * B[2] - A[2] * B[1],
         A[2] * B[0] - A[0] * B[2],
         A[0] * B[1] - A[1] * B[0],
