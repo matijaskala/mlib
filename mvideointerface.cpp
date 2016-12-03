@@ -19,6 +19,8 @@
 
 #include "mvideointerface.h"
 
+#include <mwindow.h>
+
 #include <GL/gl.h>
 
 #include <chrono>
