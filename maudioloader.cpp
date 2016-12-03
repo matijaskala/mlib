@@ -20,15 +20,31 @@
 #include <MResourceLoader>
 #include <MAudioStream>
 #include <MAudioFile>
+#include <MDebug>
 
 #include <fstream>
 
 static class MAudioLoader : public MResourceLoader
 {
+    virtual bool valid ( std::string file ) override;
     virtual MResource* load ( std::string file ) override;
     virtual MResource::Type type() override;
     virtual std::string name() override;
 } audioLoader;
+
+bool MAudioLoader::valid ( std::string file )
+{
+    return MResourceLoader::valid ( file );
+    std::ifstream stream{file};
+    if ( !stream.is_open() )
+        mDebug() << file << ": No such file or directory.";
+    if ( !stream.good() )
+        return false;
+    for ( auto iface: MAudioStreamInterface::interfaces() )
+        if ( iface->valid ( &stream ) )
+            return true;
+    return false;
+}
 
 MResource* MAudioLoader::load ( std::string file )
 {
