@@ -23,13 +23,6 @@
 
 using namespace wml;
 
-struct parser::element {
-    element ( config& cfg, int start_line = 0 )
-        : cfg{cfg}, start_line{start_line} {}
-    config& cfg;
-    int start_line;
-};
-
 exception::exception ( std::string message )
     : message{message} {}
 
@@ -59,7 +52,7 @@ parser::parser ( std::istream* stream )
 void parser::operator() ( config& cfg )
 {
     cfg.clear();
-    elements.push(cfg);
+    elements.push({cfg, 0});
 
     do {
         switch ( tok.next_token().type ) {
@@ -79,15 +72,15 @@ void parser::operator() ( config& cfg )
     } while ( tok.current_token().type != token::END );
 
     if ( elements.size() != 1 )
-        throw exception{"Missing closing tag for tag [" + elements.top().cfg.name +
-                        "] opened at " + std::to_string(elements.top().start_line)};
+        throw exception{"Missing closing tag for tag [" + elements.top().first.name +
+                        "] opened at " + std::to_string(elements.top().second)};
     elements.pop();
 }
 
 void parser::parse_element()
 {
     std::string elname;
-    config& cfg = elements.top().cfg;
+    config& cfg = elements.top().first;
     switch ( tok.next_token().type ) {
         case token::WORD:
             elname = tok.current_token().value;
@@ -120,7 +113,7 @@ void parser::parse_element()
                 throw exception{"Unexpected closing tag"};
             if ( elname != cfg.name )
                 throw exception{"Found invalid closing tag [/" + elname + "] for tag [" +
-                                cfg.name + "] opened at " + std::to_string(elements.top().start_line) +
+                                cfg.name + "] opened at " + std::to_string(elements.top().second) +
                                 " closed at " + std::to_string(tok.start_line())};
             elements.pop();
             break;
@@ -131,7 +124,7 @@ void parser::parse_element()
 
 void parser::parse_variable()
 {
-    config& cfg = elements.top().cfg;
+    config& cfg = elements.top().first;
     std::deque<std::string> vars{{}};
     for ( int token_type = tok.current_token().type; token_type != token::EQUALS; token_type = tok.next_token().type )
         switch ( token_type ) {

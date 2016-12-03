@@ -45,8 +45,7 @@ public:
 private:
     void parse_element();
     void parse_variable();
-    struct element;
-    std::stack<element> elements;
+    std::stack<std::pair<config&, int>> elements;
     std::unique_ptr<std::istream> stream;
     tokenizer tok;
 };
