@@ -38,11 +38,6 @@ public:
 
     MTexture* createTexture() const;
 
-    static bool load ( std::string file );
-    static void unload ( std::string file );
-    static void unload ( const MImage* image );
-    static MImage* get ( std::string file );
-
 private:
     MSize m_size;
     bool m_alpha;

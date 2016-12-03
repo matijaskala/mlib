@@ -26,11 +26,6 @@ class MTexture;
 class M_EXPORT MFont : public MResource
 {
 public:
-    static bool load ( std::string file );
-    static void unload ( std::string file );
-    static void unload ( const MFont* font );
-    static MFont* get ( std::string file );
-
     virtual std::uint16_t getSize() = 0;
     virtual bool setSize ( std::uint16_t size, std::uint16_t res = 0 ) = 0;
     virtual MTexture* render ( std::wstring text ) = 0;

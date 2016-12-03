@@ -26,47 +26,6 @@
 
 using namespace std;
 
-static map< string, MFont* > fonts;
-
-bool MFont::load ( string file )
-{
-    for ( auto loader: MResourceLoader::loaders() ) {
-        if ( loader->type() != Font )
-            continue;
-        MResource* res = loader->load(file);
-        if ( !res )
-            continue;
-        MFont* font = dynamic_cast<MFont*> ( res );
-        if ( !font ) {
-            delete res;
-            continue;
-        }
-        fonts[file] = font;
-        return true;
-    }
-    return false;
-}
-
-void MFont::unload ( string file )
-{
-    auto i = fonts.find ( file );
-    delete i->second;
-    fonts.erase ( i );
-}
-
-void MFont::unload ( const MFont* font )
-{
-    for ( auto i = fonts.begin(); i != fonts.end(); i++ )
-        if ( i->second == font )
-            fonts.erase ( i );
-    delete font;
-}
-
-MFont* MFont::get ( string file )
-{
-    return fonts[file];
-}
-
 uint16_t MFont::size()
 {
     return getSize();

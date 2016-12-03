@@ -27,8 +27,6 @@
 #include <GL/glext.h>
 #include <cstring>
 
-static std::map< std::string, MImage* > map;
-
 MImage::MImage ( MSize size, bool alpha, void* data )
     : m_size{size}
     , m_alpha{alpha}
@@ -73,45 +71,4 @@ MTexture* MImage::createTexture() const
     GLenum format = hasAlpha() ? GL_RGBA : GL_RGB;
     glTexImage2D ( GL_TEXTURE_2D, 0, format, size().width(), size().height(), 0, format, GL_UNSIGNED_BYTE, data() );
     return texture;
-}
-
-bool MImage::load ( std::string file )
-{
-    for ( auto loader: MResourceLoader::loaders() ) {
-        if ( loader->type() != Image )
-            continue;
-        if ( !loader->valid ( file ) )
-            continue;
-        auto res = loader->load ( file );
-        if ( !res )
-            continue;
-        auto image = dynamic_cast< MImage* > ( res );
-        if ( !image ) {
-            delete res;
-            continue;
-        }
-        map[file] = image;
-        return true;
-    }
-    return false;
-}
-
-void MImage::unload ( std::string file )
-{
-    auto i = map.find ( file );
-    delete i->second;
-    map.erase ( i );
-}
-
-void MImage::unload ( const MImage* image )
-{
-    for ( auto position: map )
-        if ( position.second == image )
-            map.erase ( position.first );
-    delete image;
-}
-
-MImage* MImage::get ( std::string file )
-{
-    return map[file];
 }
