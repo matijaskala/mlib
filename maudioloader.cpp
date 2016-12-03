@@ -34,7 +34,6 @@ static class MAudioLoader : public MResourceLoader
 
 bool MAudioLoader::valid ( std::string file )
 {
-    return MResourceLoader::valid ( file );
     std::ifstream stream{file};
     if ( !stream.is_open() )
         mDebug() << file << ": No such file or directory.";
