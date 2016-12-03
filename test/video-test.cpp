@@ -176,7 +176,7 @@ int main ( int argc, char** argv ) {
             continue;
         MDebug debug;
         debug << "Loading image " << f.name() << " ... ";
-        if ( MImage::load ( f.path() + "/" + f.name() ) )
+        if ( MResource::load ( f.path() + "/" + f.name() ) )
             debug << "done";
         else
             debug << "failed";
@@ -186,14 +186,14 @@ int main ( int argc, char** argv ) {
             continue;
         MDebug debug;
         debug << "Loading font " << f.name() << " ... ";
-        if ( MFont::load ( f.path() + "/" + f.name() ) )
+        if ( MResource::load ( f.path() + "/" + f.name() ) )
             debug << "done";
         else
             debug << "failed";
     }
-    auto img = MImage::get ( MLIB_DATA_DIR "images/sample.png" );
+    auto img = MResource::get<MImage> ( MLIB_DATA_DIR "images/sample.png" );
     tex = img->createTexture();
-    font = MFont::get ( MLIB_DATA_DIR "fonts/DejaVuSans.ttf" );
+    font = MResource::get<MFont> ( MLIB_DATA_DIR "fonts/DejaVuSans.ttf" );
     text = new Text;
     Menu* menu = new Menu{w};
     menu->items.push_back("ITEM1");
