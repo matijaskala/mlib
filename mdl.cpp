@@ -22,14 +22,9 @@
 #include <MDebug>
 
 #include <unordered_map>
+#include <nonstd/dl>
 
 using namespace std;
-
-#ifndef _WIN32
-#include <dlfcn.h>
-#else
-#include <windows.h>
-#endif
 
 static unordered_map<string,void*> modules;
 
@@ -42,30 +37,9 @@ bool MDL::open ( string file )
         mDebug() << "Module '" << file << "' already loaded";
         return true;
     }
-#ifdef _WIN32
-    string mspath;
-    for ( char c: file )
-        mspath += ( c == '/' ) ? '\\' : c;
-    module = LoadLibraryExA ( (LPSTR) mspath.c_str(), NULL, 
-                             LOAD_WITH_ALTERED_SEARCH_PATH );
-
-    if ( !module ) {
-        static TCHAR error_buffer[0x100];
-        FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
-                      MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
-                      error_buffer, sizeof(error_buffer), NULL);
-
-        mDebug(ERROR) << error_buffer;
-    }
-#else
-    dlerror();
-    module = dlopen ( file.c_str(), RTLD_NOW | RTLD_LOCAL );
-    if ( module == nullptr ) {
-        char* error = dlerror();
-        if ( error )
-            mDebug(ERROR) << error;
-    }
-#endif
+    module = dl::open ( file.c_str() );
+    if ( module == nullptr )
+        mDebug(ERROR) << dl::error();
     return module;
 }
 
@@ -78,20 +52,8 @@ bool MDL::close ( string file )
         mDebug() << "Module '" << file << "' was not loaded";
         return true;
     }
-#ifdef _WIN32
-    if ( !FreeLibrary ( static_cast<HMODULE> ( module ) ) ) {
-        static TCHAR error_buffer[0x100];
-        FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
-                      MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
-                      error_buffer, sizeof(error_buffer), NULL);
-
-        mDebug(ERROR) << error_buffer;
-    }
-#else
-    dlerror();
-    if ( dlclose(module) != 0 )
-        mDebug() << dlerror();
-#endif
+    if ( !dl::close(module) )
+        mDebug() << dl::error();
     else {
         modules.erase(file);
         return true;
@@ -112,10 +74,5 @@ MDL MDL::get ( string file )
 template<>
 void* MDL::symbol ( string name )
 {
-#ifdef _WIN32
-    FARPROC sym = GetProcAddress( static_cast<HMODULE> ( m_ptr ), name.c_str());
-    return reinterpret_cast<void*> ( sym );
-#else
-    return dlsym(m_ptr, name.c_str());
-#endif
+    return dl::sym(m_ptr, name.c_str());
 }
