@@ -30,8 +30,9 @@ using namespace non_std;
 
 static bool initialized{false};
 
-void M::init ( int& argc, char**& argv )
+void MLib::init ( int& argc, char**& argv )
 {
+    (void)argc; (void)argv;
     if ( initialized ) {
         mDebug() << "MLib already initialized";
         return;
@@ -48,7 +49,7 @@ void M::init ( int& argc, char**& argv )
     alcMakeContextCurrent ( context );
 }
 
-void M::quit ( int status )
+void MLib::quit ( int status )
 {
     auto video = MVideoInterface::get();
     if (video)

@@ -38,7 +38,7 @@
 #define M_WARN_UNUSED_RESULT
 #endif
 
-namespace M
+namespace MLib
 {
     M_EXPORT void init ( int& argc, char**& argv );
     M_EXPORT void quit ( int status = 0 );

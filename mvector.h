@@ -285,7 +285,7 @@ std::basic_ostream<C, T>& operator<< ( std::basic_ostream<C, T>& os, const MVect
     return os << s.str();
 }
 
-namespace M {
+namespace MLib {
 
 template<typename N>
 auto abs ( const MVector<N>& vector ) {
