@@ -18,28 +18,32 @@
  */
 
 #include <mcairo.h>
+#include <mdebug.h>
 
 static std::uint8_t multiply_alpha ( std::uint8_t alpha, std::uint8_t color ) {
     int t = alpha * color + 0x80;
     return ((t + (t >> 8)) >> 8);
 }
-void mcairo_from_rgba ( MSize size, std::uint8_t* data, int stride, bool hasAlpha )
+void mcairo_from_rgba ( std::uint8_t* dest_data, std::uint8_t* src_data,
+                        std::uint_fast16_t dest_stride, std::uint_fast16_t src_stride,
+                        MSize size, bool hasAlpha )
 {
-    if ( stride / size.width() != 4 )
+    if ( dest_stride != size.width() * 4 ) {
+        mDebug(ERROR) << "unimplemented case: dest_stride = " << dest_stride << ", size.width() = " << size.width();
         return;
-    for ( unsigned int x = 0; x < size.width(); x++ )
-        for ( unsigned int y = 0; y < size.height(); y++ ) {
-            auto b = data + y * stride + x * 4;
-            auto alpha = hasAlpha ? b[3] : 0xff;
+    }
+    for ( unsigned int y = 0; y < size.height(); y++ )
+        for ( unsigned int x = 0; x < size.width(); x++ ) {
+            auto src_b = src_data + y * src_stride + x * ( src_stride / size.width() );
+            auto dest_b = dest_data + y * dest_stride + x * ( dest_stride / size.width() );
+            auto alpha = hasAlpha ? src_b[3] : 0xff;
             if ( !alpha )
-                memset (b, 0, 4);
+                memset ( dest_b, 0, dest_stride / size.width() );
             else {
-                if ( alpha != 0xff ) {
-                    b[0] = multiply_alpha ( alpha, b[0] );
-                    b[1] = multiply_alpha ( alpha, b[1] );
-                    b[2] = multiply_alpha ( alpha, b[2] );
-                }
-                *reinterpret_cast<std::uint32_t*> ( b ) = b[0] << 16 | b[1] << 8 | b[2] << 0 | alpha << 24;
+                dest_b[0] = multiply_alpha ( alpha, src_b[0] );
+                dest_b[1] = multiply_alpha ( alpha, src_b[1] );
+                dest_b[2] = multiply_alpha ( alpha, src_b[2] );
+                *reinterpret_cast<std::uint32_t*> ( dest_b ) = dest_b[0] << 16 | dest_b[1] << 8 | dest_b[2] << 0 | alpha << 24;
             }
         }
 }
@@ -48,22 +52,27 @@ static std::uint8_t unpremultiply_alpha ( std::uint8_t alpha, std::uint8_t color
 {
     return (color * 0xff + alpha/2) / alpha;
 }
-void mcairo_to_rgba ( MSize size, std::uint8_t* data, int stride, bool hasAlpha )
+void mcairo_to_rgba ( std::uint8_t* dest_data, std::uint8_t* src_data,
+                      std::uint_fast16_t dest_stride, std::uint_fast16_t src_stride,
+                      MSize size, bool hasAlpha )
 {
-    if ( stride / size.width() != 4 )
+    if ( src_stride != size.width() * 4 ) {
+        mDebug(ERROR) << "unimplemented case: src_stride = " << src_stride << ", size.width() = " << size.width();
         return;
-    for ( unsigned int x = 0; x < size.width(); x++ )
-        for ( unsigned int y = 0; y < size.height(); y++ ) {
-            auto b = data + y * stride + x * 4;
-            auto pixel = *reinterpret_cast<std::uint32_t*> ( b );
+    }
+    for ( unsigned int y = 0; y < size.height(); y++ )
+        for ( unsigned int x = 0; x < size.width(); x++ ) {
+            auto src_b = src_data + y * src_stride + x * ( src_stride / size.width() );
+            auto dest_b = dest_data + y * dest_stride + x * ( dest_stride / size.width() );
+            auto pixel = *reinterpret_cast<std::uint32_t*> ( src_b );
             std::uint8_t alpha = hasAlpha ? pixel >> 24 : 0xff;
             if ( !alpha )
-                memset ( b, 0, 4 );
+                memset ( dest_b, 0, dest_stride / size.width() );
             else {
-                b[0] = unpremultiply_alpha ( alpha, (pixel & 0xff0000) >> 16 );
-                b[1] = unpremultiply_alpha ( alpha, (pixel & 0x00ff00) >>  8 );
-                b[2] = unpremultiply_alpha ( alpha, (pixel & 0x0000ff) >>  0 );
-                b[3] = alpha;
+                dest_b[0] = unpremultiply_alpha ( alpha, (pixel & 0xff0000) >> 16 );
+                dest_b[1] = unpremultiply_alpha ( alpha, (pixel & 0x00ff00) >>  8 );
+                dest_b[2] = unpremultiply_alpha ( alpha, (pixel & 0x0000ff) >>  0 );
+                dest_b[3] = alpha;
             }
         }
 }

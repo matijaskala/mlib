@@ -53,10 +53,14 @@ inline void cairo_image_surface_format_bind_to_m_texture(CairoImageSurface surfa
         return;
     MSize size{cairo_image_surface_get_width ( surface ), cairo_image_surface_get_height ( surface )};
     auto stride = cairo_image_surface_get_stride ( surface );
-    auto data = static_cast<std::uint8_t*> ( std::malloc ( stride * size.height() ) );
-    std::memcpy ( data, cairo_image_surface_get_data ( surface ), stride * size.height() );
+    auto dest_stride = stride;
+    if ( format != 3 )
+        dest_stride = ( ( ( format == 1 ) ? 3 : 1 ) * size.width() + 3 ) &~3;
+    auto data = static_cast<std::uint8_t*> ( std::malloc ( dest_stride * size.height() ) );
     if ( format & 1 )
-        mcairo_to_rgba ( size, data, stride, format & 2 );
+        mcairo_to_rgba ( data, cairo_image_surface_get_data ( surface ), dest_stride, stride, size, format & 2 );
+    else
+        std::memcpy ( data, cairo_image_surface_get_data ( surface ), stride * size.height() );
     texture->image2D ( size, format, data );
     std::free ( data );
 }
@@ -64,7 +68,11 @@ inline void cairo_image_surface_format_bind_to_m_texture(CairoImageSurface surfa
 #define cairo_image_surface_bind_to_m_texture(surface, texture) \
     cairo_image_surface_format_bind_to_m_texture ( surface, cairo_image_surface_pick_mgl_format ( surface ), texture )
 
-M_EXPORT void mcairo_from_rgba ( MSize size, std::uint8_t* data, int stride, bool hasAlpha );
-M_EXPORT void mcairo_to_rgba ( MSize size, std::uint8_t* data, int stride, bool hasAlpha );
+M_EXPORT void mcairo_from_rgba ( std::uint8_t* dest_data, std::uint8_t* src_data,
+                                 std::uint_fast16_t dest_stride, std::uint_fast16_t src_stride,
+                                 MSize size, bool hasAlpha );
+M_EXPORT void mcairo_to_rgba ( std::uint8_t* dest_data, std::uint8_t* src_data,
+                               std::uint_fast16_t dest_stride, std::uint_fast16_t src_stride,
+                               MSize size, bool hasAlpha );
 
 #endif // MCAIRO_H
