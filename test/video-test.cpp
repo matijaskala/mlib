@@ -29,6 +29,9 @@
 #include <MImage>
 #include <mvideointerface.h>
 #include <mwindow.h>
+#include <maudio.h>
+#include <maudiofile.h>
+#include <mplaylist.h>
 
 static MFont* font = nullptr;
 MTexture* tex = nullptr;
@@ -156,16 +159,19 @@ void Texture::draw()
 using namespace std::chrono;
 Text* text;
 int main ( int argc, char** argv ) {
-    M::init ( argc, argv );
+    MLib::init ( argc, argv );
     auto i = MVideoInterface::get();
-    w = i->createWindow(800,600);
+    w = i->createWindow(800,600,M_VIDEO_FLAGS_RESIZABLE);
+    w->setTitle("Test");
     class EventHandler : public MEventHandler {
-        virtual void quit() { M::quit(); }
+        virtual void quit() { MLib::quit(); }
         virtual void keyPressed ( MKey key, uint32_t mods )
         {
             if ( key == M_KEY_BACKSPACE && !text->text.empty() )
                 text->text.pop_back();
-            else if ( m_key_is_character ( key ) )
+            else if ( key == '\t' )
+                text->text += L'»';
+            else if ( m_key_to_wchar ( key ) )
                 text->text += m_key_to_wchar ( key );
             text->changed();
         };
@@ -191,6 +197,25 @@ int main ( int argc, char** argv ) {
         else
             debug << "failed";
     }
+    for ( auto f: non_std::directory ( MLIB_DATA_DIR "sound" ) ) {
+        if ( f.name().front() == '.' )
+            continue;
+        MDebug debug;
+        debug << "Loading sound " << f.name() << " ... ";
+        if ( MResource::load(f.path() + "/" + f.name()) )
+            debug << "done";
+        else
+            debug << "failed";
+    }
+    MAudio::setVolume(0.8);
+    MAudioStream* audio = new MAudioStream{"/usr/share/games/supertuxkart/data/music/menutheme.ogg"};
+    MPlaylist playlist;
+    playlist.loop = true;
+    playlist.insert("/usr/share/games/supertuxkart/data/sfx/goal_scored.ogg");
+    playlist.stopAfter(0);
+    playlist.insert(audio);
+    playlist.insert("/usr/share/games/supertuxkart/data/music/egypt.ogg");
+    playlist.playNext();
     auto img = MResource::get<MImage> ( MLIB_DATA_DIR "images/sample.png" );
     tex = img->createTexture();
     font = MResource::get<MFont> ( MLIB_DATA_DIR "fonts/DejaVuSans.ttf" );
