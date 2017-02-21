@@ -23,15 +23,15 @@
 
 class MIStream : public std::istream {
 public:
-    explicit MIStream ( const std::string& file ) : std::istream{new std::filebuf} {
-        if ( !static_cast<std::filebuf*> (rdbuf())->open ( file, std::ios::in | std::ios::binary ) )
-            setstate(std::ios::failbit);
+    explicit MIStream ( const std::string& file ) : MIStream{new std::filebuf} {
+        if ( !static_cast<std::filebuf*> (rdbuf())->open ( file, in | binary ) )
+            setstate ( failbit );
         else
             clear();
     }
-    explicit MIStream ( const char* file ) : std::istream{new std::filebuf} {
-        if ( !static_cast<std::filebuf*> (rdbuf())->open ( file, std::ios::in | std::ios::binary ) )
-            setstate(std::ios::failbit);
+    explicit MIStream ( const char* file ) : MIStream{new std::filebuf} {
+        if ( !static_cast<std::filebuf*> (rdbuf())->open ( file, in | binary ) )
+            setstate ( failbit );
         else
             clear();
     }
