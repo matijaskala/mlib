@@ -194,9 +194,9 @@ void autocomplete ( const string& com ) {
 }
 
 string get_command ( list<mstring>& history ) {
-    autocompletion_string prompt;
-    prompt.fgcolor = green;
-    prompt.name = "$";
+    char cwd[60];
+    getcwd(cwd, 60);
+    string prompt = xterm::fgcolor ( magenta ) + cwd + xterm::fgcolor ( green ) + " $ " + xterm::escape ( "m" );
     cerr << xterm::escape ( "G" ) << prompt;
     termios_handler h;
     list<mstring>::iterator command_it = history.end();
