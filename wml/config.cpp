@@ -47,6 +47,8 @@ config::attribute& config::attribute::operator= ( long int l )
 
 config::config ( string name )
     : name ( name )
+    , children()
+    , attributes()
 {
 
 }
