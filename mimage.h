@@ -28,7 +28,10 @@ class M_EXPORT MImage : public MResource
 {
 public:
     MImage ( MSize size, bool alpha, void* data );
+    MImage ( const MImage& ) = delete;
     MImage ( MImage&& other );
+    MImage& operator= ( const MImage& ) = delete;
+    MImage& operator= ( MImage&& ) = default;
     virtual ~MImage();
 
     const MSize& size() const { return m_size; }

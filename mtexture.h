@@ -21,14 +21,17 @@
 #define MTEXTURE_H
 
 #include <mglobal.h>
+#include <utility>
 #include <MSize>
 
 class M_EXPORT MTexture
 {
 public:
     MTexture ();
-    MTexture ( const MTexture& other ) = delete;
-    MTexture ( MTexture&& other ) { d = other.d; other.d = nullptr; }
+    MTexture ( const MTexture& ) = delete;
+    MTexture ( MTexture&& other ) : d{std::exchange(other.d, nullptr)} {}
+    MTexture& operator= ( const MTexture& ) = delete;
+    MTexture& operator= ( MTexture&& ) = default;
     ~MTexture ();
     void bind () const;
     void image2D ( MSize size, int format, void* data );
