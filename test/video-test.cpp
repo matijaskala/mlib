@@ -32,6 +32,7 @@
 #include <maudio.h>
 #include <maudiofile.h>
 #include <mplaylist.h>
+#include <mobject.h>
 
 static MFont* font = nullptr;
 MTexture* tex = nullptr;
@@ -46,13 +47,12 @@ public:
 
 #define STIRIINSESTDESET 64
 
-struct Menu : public Drawable {
+struct Menu : public Drawable, public MObject {
     uint16_t current = 0;
     Menu ( MWindow* w ) {
-        w->keyPressed.connect(onKeyPress);
+        NON_STD_SIGNAL_CONNECT(w, keyPressed, this, onKeyPress);
     }
-    non_std::slot<MKey,std::uint32_t> onKeyPress =
-            [this] ( MKey key, std::uint32_t mod ) {
+    void onKeyPress ( MKey key, std::uint32_t mod ) {
                 if ( key == M_KEY_UP ) {
                     if ( current == 0 )
                         current = items.size();
@@ -66,7 +66,7 @@ struct Menu : public Drawable {
                 else if ( key == M_KEY_RETURN )
                     activated ( current );
                 render(font);
-            };
+            }
     virtual void draw();
     std::vector< std::string > items;
     std::vector< MTexture* > textures;
@@ -83,17 +83,15 @@ struct Menu : public Drawable {
     }
 };
 
-class Listener {
+class Listener : public MObject {
     Menu* menu;
     void activated ( int z ) {
         menu->items.push_back ( "ACTIVATED: " + menu->items[z] );
         menu->render(font);
     }
-    non_std::slot<int> slotActivated{&this_t::activated, this};
 public:
     Listener ( Menu* menu ) : menu{menu} {
-#undef connect
-        menu->activated.connect(slotActivated);
+        menu->activated.connect(this, &this_t::activated);
     }
 };
 
