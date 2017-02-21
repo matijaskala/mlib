@@ -30,6 +30,7 @@ class M_EXPORT MAudioFile : public MResource
         Buffer () : m_buffer{new std::vector<std::uint8_t>}, m_refcount{new int} {}
         Buffer ( const Buffer& other ) : m_buffer{other.m_buffer}, m_refcount{other.m_refcount} { ++*m_refcount; }
         ~Buffer () { if ( !--*m_refcount ) { delete m_buffer; delete m_refcount; } }
+        Buffer& operator= ( const Buffer& ) = default;
         std::vector<std::uint8_t>* operator->() { return m_buffer; }
 
     private:
@@ -38,9 +39,9 @@ class M_EXPORT MAudioFile : public MResource
     };
 
 public:
-    bool stereo;
-    int freq;
-    Buffer buffer;
+    bool stereo = false;
+    int freq = 0;
+    Buffer buffer{};
     void playSync ();
     void play ();
 

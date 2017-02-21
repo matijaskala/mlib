@@ -50,6 +50,7 @@ public:
     explicit MAudioStream ( const char* file );
     MAudioStream ( const MAudioStream& ) = delete;
     ~MAudioStream ();
+    MAudioStream& operator= ( const MAudioStream& ) = delete;
 
     bool eof () { return m_eof; }
     int freq () { return m_freq; }
