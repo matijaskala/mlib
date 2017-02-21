@@ -1,6 +1,6 @@
 /*
  * This file is part of MLib
- * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
+ * Copyright (C) 2014-2017  Matija Skala <mskala@gmx.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,30 +18,39 @@
  */
 
 #include "mobject.h"
-#include "mobject_p.h"
 
-MObject::Private::Private ( MObject* q ) : q ( q )
-{
-    parent = nullptr;
-}
-MObject::Private::~Private()
-{
-    for ( auto connection: signal_connections ) {
-        connection->d->signal->connections.remove ( connection );
-        delete_connection ( connection );
+#include <forward_list>
+#include <unordered_map>
+
+namespace std {
+template<>
+struct hash<pair<string, non_std::tuple_index>> {
+    auto operator() ( const pair<string, non_std::tuple_index>& a ) const noexcept {
+        return hash<string>{}(a.first) + hash<non_std::tuple_index>{}(a.second);
     }
+};
 }
+
+struct MObject::Private {
+    MObject* parent = nullptr;
+    std::list<MObject*> children{};
+    std::unordered_map<std::string, void*> signals{};
+    std::unordered_map<std::pair<std::string, non_std::tuple_index>, void*> named_slots{};
+    std::unordered_map<void*, void*> method_slots{};
+    std::forward_list<std::function<void()>> destructors{};
+};
 
 MObject::MObject ( MObject* parent )
-    : d ( new Private ( this ) )
+    : d{new Private}
 {
     reparent ( parent );
 }
 
 MObject::~MObject()
 {
+    for ( auto&& func: d->destructors )
+        func();
     delete d;
-
 }
 
 void MObject::reparent ( MObject* parent )
@@ -53,52 +62,27 @@ void MObject::reparent ( MObject* parent )
         d->parent->d->children.push_back ( this );
 }
 
-const std::list< MObject* >& MObject::children()
+const std::list<MObject*>& MObject::children () const
 {
     return d->children;
 }
 
-void MObject::connect_private ( SignalBase* signal, Connection::Slot slot, WrapperBase* wrapper )
+void*& MObject::access_signal ( std::string signal_name )
 {
-    auto connection = new Connection;
-    connection->d = new Connection::Data;
-    connection->d->signal = signal;
-    connection->d->receiver = this;
-    connection->d->slot = slot;
-    connection->d->wrapper = wrapper;
-    signal->connections.push_back ( connection );
-    d->signal_connections.push_back ( connection );
+    return d->signals[signal_name];
 }
 
-void MObject::disconnect_private ( SignalBase* signal, Connection::Slot slot )
+void*& MObject::access_slot ( std::string slot_name, non_std::tuple_index arg_types )
 {
-    for ( auto connection: signal->connections )
-        if ( connection->d->receiver == this && connection->d->slot == slot ) {
-            signal->connections.remove ( connection );
-            d->signal_connections.remove ( connection );
-            delete_connection ( connection );
-            return;
-        }
+    return d->named_slots[{slot_name, arg_types}];
 }
 
-void MObject::delete_connection ( Connection* connection )
+void*& MObject::access_slot ( void (MObject::*method) () )
 {
-    delete connection->d->wrapper;
-    delete connection->d;
-    delete connection;
+    return d->method_slots[(void*&)method];
 }
 
-
-MObject::SignalBase::~SignalBase() {
-    for ( auto connection: connections ) {
-        connection->d->receiver->d->signal_connections.remove ( connection );
-        delete_connection ( connection );
-    }
-}
-
-MObject::WrapperBase* MObject::Connection::__wrapper()
+void MObject::push_destructor ( std::function<void()> func )
 {
-    return d->wrapper;
+    d->destructors.push_front ( func );
 }
-
-
