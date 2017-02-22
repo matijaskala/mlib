@@ -91,7 +91,7 @@ public:
         auto* s = access_slot ( slot_name, static_typeid<_Args...> () );
         if ( !s ) {
             auto& sig = get_signal<_Args...> ( slot_name );
-            auto* a = new non_std::slot<_Args...> ( [&sig] { sig(); } );
+            auto* a = new non_std::slot<_Args...> ( [&sig] (_Args... args) { sig(std::forward<_Args>(args)...); } );
             s = a;
             push_destructor ( [a] { delete a; } );
         }
