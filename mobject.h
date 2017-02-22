@@ -36,8 +36,12 @@
 #define NON_STD_SIGNAL_DISCONNECT(sender,signal,receiver,slot) \
     (sender)->signal.disconnect ( receiver, &__classof__(receiver)::slot )
 
+class MObject;
+extern "C" void m_object_connect ( MObject* sender, const char* signal, MObject* receiver, void (*slot) () );
+
 class M_EXPORT MObject
 {
+    friend void m_object_connect ( MObject* sender, const char* signal, MObject* receiver, void (*slot) () );
 public:
     MObject ( MObject* parent = nullptr );
     virtual ~MObject();
@@ -61,7 +65,7 @@ public:
 
     template< typename... _Args >
     void emit ( std::string signal_name, _Args&&... args ) {
-        get_signal<_Args...> ( signal_name ) ( std::forward<_Args> ( args )... );
+        get_signal<dearrayize_t<_Args>...> ( signal_name ) ( std::forward<_Args> ( args )... );
     }
 
     template< typename... _Args >
@@ -120,8 +124,8 @@ protected:
         emit ( std::move ( signal_name ), std::forward<_Args> ( args )... );
     }
 
-    template< typename _Slot, typename _Object, typename... _Args >
-    void make_slot ( _Slot slot, void (_Object::*func) (_Args...) ) {
+    template< typename _Object, typename... _Args >
+    void make_slot ( std::string slot, void (_Object::*func) (_Args...) ) {
         auto*& s = access_slot ( slot, static_typeid<_Args...> () );
         auto* self = dynamic_cast<_Object*> ( this );
         if ( s ) {
@@ -135,9 +139,38 @@ protected:
         }
     }
 
-    template< typename _Slot, typename... _Args >
-    void make_slot ( _Slot slot, std::function<void(_Args...)> func ) {
+    template< typename... _Args >
+    void make_slot ( std::string slot, std::function<void(_Args...)> func ) {
         auto*& s = access_slot ( slot, static_typeid<_Args...> () );
+        if ( s ) {
+            static_cast<non_std::slot<_Args...>*> ( s )->~slot();
+            ::new ( s ) non_std::slot<_Args...> ( func );
+        }
+        else {
+            auto* a = new non_std::slot<_Args...> ( func );
+            s = a;
+            push_destructor ( [a] { delete a; } );
+        }
+    }
+
+    template< typename _Object, typename... _Args >
+    void make_slot ( void (_Object::*slot) (), void (_Object::*func) (_Args...) ) {
+        auto*& s = access_slot ( slot );
+        auto* self = dynamic_cast<_Object*> ( this );
+        if ( s ) {
+            static_cast<non_std::slot<_Args...>*> ( s )->~slot();
+            ::new ( s ) non_std::slot<_Args...> ( func, self );
+        }
+        else {
+            auto* a = new non_std::slot<_Args...> ( func, self );
+            s = a;
+            push_destructor ( [a] { delete a; } );
+        }
+    }
+
+    template< typename _Object, typename... _Args >
+    void make_slot ( void (_Object::*slot) (_Args...), std::function<void(_Args...)> func ) {
+        auto*& s = access_slot ( slot );
         if ( s ) {
             static_cast<non_std::slot<_Args...>*> ( s )->~slot();
             ::new ( s ) non_std::slot<_Args...> ( func );
@@ -159,6 +192,12 @@ private:
     }
 
     void push_destructor ( std::function<void()> func );
+
+    template< typename _Tp >
+    using dearrayize_t = std::conditional_t<std::is_array<
+                         std::remove_reference_t<_Tp>>{},
+                         std::remove_extent_t<
+                         std::remove_reference_t<_Tp>>*, _Tp>;
 
     struct Private;
     Private* const d;
