@@ -39,6 +39,7 @@ add_library(mlib SHARED
     mfont.cpp
     mglobal.cpp
     mimage.cpp
+    mlist.cpp
     mmouse.cpp
     mmusic.cpp
     mobject.cpp
