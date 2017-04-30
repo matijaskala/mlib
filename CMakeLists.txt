@@ -12,6 +12,7 @@ find_package(X11 REQUIRED)
 find_package(LibNonStdC++ REQUIRED)
 
 pkg_check_modules(OPUSFILE REQUIRED opusfile)
+pkg_check_modules(VORBIS REQUIRED vorbis vorbisfile)
 
 include_directories(${FREETYPE_INCLUDE_DIRS} ${OPENAL_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} ${OPUSFILE_INCLUDE_DIRS})
 
@@ -59,7 +60,7 @@ target_link_libraries(mpng mlib ${PNG_LIBRARIES})
 add_library(mtype MODULE mtype.cpp)
 target_link_libraries(mtype mlib ${FREETYPE_LIBRARIES})
 add_library(mvorbis MODULE mvorbis.cpp)
-target_link_libraries(mvorbis mlib vorbis vorbisfile)
+target_link_libraries(mvorbis mlib ${VORBIS_LIBRARIES})
 add_library(msdl MODULE msdl.cpp)
 if(WIN32)
 target_link_libraries(msdl mlib SDL dxguid winmm)
