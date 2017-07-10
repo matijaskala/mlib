@@ -88,7 +88,7 @@ void MObject::push_destructor ( std::function<void()> func )
 }
 
 extern "C" {
-void m_object_connect ( MObject* sender, const char* signal, MObject* receiver, void (*slot) () )
+M_EXPORT void m_object_connect ( MObject* sender, const char* signal, MObject* receiver, void (*slot) () )
 {
 #if defined __x86_64__ && defined __ILP32__
 #define register_t long long
@@ -110,13 +110,13 @@ void m_object_connect ( MObject* sender, const char* signal, MObject* receiver, 
     MObject::connect ( sender, signal, receiver, s );
 }
 
-void m_object_disconnect ( MObject* sender, const char* signal, MObject* receiver, void (*slot) () )
+M_EXPORT void m_object_disconnect ( MObject* sender, const char* signal, MObject* receiver, void (*slot) () )
 {
     void (MObject::*s) (all_args) = reinterpret_cast<void (MObject::*&) (all_args)> ( slot );
     MObject::disconnect ( sender, signal, receiver, s );
 }
 
-void m_object_emit ( MObject* sender, const char* signal, all_args ) {
+M_EXPORT void m_object_emit ( MObject* sender, const char* signal, all_args ) {
 #undef register_t
 #undef all_args
     sender->emit ( signal, r1,r2,r3,r4,r5,r6,r7,r8,f1,f2,f3,f4,f5,f6,f7,f8 );
