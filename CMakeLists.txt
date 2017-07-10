@@ -2,6 +2,8 @@ project(mlib)
 
 cmake_minimum_required(VERSION 2.6)
 
+find_package(ECM 1.3.0 REQUIRED NO_MODULE)
+
 find_package(Freetype REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
@@ -13,6 +15,11 @@ find_package(LibNonStdC++ REQUIRED)
 
 pkg_check_modules(OPUSFILE REQUIRED opusfile)
 pkg_check_modules(VORBIS REQUIRED vorbis vorbisfile)
+
+set(CMAKE_MODULE_PATH ${ECM_MODULE_DIR})
+
+include(GNUInstallDirs)
+include(ECMUninstallTarget)
 
 include_directories(${FREETYPE_INCLUDE_DIRS} ${OPENAL_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} ${OPUSFILE_INCLUDE_DIRS})
 
@@ -115,8 +122,8 @@ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mlib)
 target_link_libraries(mlib ${CMAKE_DL_LIBS} ${OPENAL_LIBRARY} ${OPENGL_gl_LIBRARY})
 
 install(TARGETS mlib
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib${LIB_SUFFIX}
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 )
 install(DIRECTORY data/ DESTINATION share/mlib)
 
