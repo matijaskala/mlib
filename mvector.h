@@ -257,7 +257,7 @@ std::basic_istream<C, T>& operator>> ( std::basic_istream<C, T>& is, MVector<N>&
         is.putback(ch);
         is >> x >> ch;
         auto newData = new N[++dim];
-        for ( auto i = dim - 2; i >= 0; i-- )
+        for ( std::size_t i = 0; i < dim - 1; i++ )
             newData[i] = std::move(data[i]);
         if ( data )
             delete data;
