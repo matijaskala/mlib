@@ -49,10 +49,6 @@ public: \
     static MReflection* getClass() { \
         return MReflection::get ( className() ); \
     } \
-    template<typename T> \
-    T& access ( const std::string& sym ) { \
-        return getClass()->access<T>(this, sym); \
-    } \
     template< typename... _Args > \
     void invoke ( const std::string& sym, _Args... __args ) { \
         getClass()->invoke(this, sym, __args...); \
