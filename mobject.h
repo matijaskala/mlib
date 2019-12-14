@@ -36,12 +36,8 @@
 #define NON_STD_SIGNAL_DISCONNECT(sender,signal,receiver,slot) \
     (sender)->signal.disconnect ( receiver, &__classof__(receiver)::slot )
 
-class MObject;
-extern "C" void m_object_connect ( MObject* sender, const char* signal, MObject* receiver, void (*slot) () );
-
 class M_EXPORT MObject
 {
-    friend void m_object_connect ( MObject* sender, const char* signal, MObject* receiver, void (*slot) () );
 public:
     MObject ( MObject* parent = nullptr );
     virtual ~MObject();

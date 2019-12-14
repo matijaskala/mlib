@@ -86,39 +86,3 @@ void MObject::push_destructor ( std::function<void()> func )
 {
     d->destructors.push_front ( func );
 }
-
-extern "C" {
-M_EXPORT void m_object_connect ( MObject* sender, const char* signal, MObject* receiver, void (*slot) () )
-{
-#if defined __x86_64__ && defined __ILP32__
-#define register_t long long
-#else
-#define register_t long
-#endif
-#define all_args \
-            register_t r1, register_t r2, register_t r3, register_t r4, \
-            register_t r5, register_t r6, register_t r7, register_t r8, \
-            double f1, double f2, double f3, double f4, double f5, double f6, double f7, double f8
-    void (MObject::*s) (all_args) = reinterpret_cast<void (MObject::*&) (all_args)> ( slot );
-    if ( !receiver->access_slot ( s ) )
-        receiver->make_slot ( s, static_cast<std::function<void(all_args)>> (
-            [receiver,slot] ( all_args ) {
-                auto s = reinterpret_cast<void(*)(all_args)> ( slot );
-                s ( r1,r2,r3,r4,r5,r6,r7,r8,f1,f2,f3,f4,f5,f6,f7,f8 );
-            }
-        ) );
-    MObject::connect ( sender, signal, receiver, s );
-}
-
-M_EXPORT void m_object_disconnect ( MObject* sender, const char* signal, MObject* receiver, void (*slot) () )
-{
-    void (MObject::*s) (all_args) = reinterpret_cast<void (MObject::*&) (all_args)> ( slot );
-    MObject::disconnect ( sender, signal, receiver, s );
-}
-
-M_EXPORT void m_object_emit ( MObject* sender, const char* signal, all_args ) {
-#undef register_t
-#undef all_args
-    sender->emit ( signal, r1,r2,r3,r4,r5,r6,r7,r8,f1,f2,f3,f4,f5,f6,f7,f8 );
-}
-}
