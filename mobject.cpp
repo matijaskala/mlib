@@ -24,9 +24,9 @@
 
 namespace std {
 template<>
-struct hash<pair<string, non_std::tuple_index>> {
-    auto operator() ( const pair<string, non_std::tuple_index>& a ) const noexcept {
-        return hash<string>{}(a.first) + hash<non_std::tuple_index>{}(a.second);
+struct hash<pair<string, tuple_index>> {
+    auto operator() ( const pair<string, tuple_index>& a ) const noexcept {
+        return hash<string>{}(a.first) + a.second.hash_code();
     }
 };
 }
@@ -35,7 +35,7 @@ struct MObject::Private {
     MObject* parent = nullptr;
     std::list<MObject*> children{};
     std::unordered_map<std::string, void*> signals{};
-    std::unordered_map<std::pair<std::string, non_std::tuple_index>, void*> named_slots{};
+    std::unordered_map<std::pair<std::string, tuple_index>, void*> named_slots{};
     std::unordered_map<void*, void*> method_slots{};
     std::forward_list<std::function<void()>> destructors{};
 };
@@ -72,7 +72,7 @@ void*& MObject::access_signal ( std::string signal_name )
     return d->signals[signal_name];
 }
 
-void*& MObject::access_slot ( std::string slot_name, non_std::tuple_index arg_types )
+void*& MObject::access_slot ( std::string slot_name, tuple_index arg_types )
 {
     return d->named_slots[{slot_name, arg_types}];
 }

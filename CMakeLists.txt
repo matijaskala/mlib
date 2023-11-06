@@ -11,7 +11,6 @@ find_package(PkgConfig REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(X11 REQUIRED)
-find_package(LibNonStdC++ REQUIRED)
 
 pkg_check_modules(OPUSFILE REQUIRED opusfile)
 pkg_check_modules(VORBIS REQUIRED vorbis vorbisfile)
@@ -59,7 +58,6 @@ add_library(mlib SHARED
     mvideointerface.cpp
     mwindow.cpp
 )
-target_link_libraries(mlib nonstdc++)
 add_library(mjpg MODULE mjpg.cpp)
 target_link_libraries(mjpg mlib ${JPEG_LIBRARIES})
 add_library(mpng MODULE mpng.cpp)

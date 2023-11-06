@@ -21,9 +21,9 @@
 #define MOBJECT_H
 
 #include <mglobal.h>
-#include <nonstd/signal>
-#include <nonstd/traits>
-#include <nonstd/tupleid>
+#include <forward_list>
+#include <tupleid.hh>
+#include <sigxx.hh>
 
 #define M_DECL_SIGNAL(...) \
     { MObject::emit_pretty ( __PRETTY_FUNCTION__, __VA_ARGS__ ); }
@@ -76,26 +76,26 @@ public:
     }
 
     template< typename... _Args >
-    non_std::signal<_Args...>& get_signal ( std::string signal_name ) {
+    sigxx::signal<_Args...>& get_signal ( std::string signal_name ) {
         auto& s = access_signal ( signal_name );
         if ( !s ) {
-            auto* a = new non_std::signal<_Args...> ( this );
+            auto* a = new sigxx::signal<_Args...> ( this );
             s = a;
             push_destructor ( [a] { delete a; } );
         }
-        return *static_cast<non_std::signal<_Args...>*> ( s );
+        return *static_cast<sigxx::signal<_Args...>*> ( s );
     }
 
     template< typename... _Args >
-    non_std::slot<_Args...>& non_std_slot ( std::string slot_name ) {
+    sigxx::slot<_Args...>& non_std_slot ( std::string slot_name ) {
         auto* s = access_slot ( slot_name, static_typeid<_Args...> () );
         if ( !s ) {
             auto& sig = get_signal<_Args...> ( slot_name );
-            auto* a = new non_std::slot<_Args...> ( [&sig] (_Args... args) { sig(std::forward<_Args>(args)...); } );
+            auto* a = new sigxx::slot<_Args...> ( [&sig] (_Args... args) { sig(std::forward<_Args>(args)...); } );
             s = a;
             push_destructor ( [a] { delete a; } );
         }
-        return *static_cast<non_std::slot<_Args...>*> ( s );
+        return *static_cast<sigxx::slot<_Args...>*> ( s );
     }
 
     template< typename... _Args, typename _Object >
@@ -103,11 +103,11 @@ public:
         auto& s = access_slot ( method );
         if ( !s ) {
             auto* self = dynamic_cast<_Object*> ( this );
-            auto* a = new non_std::slot<_Args...> ( method, self );
+            auto* a = new sigxx::slot<_Args...> ( method, self );
             s = a;
             push_destructor ( [a] { delete a; } );
         }
-        return *static_cast<non_std::slot<_Args...>*> ( s );
+        return *static_cast<sigxx::slot<_Args...>*> ( s );
     }
 
 protected:
@@ -125,11 +125,11 @@ protected:
         auto*& s = access_slot ( slot, static_typeid<_Args...> () );
         auto* self = dynamic_cast<_Object*> ( this );
         if ( s ) {
-            static_cast<non_std::slot<_Args...>*> ( s )->~slot();
-            ::new ( s ) non_std::slot<_Args...> ( func, self );
+            static_cast<sigxx::slot<_Args...>*> ( s )->~slot();
+            ::new ( s ) sigxx::slot<_Args...> ( func, self );
         }
         else {
-            auto* a = new non_std::slot<_Args...> ( func, self );
+            auto* a = new sigxx::slot<_Args...> ( func, self );
             s = a;
             push_destructor ( [a] { delete a; } );
         }
@@ -139,11 +139,11 @@ protected:
     void make_slot ( std::string slot, std::function<void(_Args...)> func ) {
         auto*& s = access_slot ( slot, static_typeid<_Args...> () );
         if ( s ) {
-            static_cast<non_std::slot<_Args...>*> ( s )->~slot();
-            ::new ( s ) non_std::slot<_Args...> ( func );
+            static_cast<sigxx::slot<_Args...>*> ( s )->~slot();
+            ::new ( s ) sigxx::slot<_Args...> ( func );
         }
         else {
-            auto* a = new non_std::slot<_Args...> ( func );
+            auto* a = new sigxx::slot<_Args...> ( func );
             s = a;
             push_destructor ( [a] { delete a; } );
         }
@@ -154,11 +154,11 @@ protected:
         auto*& s = access_slot ( slot );
         auto* self = dynamic_cast<_Object*> ( this );
         if ( s ) {
-            static_cast<non_std::slot<_Args...>*> ( s )->~slot();
-            ::new ( s ) non_std::slot<_Args...> ( func, self );
+            static_cast<sigxx::slot<_Args...>*> ( s )->~slot();
+            ::new ( s ) sigxx::slot<_Args...> ( func, self );
         }
         else {
-            auto* a = new non_std::slot<_Args...> ( func, self );
+            auto* a = new sigxx::slot<_Args...> ( func, self );
             s = a;
             push_destructor ( [a] { delete a; } );
         }
@@ -168,11 +168,11 @@ protected:
     void make_slot ( void (_Object::*slot) (_Args...), std::function<void(_Args...)> func ) {
         auto*& s = access_slot ( slot );
         if ( s ) {
-            static_cast<non_std::slot<_Args...>*> ( s )->~slot();
-            ::new ( s ) non_std::slot<_Args...> ( func );
+            static_cast<sigxx::slot<_Args...>*> ( s )->~slot();
+            ::new ( s ) sigxx::slot<_Args...> ( func );
         }
         else {
-            auto* a = new non_std::slot<_Args...> ( func );
+            auto* a = new sigxx::slot<_Args...> ( func );
             s = a;
             push_destructor ( [a] { delete a; } );
         }
@@ -180,7 +180,7 @@ protected:
 
 private:
     void*& access_signal ( std::string signal_name );
-    void*& access_slot ( std::string slot_name, non_std::tuple_index arg_types );
+    void*& access_slot ( std::string slot_name, tuple_index arg_types );
     void*& access_slot ( void (MObject::*method) () );
     template< typename _Object, typename... _Args >
     void*& access_slot ( void (_Object::*method) ( _Args... ) ) {

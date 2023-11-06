@@ -19,14 +19,14 @@
 
 #include "mglobal.h"
 
-#include <nonstd/directory>
+#include <filesystem>
 #include <MDL>
 #include <MDebug>
 #include "mvideointerface.h"
 
 #include <alc.h>
 
-using namespace non_std;
+using namespace std::filesystem;
 
 static bool initialized{false};
 
@@ -39,10 +39,10 @@ void MLib::init ( int& argc, char**& argv )
     }
     initialized = true;
 
-    directory dir ( MLIB_LIBRARY_DIR );
-    for ( directory::entry f: dir )
-        if ( f.name()[0] != '.' )
-            MDL::open(f.path() + f.name());
+    directory_iterator dir ( MLIB_LIBRARY_DIR );
+    for ( auto&& f: dir )
+        if ( f.path().filename().string()[0] != '.' )
+            MDL::open(MLIB_LIBRARY_DIR + f.path().filename().string());
 
     auto device = alcOpenDevice ( nullptr );
     auto context = alcCreateContext ( device, nullptr );

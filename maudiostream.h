@@ -22,6 +22,7 @@
 
 #include <mglobal.h>
 #include <list>
+#include <string>
 #include <thread>
 
 enum MAudioTag {

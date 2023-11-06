@@ -23,7 +23,7 @@
 #include <mglobal.h>
 #include <cstdint>
 #include <stack>
-#include <nonstd/signal>
+#include <sigxx.hh>
 
 enum MKey : std::uint32_t;
 class MEventHandler
@@ -41,9 +41,9 @@ public:
         MEventHandler& top();
         bool empty() const;
 
-        non_std::slot<> quit = [this] { top().quit(); };
-        non_std::slot<MKey,std::uint32_t> keyPressed = [this] ( MKey key, std::uint32_t mods ) { top().keyPressed ( key, mods ); };
-        non_std::slot<MKey,std::uint32_t> keyReleased = [this] ( MKey key, std::uint32_t mods ) { top().keyReleased ( key, mods ); };
+        sigxx::slot<> quit;
+        sigxx::slot<MKey,std::uint32_t> keyPressed;
+        sigxx::slot<MKey,std::uint32_t> keyReleased;
     };
 
 protected:

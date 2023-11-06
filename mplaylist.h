@@ -22,7 +22,7 @@
 
 #include <maudiostream.h>
 #include <array>
-#include <nonstd/signal>
+#include <sigxx.hh>
 
 class M_EXPORT MPlaylist
 {
@@ -156,7 +156,7 @@ public:
      *  A song finished playing.
      *  @param  1 True if it was stopped using @c stop().
      */
-    non_std::signal<bool> finished{this};
+    sigxx::signal<bool> finished{this};
 
     void seek ( std::chrono::duration < double > seconds );
 

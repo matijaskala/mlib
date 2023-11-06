@@ -31,7 +31,7 @@ namespace al {
 }
 
 using namespace std;
-using namespace non_std;
+using namespace sigxx;
 using namespace chrono;
 using namespace this_thread;
 using namespace al;

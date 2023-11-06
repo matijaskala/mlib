@@ -21,6 +21,7 @@
 #define MAUDIOFILE_H
 
 #include <MResource>
+#include <cstdint>
 #include <vector>
 
 class M_EXPORT MAudioFile : public MResource
