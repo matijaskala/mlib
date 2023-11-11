@@ -32,6 +32,7 @@ MObject::MObject ( MObject* parent )
 
 MObject::~MObject()
 {
+    reparent(nullptr);
     delete d;
 }
 
