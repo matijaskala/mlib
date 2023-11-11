@@ -19,9 +19,6 @@
 
 #include "mobject.h"
 
-#include <forward_list>
-#include <unordered_map>
-
 namespace std {
 template<>
 struct hash<pair<string, tuple_index>> {
@@ -33,11 +30,7 @@ struct hash<pair<string, tuple_index>> {
 
 struct MObject::Private {
     MObject* parent = nullptr;
-    std::list<MObject*> children{};
-    std::unordered_map<std::string, void*> signals{};
-    std::unordered_map<std::pair<std::string, tuple_index>, void*> named_slots{};
-    std::unordered_map<void*, void*> method_slots{};
-    std::forward_list<std::function<void()>> destructors{};
+    std::forward_list<MObject*> children{};
 };
 
 MObject::MObject ( MObject* parent )
@@ -48,8 +41,6 @@ MObject::MObject ( MObject* parent )
 
 MObject::~MObject()
 {
-    for ( auto&& func: d->destructors )
-        func();
     delete d;
 }
 
@@ -59,30 +50,10 @@ void MObject::reparent ( MObject* parent )
         d->parent->d->children.remove ( this );
     d->parent = parent;
     if ( d->parent )
-        d->parent->d->children.push_back ( this );
+        d->parent->d->children.push_front ( this );
 }
 
-const std::list<MObject*>& MObject::children () const
+const std::forward_list<MObject*>& MObject::children () const
 {
     return d->children;
-}
-
-void*& MObject::access_signal ( std::string signal_name )
-{
-    return d->signals[signal_name];
-}
-
-void*& MObject::access_slot ( std::string slot_name, tuple_index arg_types )
-{
-    return d->named_slots[{slot_name, arg_types}];
-}
-
-void*& MObject::access_slot ( void (MObject::*method) () )
-{
-    return d->method_slots[(void*&)method];
-}
-
-void MObject::push_destructor ( std::function<void()> func )
-{
-    d->destructors.push_front ( func );
 }
