@@ -19,15 +19,6 @@
 
 #include "mobject.h"
 
-namespace std {
-template<>
-struct hash<pair<string, tuple_index>> {
-    auto operator() ( const pair<string, tuple_index>& a ) const noexcept {
-        return hash<string>{}(a.first) + a.second.hash_code();
-    }
-};
-}
-
 struct MObject::Private {
     MObject* parent = nullptr;
     std::forward_list<MObject*> children{};
