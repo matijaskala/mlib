@@ -19,19 +19,23 @@
 
 #include "mdebug.h"
 
-#include <nonstd/xterm>
 #include <iostream>
 
-using namespace non_std::xterm;
+using namespace std;
+
+std::string xterm_escape ( std::string s ) {
+    static char* TERM = getenv ( "TERM" );
+    return TERM ? "["s + s : "";
+}
 
 MDebug::MDebug ( MDebugLevel level )
     : level ( level )
     , stream ( std::cerr )
 {
     if ( level == ERROR ) {
-        stream << bold << fgcolor ( non_std::yellow ) << bgcolor ( non_std::red );
-        stream << "ERROR: ";
-        stream << fgcolor ( non_std::default_color );
+        stream << xterm_escape("1m"s) << xterm_escape("33m"s) << xterm_escape("41m"s);
+        stream << "ERROR: "s;
+        stream << xterm_escape("39m"s);
     }
 }
 
@@ -39,19 +43,20 @@ MDebug::MDebug ( const char* file, int line, MDebugLevel level )
     : level{level}
     , stream{std::cerr}
 {
-    stream << fgcolor ( non_std::magenta ) << file << fgcolor ( non_std::cyan ) << ':';
-    stream << fgcolor ( non_std::green ) << line << fgcolor ( non_std::cyan ) << ':' << reset;
+    stream << xterm_escape("35m"s) << file << xterm_escape("36m"s) << ':';
+    stream << xterm_escape("32m"s) << line << xterm_escape("36m"s) << ':' << xterm_escape("m"s);
     if ( level == ERROR ) {
-        stream << bold << fgcolor ( non_std::yellow ) << bgcolor ( non_std::red );
-        stream << "ERROR: ";
-        stream << fgcolor ( non_std::default_color );
+        stream << xterm_escape("1m"s) << xterm_escape("33m"s) << xterm_escape("41m"s);
+        stream << "ERROR: "s;
+        stream << xterm_escape("39m"s);
     }
 }
 
 MDebug::~MDebug()
 {
     stream << trace;
-    stream << reset;
+    stream << xterm_escape("m"s);
     stream << std::endl;
+    stream.flush();
 }
 
