@@ -19,8 +19,8 @@
 
 #include "mfont.h"
 
+#include <codecvt>
 #include <map>
-#include <nonstd/lexical_cast>
 #include <MDebug>
 #include <MResourceLoader>
 
@@ -33,5 +33,7 @@ uint16_t MFont::size()
 
 MTexture* MFont::render ( string text )
 {
-    return render(lexical_cast<wstring> ( text ));
+    struct facet : codecvt<wchar_t, char, mbstate_t> {};
+    wstring_convert<facet> conv;
+    return render(conv.from_bytes(text));
 }
