@@ -23,10 +23,10 @@
 #include <thread>
 
 using namespace std;
-using namespace non_std;
+using namespace sigxx;
 
 slot<> MWindow::slotSizeChanged = [] {
-    auto& size = slotSizeChanged.data<MWindow>()->size;
+    auto& size = slotSizeChanged.userdata<MWindow>()->size;
     glViewport ( 0, 0, size.width(), size.height() );
     glMatrixMode ( GL_PROJECTION );
     glLoadIdentity();

@@ -18,21 +18,24 @@
  */
 
 #include <mkeys.h>
-#include <nonstd/signal>
+#include <sigxx.hh>
 #include <msize.h>
 #include <meventhandler.h>
 #include <mglobal.h>
+#include <string>
 
+class MVideoInterface;
 class M_EXPORT MWindow
 {
-    friend class MVideoInterface;
+    friend MVideoInterface;
+
 protected:
     MWindow ( int width, int height );
     virtual ~MWindow() = default;
     virtual void makeCurrent () = 0;
     virtual void resize () = 0;
     virtual void swapBuffers () = 0;
-    static non_std::slot<> slotSizeChanged;
+    static sigxx::slot<> slotSizeChanged;
 
 public:
     void beginPaint();
@@ -42,8 +45,8 @@ public:
     MSize size;
     MEventHandler::Stack eventHandlers;
 
-    non_std::signal<> quit{this};
-    non_std::signal<> sizeChanged{this};
-    non_std::signal<MKey,std::uint32_t> keyPressed{this};
-    non_std::signal<MKey,std::uint32_t> keyReleased{this};
+    sigxx::signal<> quit{this};
+    sigxx::signal<> sizeChanged{this};
+    sigxx::signal<MKey,std::uint32_t> keyPressed{this};
+    sigxx::signal<MKey,std::uint32_t> keyReleased{this};
 };

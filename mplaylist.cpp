@@ -37,7 +37,7 @@ using namespace this_thread;
 using namespace al;
 
 static slot<bool> slotFinished = [] ( bool stop ) {
-    auto playlist = slotFinished.data<MPlaylist>();
+    auto playlist = slotFinished.userdata<MPlaylist>();
     if ( playlist->stoppingAfter() != 0 && stop == false)
         playlist->playNext();
 };
