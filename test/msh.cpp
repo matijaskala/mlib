@@ -18,8 +18,8 @@
  */
 
 #include <iostream>
-#include <nonstd/file>
-#include <nonstd/xterm>
+#include <termcolor.hh>
+#include <filesystem>
 #include <functional>
 #include <list>
 #include <set>
@@ -30,7 +30,8 @@
 #include <sys/wait.h>
 
 using namespace std;
-using namespace non_std;
+using namespace filesystem;
+using namespace termcolor;
 
 
 
@@ -77,8 +78,8 @@ struct termios_handler {
 
 struct autocompletion_string {
         string name;
-        color fgcolor = default_color;
-        color bgcolor = default_color;
+        value fgcolor = default_color;
+        value bgcolor = default_color;
         bool bold = false;
         bool blink = false;
         char suffix = ' ';
@@ -88,13 +89,13 @@ struct autocompletion_string {
     inline std::basic_ostream<_CharT, _Traits>&
     operator<<(std::basic_ostream<_CharT, _Traits>& __os, const autocompletion_string& s) {
         if (s.bold)
-            __os << xterm::bold;
+            __os << bold;
         if (s.blink)
-            __os << xterm::escape("5m");
-        __os << xterm::fgcolor(s.fgcolor);
-        __os << xterm::bgcolor(s.bgcolor);
+            __os << escape("5m");
+        __os << fg(s.fgcolor);
+        __os << bg(s.bgcolor);
         __os << s.name;
-        __os << xterm::reset;
+        __os << reset;
         __os << s.suffix;
         return __os;
     }
@@ -107,9 +108,9 @@ void refresh_commands() {
     commands.insert ( "cd" );
     commands.insert ( "ls" );
     commands.insert ( "pwd" );
-    for ( file f: directory ( "/bin" ) )
-        if ( f.type() == file::regular && f.mode() & 0100 )
-            commands.insert ( f.name() );
+    for ( auto&& f: directory_iterator ( "/bin" ) )
+        if ( f.symlink_status().type() == file_type::regular && ( f.status().permissions() & perms::owner_exec ) != perms::none )
+            commands.insert ( f.path().filename() );
 }
 
 winsize termsize() {
@@ -133,7 +134,7 @@ void fprint_list ( const list< _string > files, bool interactive ) {
     int rows = files.size() / cols + 1;
     auto it = files.begin();
     if ( interactive ) {
-        cerr << xterm::escape ( "s" ) << '\n';
+        cerr << escape ( "s" ) << '\n';
     }
     for ( int _d = files.size(); _d > 0; _d-- ) {
         out << *it << string ( longest - it->length(), ' ' );
@@ -150,7 +151,7 @@ void fprint_list ( const list< _string > files, bool interactive ) {
         }
     }
     if ( interactive )
-        cerr << xterm::escape ( "u" );
+        cerr << escape ( "u" );
 }
 
 void autocomplete_fini ( const string& com, short unsigned int rows, short unsigned int cols, const string& position ) {
@@ -168,36 +169,36 @@ void autocomplete_fini ( const string& com, short unsigned int rows, short unsig
     int wcols = w.ws_col / ( longest + 1 );
     int wrows = files.size() / wcols + 1;
     if ( wrows >= w.ws_row ) {
-        cerr << xterm::escape ( "s" ) << "do you wish to see all " << files.size() << " possibilities (" << wrows << " lines)?";
+        cerr << escape ( "s" ) << "do you wish to see all " << files.size() << " possibilities (" << wrows << " lines)?";
         char r = getchar();
-	cerr << xterm::escape ( "u" );
+	cerr << escape ( "u" );
         if ( r == 'y' )
             cerr << endl;
         else {
-            cerr << xterm::escape ( "K" );
+            cerr << escape ( "K" );
             return;
         }
     }
     if ( rows - row < wrows ) {
         string srows = to_string ( wrows - rows + row );
-            cerr << xterm::escape ( srows + "S" ) << xterm::escape ( srows + "A" );
+            cerr << escape ( srows + "S" ) << escape ( srows + "A" );
     }
     fprint_list ( files, true );
     if ( rows - row <= wrows )
-        cerr << xterm::escape ( "T" );
+        cerr << escape ( "T" );
 }
 
 void autocomplete ( const string& com ) {
     winsize w = termsize();
-    cerr << xterm::escape ( "6n" ) << xterm::escape ( "J" );
+    cerr << escape ( "6n" ) << escape ( "J" );
     waiting = bind ( autocomplete_fini, com, w.ws_row, w.ws_col, placeholders::_1 );
 }
 
 string get_command ( list<mstring>& history ) {
     char cwd[60];
     getcwd(cwd, 60);
-    string prompt = xterm::fgcolor ( magenta ) + cwd + xterm::fgcolor ( green ) + " $ " + xterm::escape ( "m" );
-    cerr << xterm::escape ( "G" ) << prompt;
+    string prompt = fg ( magenta ) + cwd + fg ( green ) + " $ " + escape ( "m" );
+    cerr << escape ( "G" ) << prompt;
     termios_handler h;
     list<mstring>::iterator command_it = history.end();
     mstring command;
@@ -216,11 +217,11 @@ string get_command ( list<mstring>& history ) {
                 }
                 break;
             case 9: // TAB
-                cerr << xterm::escape ( "J" );
+                cerr << escape ( "J" );
                 autocomplete ( to_string(command) );
                 break;
             case 10: // ENTER
-                cerr << xterm::escape ( "J" );
+                cerr << escape ( "J" );
                 //if( !command.empty() ) {
                     for ( list<mstring>::iterator i = history.begin(); i != history.end(); i++ )
                         if ( *i == command ) {
@@ -231,7 +232,7 @@ string get_command ( list<mstring>& history ) {
                 cerr << endl;
                 return to_string(command);
             case 12: // CLS
-                cerr << xterm::escape ( "H" ) << xterm::escape ( "2J" ) << prompt << command;
+                cerr << escape ( "H" ) << escape ( "2J" ) << prompt << command;
                 break;
             case 27: // ESC
                 cin >> c;
@@ -250,7 +251,7 @@ string get_command ( list<mstring>& history ) {
                                 command_it--;
                                 command = *command_it;
                                 cn = command.size();
-                                cerr << xterm::escape ( "G" ) << prompt << command << xterm::escape ( "K" );
+                                cerr << escape ( "G" ) << prompt << command << escape ( "K" );
                             }
                             break;
                         case 'B':
@@ -261,30 +262,30 @@ string get_command ( list<mstring>& history ) {
                                 else
                                     command = *command_it;
                                 cn = command.size();
-                                cerr << xterm::escape ( "G" ) << prompt << command << xterm::escape ( "K" );
+                                cerr << escape ( "G" ) << prompt << command << escape ( "K" );
                             }
                             break;
                         case 'C':
                             if ( cn < command.size() ) {
                                 cn++;
-                                cerr << xterm::escape ( "C" );
+                                cerr << escape ( "C" );
                             }
                             break;
                         case 'D':
                             if ( cn > 0 ) {
                                 cn--;
-                                cerr << xterm::escape ( "D" );
+                                cerr << escape ( "D" );
                             }
                             break;
                         case 'F':
                             if ( cn != command.size() ) {
-                                cerr << xterm::escape ( to_string ( command.size() - cn ) + "C" );
+                                cerr << escape ( to_string ( command.size() - cn ) + "C" );
                                 cn = command.size();
                             }
                             break;
                         case 'H':
                             if ( cn != 0 ) {
-                                cerr << xterm::escape ( to_string ( cn ) + "D" );
+                                cerr << escape ( to_string ( cn ) + "D" );
                                 cn = 0;
                             }
                             break;
@@ -299,7 +300,7 @@ string get_command ( list<mstring>& history ) {
                             cerr << c;
                             break;
                         default:
-                            cerr << xterm::escape ( seq + c );
+                            cerr << escape ( seq + c );
                             cerr << "unknown escape: " << c << endl;
                     }
                 }
@@ -307,13 +308,13 @@ string get_command ( list<mstring>& history ) {
                             cin >> c;
                             if ( c == 'F' ) {
                                 if ( cn != command.size() ) {
-                                    cerr << xterm::escape ( to_string ( command.size() - cn ) + "C" );
+                                    cerr << escape ( to_string ( command.size() - cn ) + "C" );
                                     cn = command.size();
                                 }
                             }
                             if ( c == 'H' ) {
                                 if ( cn != 0 ) {
-                                    cerr << xterm::escape ( to_string ( cn ) + "D" );
+                                    cerr << escape ( to_string ( cn ) + "D" );
                                     cn = 0;
                                 }
                             }
@@ -323,10 +324,10 @@ string get_command ( list<mstring>& history ) {
             case 127: // BACKSPACE
                 if ( cn > 0 ) {
                     cerr << '\b';
-                    cerr << xterm::escape ( "s" );
+                    cerr << escape ( "s" );
                     cerr << command.substr ( cn );
                     cerr << ' ';
-                    cerr << xterm::escape ( "u" );
+                    cerr << escape ( "u" );
                     cn--;
                     command.erase ( cn, 1 );
                 }
@@ -334,9 +335,9 @@ string get_command ( list<mstring>& history ) {
             default:
                 if ( c > 31 ) {
                     command.insert ( cn, 1, c );
-                    cerr << xterm::escape ( "s" );
+                    cerr << escape ( "s" );
                     cerr << command.substr ( cn );
-                    cerr << xterm::escape ( "u" ) << c;
+                    cerr << escape ( "u" ) << c;
                     cn++;
                 }
                 else
@@ -345,72 +346,74 @@ string get_command ( list<mstring>& history ) {
     }
 }
 
-void ls_files ( const directory& dir ) {
+void ls_files ( string dir ) {
     list< autocompletion_string > files;
-    for ( file f: dir ) {
+    for ( auto&& entry: directory_iterator(dir) ) {
         autocompletion_string out;
-        if ( f.mode() & 0100 )
+        auto perms = entry.symlink_status().permissions();
+        auto type = entry.symlink_status().type();
+        if ( ( perms & perms::owner_exec ) != perms::none )
             out.bold = true;
-        switch ( f.type() ) {
-            case file::regular:
-                if ( f.mode() & 0100 )
+        switch ( type ) {
+            case file_type::regular:
+                if ( ( perms & perms::owner_exec ) != perms::none )
                     out.fgcolor = green;
                 break;
-            case file::symlink:
+            case file_type::symlink:
                 out.fgcolor = cyan;
                 {
-                    struct stat64 st;
-                    if ( stat64 ( f.fullname().c_str(), &st ) ) {
+                    if ( entry.status().type() == file_type::not_found ) {
                         out.fgcolor = white;
                         out.bgcolor = red;
                         out.blink = true;
                     }
                 }
                 break;
-            case file::directory:
+            case file_type::directory:
                 out.fgcolor = blue;
                 break;
-            case file::socket:
+            case file_type::socket:
                 out.fgcolor = magenta;
                 break;
-            case file::character_device:
-            case file::block_device:
+            case file_type::character:
+            case file_type::block:
                 out.bold = true;
-            case file::pipe:
+                [[fallthrough]];
+            case file_type::fifo:
                 out.fgcolor = yellow;
                 break;
-            case -1:
+            case file_type::unknown:
                 break;
         }
-        if ( f.mode() & 01000 ) {
+        if ( (perms & perms::sticky_bit) != perms::none ) {
             out.fgcolor = black;
             out.bgcolor = green;
         }
         char indicator;
-        switch ( f.type() ) {
-            case file::regular:
-                indicator = (f.mode() & 0100) ? '*' : ' ';
+        switch ( type ) {
+            case file_type::regular:
+                indicator = (perms & perms::owner_exec) != perms::none ? '*' : ' ';
                 break;
-            case file::symlink:
+            case file_type::symlink:
                 indicator = '@';
                 break;
-            case file::directory:
+            case file_type::directory:
                 indicator = '/';
                 break;
-            case file::socket:
+            case file_type::socket:
                 indicator = '=';
                 break;
-            case file::character_device:
+            case file_type::character:
                 indicator = '%';
                 break;
-            case file::block_device:
+            case file_type::block:
                 indicator = '#';
                 break;
-            case file::pipe:
+            case file_type::fifo:
                 indicator = '|';
                 break;
         }
-        out.name = f.name();
+        out.name = entry.path().filename();
         out.suffix = indicator;
         files.push_back ( out );
     }

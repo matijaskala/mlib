@@ -19,20 +19,19 @@
 
 #include <iostream>
 #include <vector>
-#include <nonstd/file>
-#include <nonstd/xterm>
+#include <filesystem>
+#include <termcolor.hh>
 
 using namespace std;
-using namespace non_std;
 
-void list ( const file& f ) {
-    if ( f.type() == file::symlink )
-        cerr << xterm::bold << xterm::fgcolor ( cyan );
-    else if ( f.type() == file::directory )
-        cerr << xterm::bold << xterm::fgcolor ( blue );
-    else if ( f.mode() & 0111 )
-        cerr << xterm::bold << xterm::fgcolor ( green );
-    cerr << f.name() << xterm::reset << ' ';
+void list ( const filesystem::file_status& f, string n ) {
+    if ( f.type() == filesystem::file_type::symlink )
+        cerr << termcolor::bold << termcolor::fg ( termcolor::cyan );
+    else if ( f.type() == filesystem::file_type::directory )
+        cerr << termcolor::bold << termcolor::fg ( termcolor::blue );
+    else if ( static_cast<int>(f.permissions()) & 0111 )
+        cerr << termcolor::bold << termcolor::fg ( termcolor::green );
+    cerr << n << termcolor::reset << ' ';
 }
 
 int main ( int argc, char** argv ) {
@@ -42,15 +41,15 @@ int main ( int argc, char** argv ) {
             t[i-1] = argv[i];
     else
         t[0] = ".";
-    for ( file d: t ) {
-        if ( d.type() == file::directory ) {
-            directory dir = d.name();
-            for ( auto f: dir ) {
-                list ( f );
+    for ( auto n: t ) {
+        filesystem::file_status d = filesystem::status(n);
+        if ( d.type() == filesystem::file_type::directory ) {
+            for ( auto f: filesystem::directory_iterator{n} ) {
+                list ( f.status(), f.path() );
             }
         }
         else
-            list ( d );
+            list ( d, n );
         cerr << endl;
     }
     return 0;
