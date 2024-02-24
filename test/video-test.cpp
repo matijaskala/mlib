@@ -17,12 +17,11 @@
  *
  */
 
-#include <nonstd/lexical_cast>
 #include <mglobal.h>
 #include <MTexture>
 #include <GL/gl.h>
 #include <GL/glext.h>
-#include <nonstd/directory>
+#include <filesystem>
 #include <MDebug>
 #include <MKeys>
 #include <MFont>
@@ -33,6 +32,8 @@
 #include <maudiofile.h>
 #include <mplaylist.h>
 #include <mobject.h>
+
+namespace fs = std::filesystem;
 
 static MFont* font = nullptr;
 MTexture* tex = nullptr;
@@ -47,10 +48,10 @@ public:
 
 #define STIRIINSESTDESET 64
 
-struct Menu : public Drawable, public MObject {
+struct Menu : public Drawable, public sigxx::object {
     uint16_t current = 0;
     Menu ( MWindow* w ) {
-        NON_STD_SIGNAL_CONNECT(w, keyPressed, this, onKeyPress);
+        SIGXX_CONNECT4(w, keyPressed, this, onKeyPress);
     }
     void onKeyPress ( MKey key, std::uint32_t mod ) {
                 if ( key == M_KEY_UP ) {
@@ -70,7 +71,7 @@ struct Menu : public Drawable, public MObject {
     virtual void draw();
     std::vector< std::string > items;
     std::vector< MTexture* > textures;
-    non_std::signal<int> activated{this};
+    sigxx::signal<int> activated{this};
     void render(MFont* font) {
         font->setSize(20);
         for ( auto tex: textures )
@@ -83,7 +84,7 @@ struct Menu : public Drawable, public MObject {
     }
 };
 
-class Listener : public MObject {
+class Listener : public sigxx::object {
     Menu* menu;
     void activated ( int z ) {
         menu->items.push_back ( "ACTIVATED: " + menu->items[z] );
@@ -91,7 +92,7 @@ class Listener : public MObject {
     }
 public:
     Listener ( Menu* menu ) : menu{menu} {
-        menu->activated.connect(this, &this_t::activated);
+        menu->activated.connect(this, &Listener::activated);
     }
 };
 
@@ -101,7 +102,7 @@ class Text : public Drawable {
     MTexture* texture = new MTexture;
 public:
     Text();
-    non_std::slot<> changed = [this] { onChanged(); };
+    sigxx::slot<> changed{[this] { onChanged(); }};
     std::wstring text;
 };
 
@@ -175,32 +176,32 @@ int main ( int argc, char** argv ) {
         };
     };
     w->eventHandlers.push<EventHandler>();
-    for ( auto f: non_std::directory ( MLIB_DATA_DIR "images" ) ) {
-        if ( f.name().front() == '.' )
+    for ( auto f: fs::directory_iterator ( MLIB_DATA_DIR "images" ) ) {
+        if ( f.path().filename().string().front() == '.' )
             continue;
         MDebug debug;
-        debug << "Loading image " << f.name() << " ... ";
-        if ( MResource::load ( f.path() + "/" + f.name() ) )
+        debug << "Loading image " << f.path().filename() << " ... ";
+        if ( MResource::load ( f.path().string() ) )
             debug << "done";
         else
             debug << "failed";
     }
-    for ( auto f: non_std::directory ( MLIB_DATA_DIR "fonts" ) ) {
-        if ( f.name().front() == '.' )
+    for ( auto f: fs::directory_iterator ( MLIB_DATA_DIR "fonts" ) ) {
+        if ( f.path().filename().string().front() == '.' )
             continue;
         MDebug debug;
-        debug << "Loading font " << f.name() << " ... ";
-        if ( MResource::load ( f.path() + "/" + f.name() ) )
+        debug << "Loading font " << f.path().filename() << " ... ";
+        if ( MResource::load ( f.path().string() ) )
             debug << "done";
         else
             debug << "failed";
     }
-    for ( auto f: non_std::directory ( MLIB_DATA_DIR "sound" ) ) {
-        if ( f.name().front() == '.' )
+    for ( auto f: fs::directory_iterator ( MLIB_DATA_DIR "sound" ) ) {
+        if ( f.path().filename().string().front() == '.' )
             continue;
         MDebug debug;
-        debug << "Loading sound " << f.name() << " ... ";
-        if ( MResource::load(f.path() + "/" + f.name()) )
+        debug << "Loading sound " << f.path().filename() << " ... ";
+        if ( MResource::load(f.path().string()) )
             debug << "done";
         else
             debug << "failed";

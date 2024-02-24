@@ -45,7 +45,7 @@ int main ( int argc, char** argv ) {
         filesystem::file_status d = filesystem::status(n);
         if ( d.type() == filesystem::file_type::directory ) {
             for ( auto f: filesystem::directory_iterator{n} ) {
-                list ( f.status(), f.path() );
+                list ( f.status(), f.path().filename() );
             }
         }
         else
