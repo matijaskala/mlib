@@ -1,6 +1,6 @@
 project(mlib)
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.5)
 
 find_package(ECM 1.3.0 REQUIRED NO_MODULE)
 
@@ -16,6 +16,7 @@ pkg_check_modules(OPUSFILE REQUIRED opusfile)
 pkg_check_modules(VORBIS REQUIRED vorbis vorbisfile)
 
 set(CMAKE_MODULE_PATH ${ECM_MODULE_DIR})
+set(CMAKE_CXX_STANDARD 17)
 
 include(GNUInstallDirs)
 include(ECMUninstallTarget)
