@@ -1,6 +1,6 @@
-project(mlib)
+cmake_minimum_required(VERSION 3.10)
 
-cmake_minimum_required(VERSION 3.5)
+project(mlib)
 
 find_package(ECM 1.3.0 REQUIRED NO_MODULE)
 
@@ -9,19 +9,17 @@ find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(OpenAL REQUIRED)
-find_package(OpenGL REQUIRED)
+find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 find_package(X11 REQUIRED)
 
-pkg_check_modules(OPUSFILE REQUIRED opusfile)
-pkg_check_modules(VORBIS REQUIRED vorbis vorbisfile)
+pkg_check_modules(OpusFile REQUIRED opusfile IMPORTED_TARGET)
+pkg_check_modules(VorbisFile REQUIRED vorbisfile IMPORTED_TARGET)
 
 set(CMAKE_MODULE_PATH ${ECM_MODULE_DIR})
 set(CMAKE_CXX_STANDARD 17)
 
 include(GNUInstallDirs)
 include(ECMUninstallTarget)
-
-include_directories(${FREETYPE_INCLUDE_DIRS} ${OPENAL_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} ${OPUSFILE_INCLUDE_DIRS})
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
     set(CMAKE_INSTALL_LIBDIR lib)
@@ -59,15 +57,15 @@ add_library(mlib SHARED
     mwindow.cpp
 )
 add_library(mjpg MODULE mjpg.cpp)
-target_link_libraries(mjpg mlib ${JPEG_LIBRARIES})
+target_link_libraries(mjpg mlib JPEG::JPEG)
 add_library(mpng MODULE mpng.cpp)
-target_link_libraries(mpng mlib ${PNG_LIBRARIES})
+target_link_libraries(mpng mlib PNG::PNG)
 add_library(mtype MODULE mtype.cpp)
-target_link_libraries(mtype mlib ${FREETYPE_LIBRARIES})
+target_link_libraries(mtype mlib Freetype::Freetype)
 add_library(mopus MODULE mopus.cpp)
-target_link_libraries(mopus mlib ${OPUSFILE_LIBRARIES})
+target_link_libraries(mopus mlib PkgConfig::OpusFile)
 add_library(mvorbis MODULE mvorbis.cpp)
-target_link_libraries(mvorbis mlib ${VORBIS_LIBRARIES})
+target_link_libraries(mvorbis mlib PkgConfig::VorbisFile)
 add_library(msdl MODULE msdl.cpp)
 if(WIN32)
 target_link_libraries(msdl mlib SDL dxguid winmm)
@@ -117,7 +115,7 @@ install(FILES
     mwindow.h
 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mlib)
 
-target_link_libraries(mlib ${CMAKE_DL_LIBS} ${OPENAL_LIBRARY} ${OPENGL_gl_LIBRARY})
+target_link_libraries(mlib ${CMAKE_DL_LIBS} OpenAL::OpenAL OpenGL::OpenGL)
 
 install(TARGETS mlib
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
