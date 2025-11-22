@@ -1,6 +1,6 @@
 /*
  * This file is part of MLib
- * Copyright (C) 2014  Matija Skala <mskala@gmx.com>
+ * Copyright (C) 2014-2025  Matija Skala <mskala@gmx.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
+#ifndef MWINDOW_H
+#define MWINDOW_H
 
 #include <mkeys.h>
 #include <sigxx.hh>
@@ -50,3 +53,5 @@ public:
     sigxx::signal<MKey,std::uint32_t> keyPressed{this};
     sigxx::signal<MKey,std::uint32_t> keyReleased{this};
 };
+
+#endif // MWINDOW_H
