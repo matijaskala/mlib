@@ -93,6 +93,7 @@ const token& tokenizer::next_token()
             break;
         case '\n':
             lineno++;
+            [[fallthrough]];
         case '[':
         case ']':
         case '/':
@@ -108,6 +109,7 @@ const token& tokenizer::next_token()
                 curr_token.value = current;
                 break;
             }
+            [[fallthrough]];
         default:
             if ( isalnum ( current ) || current == '_' ) {
                 curr_token.type = token::WORD;

@@ -184,12 +184,14 @@ void parser::parse_variable()
             case token::LINE_FEED:
                 if ( ignore_next_newlines )
                     continue;
+                [[fallthrough]];
             case token::END:
                 cfg[*curvar] = buffer;
                 return;
             case token::WORD:
                 if ( previous_string )
                     buffer += ' ';
+                [[fallthrough]];
             default:
                 buffer += tok.current_token().value;
                 break;
