@@ -20,7 +20,7 @@
 #ifndef MMUSIC_H
 #define MMUSIC_H
 
-#include <MAudioStream>
+#include <maudiostream.h>
 
 namespace MMusic
 {

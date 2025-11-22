@@ -17,9 +17,9 @@
  *
  */
 
-#include <MVideoInterface>
-#include <MDebug>
-#include <MSize>
+#include <mvideointerface.h>
+#include <mdebug.h>
+#include <msize.h>
 #include <mwindow.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>

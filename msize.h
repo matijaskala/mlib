@@ -28,8 +28,8 @@ public:
     MSize()
         : MSize{0,0}
     {}
-    template <typename _W, typename _H>
-    MSize ( _W width, _H height )
+    template <typename W, typename H>
+    MSize ( W width, H height )
         : m_width ( width )
         , m_height ( height )
     {}

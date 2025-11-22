@@ -18,14 +18,14 @@
  */
 
 #include <mglobal.h>
-#include <MTexture>
+#include <mtexture.h>
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <filesystem>
-#include <MDebug>
-#include <MKeys>
-#include <MFont>
-#include <MImage>
+#include <mdebug.h>
+#include <mkeys.h>
+#include <mfont.h>
+#include <mimage.h>
 #include <mvideointerface.h>
 #include <mwindow.h>
 #include <maudio.h>

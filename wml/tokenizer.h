@@ -20,8 +20,9 @@
 #ifndef WML_TOKENIZER_H
 #define WML_TOKENIZER_H
 
-#include <MGlobal>
+#include <mglobal.h>
 #include <string>
+#include <cstdint>
 
 namespace wml
 {

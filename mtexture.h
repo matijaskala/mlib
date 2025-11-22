@@ -22,7 +22,7 @@
 
 #include <mglobal.h>
 #include <utility>
-#include <MSize>
+#include <msize.h>
 
 class M_EXPORT MTexture
 {

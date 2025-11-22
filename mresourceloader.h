@@ -21,7 +21,7 @@
 #define MDATALOADER_H
 
 #include "mglobal.h"
-#include <MResource>
+#include <mresource.h>
 #include <list>
 #include <string>
 

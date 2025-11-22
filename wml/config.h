@@ -20,7 +20,7 @@
 #ifndef WML_CONFIG_H
 #define WML_CONFIG_H
 
-#include <MGlobal>
+#include <mglobal.h>
 #include <string>
 #include <limits>
 #include <list>

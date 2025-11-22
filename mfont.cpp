@@ -19,10 +19,10 @@
 
 #include "mfont.h"
 
-#include <codecvt>
+#include <locale>
 #include <map>
-#include <MDebug>
-#include <MResourceLoader>
+#include <mdebug.h>
+#include <mresourceloader.h>
 
 using namespace std;
 

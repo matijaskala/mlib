@@ -17,9 +17,9 @@
  *
  */
 
-#include <MVideoInterface>
-#include <MDebug>
-#include <MKeys>
+#include <mvideointerface.h>
+#include <mdebug.h>
+#include <mkeys.h>
 #include <mwindow.h>
 #include <wayland-egl.h>
 #include <dlfcn.h>

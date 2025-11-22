@@ -19,7 +19,7 @@
 
 #include "mresource.h"
 
-#include <MResourceLoader>
+#include <mresourceloader.h>
 
 #include <map>
 

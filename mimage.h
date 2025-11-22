@@ -20,8 +20,8 @@
 #ifndef MIMAGE_H
 #define MIMAGE_H
 
-#include <MResource>
-#include <MSize>
+#include <mresource.h>
+#include <msize.h>
 
 class MTexture;
 class M_EXPORT MImage : public MResource

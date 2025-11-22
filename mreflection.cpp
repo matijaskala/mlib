@@ -18,7 +18,7 @@
  */
 
 #include "mreflection.h"
-#include <MDL>
+#include <mdl.h>
 
 MReflection* MReflection::get ( const std::string& name )
 {

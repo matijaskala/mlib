@@ -18,9 +18,9 @@
  */
 
 #include <cstring>
-#include <MFont>
-#include <MResourceLoader>
-#include <MTexture>
+#include <mfont.h>
+#include <mresourceloader.h>
+#include <mtexture.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

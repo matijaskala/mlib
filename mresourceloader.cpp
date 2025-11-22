@@ -19,7 +19,7 @@
 
 #include "mresourceloader.h"
 
-#include <MDebug>
+#include <mdebug.h>
 #include <fstream>
 
 MResourceLoader::MResourceLoader()

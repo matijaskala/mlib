@@ -20,8 +20,8 @@
 #ifndef MVIDEOINTERFACE_H
 #define MVIDEOINTERFACE_H
 
-#include <MGlobal>
-#include <MSize>
+#include <mglobal.h>
+#include <msize.h>
 #include <list>
 
 enum MVideoFlags {

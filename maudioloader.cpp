@@ -17,10 +17,10 @@
  *
  */
 
-#include <MResourceLoader>
-#include <MAudioStream>
-#include <MAudioFile>
-#include <MDebug>
+#include <mresourceloader.h>
+#include <maudiostream.h>
+#include <maudiofile.h>
+#include <mdebug.h>
 
 #include <fstream>
 

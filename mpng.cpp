@@ -17,9 +17,9 @@
  *
  */
 
-#include <MResourceLoader>
-#include <MDebug>
-#include <MImage>
+#include <mresourceloader.h>
+#include <mdebug.h>
+#include <mimage.h>
 #include <fstream>
 #include <png.h>
 

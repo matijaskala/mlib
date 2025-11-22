@@ -19,8 +19,8 @@
 
 #include "mimage.h"
 
-#include <MResourceLoader>
-#include <MTexture>
+#include <mresourceloader.h>
+#include <mtexture.h>
 
 #include <map>
 #include <GL/gl.h>

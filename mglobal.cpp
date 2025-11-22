@@ -20,9 +20,9 @@
 #include "mglobal.h"
 
 #include <filesystem>
-#include <MDL>
-#include <MDebug>
-#include "mvideointerface.h"
+#include <mdl.h>
+#include <mdebug.h>
+#include <mvideointerface.h>
 
 #include <alc.h>
 

@@ -19,10 +19,10 @@
 
 #include "mdl.h"
 
-#include <MDebug>
+#include <mdebug.h>
 
 #include <unordered_map>
-#include <nonstd/dl>
+#include <dlfcn.h>
 
 using namespace std;
 
@@ -37,9 +37,9 @@ bool MDL::open ( string file )
         mDebug() << "Module '" << file << "' already loaded";
         return true;
     }
-    module = dl::open ( file.c_str() );
+    module = dlopen ( file.c_str(), RTLD_NOW | RTLD_LOCAL );
     if ( module == nullptr )
-        mDebug(ERROR) << dl::error();
+        mDebug(ERROR) << dlerror();
     return module;
 }
 
@@ -52,8 +52,8 @@ bool MDL::close ( string file )
         mDebug() << "Module '" << file << "' was not loaded";
         return true;
     }
-    if ( !dl::close(module) )
-        mDebug() << dl::error();
+    if ( !dlclose(module) )
+        mDebug() << dlerror();
     else {
         modules.erase(file);
         return true;
@@ -74,5 +74,5 @@ MDL MDL::get ( string file )
 template<>
 void* MDL::symbol ( string name )
 {
-    return dl::sym(m_ptr, name.c_str());
+    return dlsym(m_ptr, name.c_str());
 }

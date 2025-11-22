@@ -20,7 +20,7 @@
 #ifndef MAUDIOFILE_H
 #define MAUDIOFILE_H
 
-#include <MResource>
+#include <mresource.h>
 #include <cstdint>
 #include <vector>
 

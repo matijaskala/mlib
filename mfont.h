@@ -20,7 +20,8 @@
 #ifndef MFONT_H
 #define MFONT_H
 
-#include <MResource>
+#include <mresource.h>
+#include <cstdint>
 
 class MTexture;
 class M_EXPORT MFont : public MResource
