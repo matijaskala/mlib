@@ -47,7 +47,6 @@ add_library(mlib SHARED
     mimage.cpp
     mmouse.cpp
     mmusic.cpp
-    mobject.cpp
     mplaylist.cpp
     mreflection.cpp
     mresource.cpp
@@ -102,7 +101,6 @@ install(FILES
     mkeys.h
     mmouse.h
     mmusic.h
-    mobject.h
     mplaylist.h
     mreflection.h
     mresourceloader.h
