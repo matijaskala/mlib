@@ -30,25 +30,15 @@ class MVariant
     using String = std::string;
     using StringList = twoway_vector<String>;
     using List = twoway_vector<MVariant>;
-    std::variant<LongDouble, String, List> base;
+    std::variant<LongDouble, String, List> m_variant;
 
 public:
     MVariant ( std::nullptr_t = nullptr ) {}
-    MVariant ( LongDouble x ) : base{x} {}
-    MVariant ( String x ) : base{std::move(x)} {}
-    MVariant ( List x ) : base{std::move(x)} {}
-    MVariant ( const char* s ) : base(static_cast<String>(s)) {}
-    MVariant ( std::initializer_list<MVariant> l ) : base(static_cast<List>(l)) {}
-    MVariant ( const MVariant& other ) : base(other.base) {}
-    MVariant ( MVariant&& other ) : base{std::move(other.base)} {}
-    MVariant& operator= ( const MVariant& other ) {
-        base = other.base;
-        return *this;
-    }
-    MVariant& operator= ( MVariant&& other ) {
-        base = std::move(other.base);
-        return *this;
-    }
+    MVariant ( LongDouble x ) : m_variant{x} {}
+    MVariant ( String x ) : m_variant{std::move(x)} {}
+    MVariant ( List x ) : m_variant{std::move(x)} {}
+    MVariant ( const char* s ) : m_variant (static_cast<String>(s)) {}
+    MVariant ( std::initializer_list<MVariant> l ) : m_variant (static_cast<List>(l)) {}
     bool operator== ( const MVariant& other ) const {
         return std::visit([] (auto&& self, auto&& other) {
             using self_t = std::decay_t<decltype(self)>;
@@ -63,7 +53,7 @@ public:
                 return std::to_string(self) == other;
             else
                 static_assert(std::is_same_v<self_t, other_t>);
-        }, base, other.base);
+        }, m_variant, other.m_variant );
     }
     bool operator!= ( const MVariant& other ) const {
         return !(*this == other);
@@ -87,7 +77,7 @@ public:
                 return std::stold(self);
             else
                 return 0.0l;
-        }, base);
+        }, m_variant );
     }
     String toString () const {
         return std::visit([] (auto&& self) {
@@ -105,16 +95,16 @@ public:
                 }
                 return r;
             }
-        }, base);
+        }, m_variant );
     }
     List toList () const {
-        return std::visit([] (auto&& self) {
+        return std::visit([this] (auto&& self) {
             using self_t = std::decay_t<decltype(self)>;
             if constexpr (std::is_same_v<self_t, List>)
                 return self;
             else
-                return List{MVariant{self}};
-        }, base);
+                return List{*this};
+        }, m_variant );
     }
 };
 
