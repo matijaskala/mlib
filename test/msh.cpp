@@ -24,7 +24,6 @@
 #include <list>
 #include <set>
 #include <vector>
-#include <mchar.h>
 
 #include <cstring>
 #include <sys/wait.h>
@@ -41,22 +40,6 @@ using namespace termcolor;
 
 
 
-typedef std::basic_string<mchar_t> mstring;
-  string to_string ( const mstring& __ms ) {
-    string __s;
-    for ( mchar_t __c: __ms ) {
-      __s += __c;
-    }
-    return __s;
-  }
-
-template<typename _CharT, typename _Traits>
-  inline std::basic_ostream<_CharT, _Traits>&
-  operator<<(std::basic_ostream<_CharT, _Traits>& __os, mstring __ms) {
-      for ( mchar_t __c: __ms )
-          __os << __c;
-      return __os;
-  }
 
 #include <termios.h>
 #include <unistd.h>
@@ -194,22 +177,22 @@ void autocomplete ( const string& com ) {
     waiting = bind ( autocomplete_fini, com, w.ws_row, w.ws_col, placeholders::_1 );
 }
 
-string get_command ( list<mstring>& history ) {
+string get_command ( list<string>& history ) {
     char cwd[60];
     getcwd(cwd, 60);
     string prompt = fg ( magenta ) + cwd + fg ( green ) + " $ " + escape ( "m" );
     cerr << escape ( "G" ) << prompt;
     termios_handler h;
-    list<mstring>::iterator command_it = history.end();
-    mstring command;
-    mstring command_t;
+    list<string>::iterator command_it = history.end();
+    string command;
+    string command_t;
     command.reserve(80);
     size_t cn = command.size();
 
     for ( ;; ) {
-        mchar_t c = getmchar();
+        char c = getchar();
                     //cerr << "<" << c.to_int() << ">";continue;
-        switch ( c.value ) {
+        switch ( c ) {
             case 4: // EOF
                 if( command.empty() ) {
                     cerr << endl;
@@ -218,19 +201,19 @@ string get_command ( list<mstring>& history ) {
                 break;
             case 9: // TAB
                 cerr << escape ( "J" );
-                autocomplete ( to_string(command) );
+                autocomplete (command);
                 break;
             case 10: // ENTER
                 cerr << escape ( "J" );
                 //if( !command.empty() ) {
-                    for ( list<mstring>::iterator i = history.begin(); i != history.end(); i++ )
+                    for ( list<string>::iterator i = history.begin(); i != history.end(); i++ )
                         if ( *i == command ) {
                             history.erase ( i-- );
                         }
                     history.push_back ( command );
                 //}
                 cerr << endl;
-                return to_string(command);
+                return command;
             case 12: // CLS
                 cerr << escape ( "H" ) << escape ( "2J" ) << prompt << command;
                 break;
@@ -243,7 +226,7 @@ string get_command ( list<mstring>& history ) {
                         seq += c;
                         cin >> c;
                     }
-                    switch ( c.value ) {
+                    switch ( c ) {
                         case 'A':
                             if ( command_it != history.begin() ) {
                                 if ( command_it == history.end() )
@@ -341,7 +324,7 @@ string get_command ( list<mstring>& history ) {
                     cn++;
                 }
                 else
-                    cerr << "<" << c.value << ">";
+                    cerr << "<" << c << ">";
         }
     }
 }
@@ -449,7 +432,7 @@ vector<string> expand_command ( string command ) {
 
 int main() {
     refresh_commands();
-    list<mstring> history;
+    list<string> history;
 
     for ( string com; com != "\4"; com = get_command ( history ) ) {
         int e = com.find ( ' ' );
